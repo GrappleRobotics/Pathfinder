@@ -1,0 +1,33 @@
+project(":libs") {
+    apply plugin: "jaci.gradle.EmbeddedTools"
+    apply plugin: "cpp"
+
+    ext.libroot = new File(rootProject.rootDir, "libs")
+    ext.gtest_root = new File(libroot, "googletest/googletest")
+    ext.units_root = new File(libroot, "units")
+
+    model {
+        components {
+            googleTest(NativeLibrarySpec) {
+                sources.cpp {
+                    source {
+                        srcDir new File(gtest_root, "src")
+                        include "**/gtest-all.cc"
+                    }
+                    exportedHeaders {
+                        srcDirs gtest_root, new File(gtest_root, "include")
+                        include "**/*.hpp", "**/*.h"
+                    }
+                }
+            }
+            units(NativeLibrarySpec) {
+                sources.cpp {
+                    exportedHeaders {
+                        srcDirs new File(units_root, "src")
+                        include "**/*.h"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,9 @@
+plugins {
+    id "jaci.gradle.EmbeddedTools" version "2018.02.04" apply false
+}
+
+apply from: "libs.gradle"
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.5.1'
+}
