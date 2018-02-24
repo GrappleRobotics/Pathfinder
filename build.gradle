@@ -2,7 +2,40 @@ plugins {
     id "jaci.gradle.EmbeddedTools" version "2018.02.04" apply false
 }
 
-apply from: "libs.gradle"
+apply from: 'libs.gradle'
+
+apply plugin: 'jaci.gradle.EmbeddedTools'
+apply plugin: 'cpp'
+apply plugin: 'google-test-test-suite'
+
+model {
+    components {
+        kinematics(NativeLibrarySpec) {
+            sources.cpp {
+                source {
+                    srcDir 'src/cpp'
+                    include '**/*.cpp'
+                }
+                exportedHeaders {
+                    srcDir 'src/include'
+                    include '**/*.h'
+                }
+            }
+        }
+    }
+    testSuites {
+        kinematicsTest(GoogleTestTestSuiteSpec) {
+            testing $.components.kinematics
+            
+            sources.cpp {
+                source {
+                    srcDir 'src/test'
+                    include '**/*.cpp'
+                }
+            }
+        }
+    }
+}
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.5.1'
