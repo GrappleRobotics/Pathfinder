@@ -1,0 +1,17 @@
+task subclean();
+
+allprojects {
+    plugins.withType(CppPlugin).whenPluginAdded {
+        project.apply plugin: "visual-studio"
+        rootProject.tasks.subclean.dependsOn tasks.clean
+    }
+    plugins.withType(GoogleTestPlugin).whenPluginAdded {
+        model {
+            binaries {
+                withType(GoogleTestTestSuiteBinarySpec) {
+                    lib project: ":libs", library: "googleTest", linkage: "static"
+                }
+            }
+        }
+    }
+}

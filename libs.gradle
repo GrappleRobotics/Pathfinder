@@ -20,12 +20,12 @@ project(":libs") {
                     }
                 }
             }
-            units(NativeLibrarySpec) {
-                sources.cpp {
-                    exportedHeaders {
-                        srcDirs new File(units_root, "src")
-                        include "**/*.h"
-                    }
+        }
+        repositories {
+            libs(PrebuiltLibraries) {
+                units {
+                    headers.srcDir new File(units_root, "src")
+                    headers.include "**/*.h"
                 }
             }
         }
