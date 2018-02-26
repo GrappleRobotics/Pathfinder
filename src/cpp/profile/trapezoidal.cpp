@@ -1,11 +1,10 @@
 #include "grpl/profile/trapezoidal.h"
 
 #include <cmath>
-#include <iostream>
 
 using namespace grpl::profile::intern;
 
-void trapezoidal_internal::calculate_single(trapezoidal_internal::segment_raw *out, trapezoidal_internal::segment_raw *last, double time) {
+void trapezoidal_internal::calculate_single(trapezoidal_internal::segment_raw *out, trapezoidal_internal::segment_raw *last, double time) const {
   // In the case 'out' and 'last' point to the same memory address, we need to cache
   // these in their own variables.
   // We could store these in another struct (copied), but there's no real advantage
@@ -16,8 +15,10 @@ void trapezoidal_internal::calculate_single(trapezoidal_internal::segment_raw *o
 
   double error = last->dist - _goal;
   double accel = (l_dist < _goal ? _acc_max : -_acc_max);
-  double decel_time = l_vel / accel;
-  double decel_dist = l_vel * decel_time - 0.5*accel*decel_time*decel_time;
+  double v_projected = l_vel + (accel * dt);
+  v_projected = v_projected > _vel_max ? _vel_max : v_projected < -_vel_max ? -_vel_max : v_projected;
+  double decel_time = v_projected / accel;
+  double decel_dist = v_projected * decel_time - 0.5*accel*decel_time*decel_time;
   double decel_error = l_dist + decel_dist - _goal;
 
   out->acc = accel;

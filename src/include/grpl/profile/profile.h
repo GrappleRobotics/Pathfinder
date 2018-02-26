@@ -15,13 +15,13 @@ namespace profile {
       #pragma pack(pop)
 
       void goal_raw(double sp)  { _goal = sp; }
-      double goal_raw()         { return _goal; }
+      double goal_raw() const { return _goal; }
 
       void timeslice_raw(double timeslice_dt) { _timeslice_dt = timeslice_dt; }
-      double timeslice_raw()                  { return _timeslice_dt; }
+      double timeslice_raw() const { return _timeslice_dt; }
 
-      virtual void calculate_single(segment_raw *out, segment_raw *last, double time) = 0;
-      void calculate(segment_raw *out, segment_raw *last, double time);
+      virtual void calculate_single(segment_raw *out, segment_raw *last, double time) const = 0;
+      void calculate(segment_raw *out, segment_raw *last, double time) const;
 
     protected:
       double _goal, _timeslice_dt = 0.001;
@@ -39,25 +39,25 @@ namespace profile {
     };
 
     void goal(UNIT_DIST sp) { goal_raw(static_cast<double>(sp)); }
-    UNIT_DIST goal()        { return static_cast<UNIT_DIST>(goal_raw()); }
+    UNIT_DIST goal() const { return static_cast<UNIT_DIST>(goal_raw()); }
 
-    void timeslice(UNIT_TIME timeslice_dt) { timeslice_raw(static_cast<double>(timeslice_dt)); }
-    UNIT_TIME timeslice() { return static_cast<UNIT_TIME>(timelice_raw()); }
+    void timeslice(UNIT_TIME timeslice_dt)  { timeslice_raw(static_cast<double>(timeslice_dt)); }
+    UNIT_TIME timeslice() const { return static_cast<UNIT_TIME>(timelice_raw()); }
 
-    void calculate(segment *out, segment *last, UNIT_TIME time) {
-      intern::profile_internal::segment_raw _tmp = { 
+    void calculate(segment *out, segment *last, UNIT_TIME time) const {
+      intern::profile_internal::segment_raw tmp = { 
         static_cast<double>(last->time),
         static_cast<double>(last->dist),
         static_cast<double>(last->vel),
         static_cast<double>(last->acc)
       };
 
-      IMPL_CLASS::calculate(&_tmp, &_tmp, static_cast<double>(time));
+      IMPL_CLASS::calculate(&tmp, &tmp, static_cast<double>(time));
 
-      out->time = static_cast<UNIT_TIME>(_tmp.time);
-      out->dist = static_cast<UNIT_DIST>(_tmp.dist);
-      out->vel = static_cast<UNIT_VEL>(_tmp.vel);
-      out->acc = static_cast<UNIT_ACC>(_tmp.acc);
+      out->time = static_cast<UNIT_TIME>(tmp.time);
+      out->dist = static_cast<UNIT_DIST>(tmp.dist);
+      out->vel = static_cast<UNIT_VEL>(tmp.vel);
+      out->acc = static_cast<UNIT_ACC>(tmp.acc);
     }
   };
 } // namespace grpl

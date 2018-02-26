@@ -2,11 +2,16 @@
 
 using namespace grpl::profile;
 
-void intern::profile_internal::calculate(intern::profile_internal::segment_raw *out, intern::profile_internal::segment_raw *last, double time) {
+void intern::profile_internal::calculate(intern::profile_internal::segment_raw *out, intern::profile_internal::segment_raw *last, double time) const {
   intern::profile_internal::segment_raw tmp = { last->time, last->dist, last->vel, last->acc };
 
   double dt = time - last->time;
-  int slice_count = static_cast<int>(dt / _timeslice_dt);
+  double slice_count_d = dt / _timeslice_dt;
+  int slice_count = static_cast<int>(slice_count_d);
+
+  // Due to small fluctuations in dt, we round up if the slice_count is off by more
+  // than 0.9 from its double counterpart.
+  if (slice_count_d - slice_count > 0.9) slice_count++;
 
   int i;
   if (slice_count < 1) {

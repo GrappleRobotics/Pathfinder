@@ -13,7 +13,7 @@ namespace profile {
         _acc_max = acc_max;
       }
 
-      void calculate_single(segment_raw *out, segment_raw *last, double time) override;
+      void calculate_single(segment_raw *out, segment_raw *last, double time) const override;
     protected:
       double _vel_max, _acc_max;
     };
