@@ -22,6 +22,7 @@ void intern::profile_internal::calculate(intern::profile_internal::segment_raw *
       calculate_single(&tmp, &tmp, time);
     }
   }
+
   out->time = tmp.time;
   out->dist = tmp.dist;
   out->vel = tmp.vel;
