@@ -10,7 +10,8 @@ using namespace grpl::units;
 void test_trapezoidal(Velocity max_v, Acceleration max_a, Distance goal, Time timeslice, std::string fname) {
   using profile_t = trapezoidal<Distance, Time, Velocity, Acceleration>;
   profile_t pr;
-  pr.configure(max_v, max_a);
+  pr.max_velocity(max_v);
+  pr.max_acceleration(max_a);
   pr.goal(goal);
   pr.timeslice(timeslice);
 

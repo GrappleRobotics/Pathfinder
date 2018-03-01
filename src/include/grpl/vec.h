@@ -1,10 +1,25 @@
 #pragma once
 
+#include "grpl/units.h"
+#include <cmath>
+
 namespace grpl {
 
   template <typename UNIT>
   struct vec2D {
     UNIT x, y;
+
+    UNIT mag() const {
+      return static_cast<UNIT>(sqrt(static_cast<double>(x*x + y*y)));
+    }
+
+    units::Angle angle() const {
+      return atan2(static_cast<double>(y), static_cast<double>(x)) * units::rad;
+    }
+
+    static vec2D &make_polar(UNIT magnitude, units::Angle angle) {
+      return vec2D { magnitude * cos(angle.as(units::rad)), magnitude * sin(angle.as(units::rad)) };
+    }
 
     vec2D &operator=(const vec2D &equal_to) {
       x = equal_to.x;

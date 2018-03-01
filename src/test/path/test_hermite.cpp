@@ -2,17 +2,18 @@
 #include <grpl/path/hermite.h>
 
 #include <fstream>
+#include <iostream>
 
 using namespace grpl;
 using namespace grpl::units;
 using namespace grpl::path;
 
 TEST(Path, Hermite) {
-  using hermite_t = hermite < vec2D<Distance> >;
-  hermite_t::waypoint wp0 = { { 2, 2 }, { 1, 0 } },
-                      wp1 = { { 2, 5 }, { 0, 0 } };
+  using hermite_t = hermite < vec2D<Distance>, Distance >;
+  hermite_t::waypoint wp0 = { { 2*m, 2*m }, { 5*m, 0*m } },
+                      wp1 = { { 4*m, 5*m }, { 0  , 5*m } };
 
-  hermite_t hermite(wp0, wp1);
+  hermite_t hermite(wp0, wp1, 10000);
   std::ofstream outfile("hermite.csv");
   outfile << "t,x,y\n";
 
