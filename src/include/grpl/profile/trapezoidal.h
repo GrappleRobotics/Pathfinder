@@ -8,9 +8,6 @@ namespace profile {
   template <typename UNIT_DIST, typename UNIT_TIME, typename UNIT_VEL, typename UNIT_ACC>
   class trapezoidal : public profile<UNIT_DIST, UNIT_TIME, UNIT_VEL, UNIT_ACC> {
   public:
-    void max_acceleration(UNIT_ACC acc_max) { _acc_max = acc_max; }
-    UNIT_ACC max_acceleration() { return _acc_max; }
-
     void calculate_single(segment *out, segment *last, UNIT_TIME time) const override {
       segment cache = { last->time, last->dist, last->vel, last->acc };
       UNIT_TIME dt = time - cache.time;
@@ -36,8 +33,6 @@ namespace profile {
       out->vel = vel > _vel_max ? _vel_max : vel < -_vel_max ? -_vel_max : vel;
       out->dist = cache.dist + (cache.vel * dt) + (0.5 * out->acc * dt *dt);
     }
-  protected:
-    UNIT_ACC _acc_max;
   };
 
 } // namespace profile

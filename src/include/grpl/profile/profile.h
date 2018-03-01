@@ -24,6 +24,9 @@ namespace profile {
     void max_velocity(UNIT_VEL vel_max) { _vel_max = vel_max; }
     UNIT_VEL max_velocity() { return _vel_max; }
 
+    void max_acceleration(UNIT_ACC acc_max) { _acc_max = acc_max; }
+    UNIT_ACC max_acceleration() { return _acc_max; }
+
     virtual void calculate_single(segment *out, segment *last, UNIT_TIME time) const = 0;
 
     void calculate(segment *out, segment *last, UNIT_TIME time) const {
@@ -50,6 +53,7 @@ namespace profile {
   protected:
     UNIT_DIST _goal;
     UNIT_VEL _vel_max;
+    UNIT_ACC _acc_max;
     UNIT_TIME _timeslice = 0.001;
   };
 } // namespace grpl

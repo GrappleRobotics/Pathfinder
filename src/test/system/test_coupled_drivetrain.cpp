@@ -18,14 +18,13 @@ TEST(System, Coupled) {
                       wp1 = { { 4 * m, 5 * m },{ 0    , 5 * m } };
 
   hermite_t hermite(wp0, wp1, 10000);
-  profile_t pr;
-  pr.max_acceleration(4*m/s/s);
+  profile_t profile;
   auto len = hermite.calculate_arc_length();
 
   std::ofstream outfile("coupled.csv");
   outfile << "path,t,x,y,d,v,a,angle,anglev\n";
 
-  coupled_drivetrain dt(&pr, &hermite, 0.5*m, 3 * m / s);
+  coupled_drivetrain dt(&profile, &hermite, 0.5*m, 3*m/s, 4 * m/s/s);
 
   coupled_drivetrain::point point;
   bool done = false;

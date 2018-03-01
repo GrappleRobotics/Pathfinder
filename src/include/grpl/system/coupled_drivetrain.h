@@ -29,11 +29,12 @@ namespace system {
       coupled_side_point left, center, right;
     };
 
-    coupled_drivetrain(profile_t *profile, path_t *path, units::Distance trackwidth, units::Velocity vel_max)
-      : _profile(profile), _path(path), _trackwidth(trackwidth), _vel_max(vel_max) { }
+    coupled_drivetrain(profile_t *profile, path_t *path, units::Distance trackwidth, units::Velocity vel_max, units::Acceleration acc_max)
+      : _profile(profile), _path(path), _trackwidth(trackwidth), _vel_max(vel_max), _acc_max(acc_max) { }
 
     bool generate(units::Distance spline_len, point *out, point *last, units::Time time) {
       point cache;
+      bool done = false;
       if (last != nullptr) {
         cache = { last->angle, last->angular_velocity, last->time, last->left, last->center, last->right };
       }
@@ -42,7 +43,7 @@ namespace system {
 
       units::Distance cur_distance = last->center.dist;
       if (cur_distance >= spline_len) {
-        return true;
+        done = true;
       }
 
       double spline_progress = (cur_distance / spline_len).scalar();  // unitless
@@ -50,10 +51,17 @@ namespace system {
       vec_t center_slope = _path->calculate_slope(spline_progress);
 
       units::Time dt = time - last->time;
+      bool first = (time == last->time);
+
       units::Angle center_angle = center_slope.angle();
-      units::AngularVelocity angular_velocity = (center_angle - last->angle) / dt;
+      units::AngularVelocity angular_velocity = first ? 0 : (center_angle - last->angle) / dt;
+      units::AngularAcceleration angular_acceleration = first ? 0 : (angular_velocity - last->angular_velocity) / dt;
+
+      units::Acceleration differential_acceleration = angular_acceleration * _trackwidth / 2.0;
+      units::Acceleration center_max_accel = _acc_max - static_cast<units::Acceleration>(abs(differential_acceleration.scalar()));
+
       units::Velocity differential_velocity = angular_velocity * _trackwidth / 2.0;
-      units::Velocity center_max_velocity = _vel_max - differential_velocity;
+      units::Velocity center_max_velocity = _vel_max - static_cast<units::Velocity>(abs(differential_velocity.scalar()));
 
       profile_t::segment tmp;
       tmp.time = last->time;
@@ -61,7 +69,8 @@ namespace system {
       tmp.vel = last->center.vel;
       tmp.acc = last->center.acc;
 
-      _profile->max_velocity(center_max_velocity);
+      _profile->max_velocity(respect_velocity_constraint ? center_max_velocity : _vel_max);
+      _profile->max_acceleration(respect_acceleration_constraint ? center_max_accel : _acc_max);
       _profile->goal(spline_len);
       _profile->calculate(&tmp, &tmp, time);
 
@@ -89,14 +98,17 @@ namespace system {
       out->left.dist = last->left.dist + out->left.vel * dt;
       out->right.dist = last->left.dist + out->right.vel * dt;
 
-      return false;
+      return done;
     }
+
+    bool respect_velocity_constraint = true, respect_acceleration_constraint = true;
 
   protected:
     profile_t *_profile;
     path_t *_path;
     units::Distance _trackwidth;
     units::Velocity _vel_max;
+    units::Acceleration _acc_max;
   };
 
 }
