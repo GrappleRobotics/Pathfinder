@@ -63,7 +63,7 @@ namespace path {
       blaze::column<2>(M) = _wp1.point;
       blaze::column<3>(M) = _wp1.tangent;
 
-      const size_t batch_size = 16;
+      const size_t batch_size = 32;
       double last_integrand = 0, arc_length = 0;
       for (t = 0; t <= 1; t += batch_size*dt) {
         blaze::StaticMatrix<double, 4, batch_size> H;
