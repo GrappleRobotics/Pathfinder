@@ -4,3 +4,6 @@
 [submodule "libs/googletest"]
 	path = libs/googletest
 	url = https://github.com/google/googletest
+[submodule "libs/blaze"]
+	path = libs/blaze
+	url = https://bitbucket.org/blaze-lib/blaze.git

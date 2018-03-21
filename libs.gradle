@@ -5,6 +5,7 @@ project(":libs") {
     ext.libroot = new File(rootProject.rootDir, "libs")
     ext.gtest_root = new File(libroot, "googletest/googletest")
     ext.units_root = new File(libroot, "units")
+    ext.blaze_root = new File(libroot, "blaze")
 
     model {
         components {
@@ -25,6 +26,10 @@ project(":libs") {
             libs(PrebuiltLibraries) {
                 units {
                     headers.srcDir new File(units_root, "src")
+                    headers.include "**/*.h"
+                }
+                blaze {
+                    headers.srcDir blaze_root
                     headers.include "**/*.h"
                 }
             }
