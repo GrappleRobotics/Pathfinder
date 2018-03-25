@@ -1,17 +1,18 @@
-// #include <gtest/gtest.h>
-// #include <grpl/profile/trapezoidal.h>
-// #include <grpl/path/hermite.h>
-// #include <grpl/system/coupled_drivetrain.h>
+#include <gtest/gtest.h>
+#include <grpl/profile/trapezoidal.h>
+#include <grpl/path/hermite.h>
+#include <grpl/system/coupled_drivetrain.h>
 
-// #include <cmath>
-// #include <fstream>
+#include <cmath>
+#include <fstream>
 
-// using namespace grpl::profile;
-// using namespace grpl::path;
-// using namespace grpl::system;
-// using namespace grpl::units;
+using namespace grpl::profile;
+using namespace grpl::path;
+using namespace grpl::system;
+using namespace grpl::units;
 
-// TEST(System, Coupled) {
+TEST(System, Coupled) {
+    //coupled_drivetrain1<hermite<Distance, 2>, trapezoidal1> dt;
 //   using hermite_t = hermite < coupled_drivetrain::vec_t, Distance >;
 //   using profile_t = trapezoidal<Distance, Time, Velocity, Acceleration>;
 //   hermite_t::waypoint wp0 = { { 2 * m, 2 * m },{ 5 * m, 0 * m } },
@@ -39,4 +40,4 @@
 //         << it.acc.as(m / s / s) << "," << point.angle.as(deg) << "," << point.angular_velocity.as(deg / s) << std::endl;
 //     }
 //   }
-// }
+}

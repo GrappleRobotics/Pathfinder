@@ -1,17 +1,15 @@
 #pragma once
 
-#include <blaze/math/StaticVector.h>
 #include "grpl/path/path.h"
 
 namespace grpl {
 namespace path {
 
-  // TODO: Allow definition of vector type?
-  //        (i.e. static or dynamic)
+  // TODO: Move to internal double impl to speed up SIMD
+  // TODO: Make double/float a compile-time choice (global #def) (for speedup via simd with smaller registers)
   template <typename UNIT, size_t DIM>
   class hermite : public path<UNIT, DIM> {
   public:
-    using vector_t = blaze::StaticVector<UNIT, DIM, blaze::columnVector>;
     struct waypoint {
       vector_t point, tangent;
     };
@@ -51,6 +49,28 @@ namespace path {
         (3 * t*t - 2 * t)
       };
       return M * h;
+    }
+
+    double calculate_curvature(double t) const override {
+      blaze::StaticVector<double, 4, blaze::columnVector> h_p {
+        (6 * t*t - 6 * t),
+        (3*t*t - 4 * t + 1),
+        (-6 * t*t + 6 * t),
+        (3 * t*t - 2 * t)
+      };
+
+      blaze::StaticVector<double, 4, blaze::columnVector> h_pp {
+        (12 * t - 6),
+        (6*t - 4),
+        (-12 * t + 6),
+        (6 * t - 2)
+      };
+
+      return (
+        sqrt( sqrLength(h_p)*sqrLength(h_pp) - pow(dot(h_p, h_pp), 2) )
+        / pow(length(h_p), 3)
+      );
+      //return length(trans(cross(h_p, h_pp))) / pow(trans(length(h_p)), 3);
     }
 
     // This uses matrix 'batches' to become highly parallelized for faster computation

@@ -16,11 +16,11 @@ TEST(Path, Hermite) {
 
   hermite_t hermite(wp0, wp1, 100000);
   std::ofstream outfile("hermite.csv");
-  outfile << "t,x,y\n";
+  outfile << "t,x,y,curvature\n";
   std::cout << static_cast<double>(hermite.calculate_arc_length()) << std::endl;
 
   for (double t = 0; t <= 1; t += 0.001) {
     auto pt = hermite.calculate(t);
-    outfile << t << "," << pt[0].as(m) << "," << pt[1].as(m) << std::endl;
+    outfile << t << "," << pt[0].as(m) << "," << pt[1].as(m) << "," << hermite.calculate_curvature(t) << std::endl;
   }
 }

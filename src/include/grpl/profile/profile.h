@@ -1,9 +1,37 @@
 #pragma once
 
+#include <blaze/Math.h>
 #include "grpl/units.h"
 
 namespace grpl {
 namespace profile {
+
+  template <size_t ORDER>
+  class profile1 {
+  public:
+    using vec_t = blaze::StaticVector<double, ORDER, blaze::columnVector>;
+    static const size_t ORDER = ORDER;
+
+    struct segment_t {
+      vec_t vect;
+      double time;
+    };
+
+    void set_goal(double sp) { _goal = sp; }
+    double get_goal() const { return _goal; }
+
+    void set_timeslice(double timeslice) { _timeslice = timeslice; }
+    double get_timeslice() const { return _timeslice; }
+
+    void apply_constraint(int derivative_idx, double maximum) { _constraints[derivative_idx] = maximum; }
+    vec_t &get_constraints() { return _constraints; }
+
+    virtual segment_t calculate(segment_t &last, double time) const = 0;
+
+  protected:
+    double _goal, _timeslice = 0.001;
+    vec_t _constraints;
+  };
 
   template <typename UNIT_DIST, typename UNIT_TIME, typename UNIT_VEL, typename UNIT_ACC>
   class profile {
