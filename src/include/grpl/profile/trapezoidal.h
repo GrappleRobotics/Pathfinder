@@ -17,8 +17,8 @@ namespace profile {
       if (slice_count_d - slice_count > 0.9) slice_count++;
       if (slice_count < 1) slice_count++;
 
-      double vel_max = _constraints[1];
-      double accel_max = _constraints[2];
+      double vel_max = _limits[1];
+      double accel_max = _limits[2];
 
       segment_t seg = last;
 

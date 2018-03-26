@@ -12,9 +12,105 @@ namespace system {
   class coupled_drivetrain1 {
   public:
     static_assert(path_t::DIMENSIONS == 2, "Path must function in exactly 2 Dimensions for Coupled Drivetrain!");
-    using state_t = blaze::StaticMatrix<double, path_t::DIMENSIONS, profile_t::ORDER>;
+    using vec_t = typename profile_t::vec_t;
+    using vector_t = typename path_t::vector_t;
 
-    
+    void apply_limits(int derivative_idx, double maximum) { _limits[derivative_idx] = maximum; }
+    vec_t &get_limits() { return _limits; }
+
+    void set_trackwidth(double tw) { _trackwidth = tw; }
+    double get_trackwidth() const { return _trackwidth; }
+
+    struct coupled_side {
+      double t;
+      vec_t k;
+      vector_t p;
+    };
+
+    struct state {
+      coupled_side l, c, r;
+      vec_t a;
+      bool done;
+    };
+
+    state generate(path_t *path, profile_t *profile, state &last, double time) {
+      bool done = false;
+      double path_len = path->get_arc_length();
+
+      double cur_distance = last.c.k[0];
+      if (cur_distance >= path_len)
+        done = true;
+      
+      double path_progress = (cur_distance / path_len);
+      vector_t center = path->calculate(path_progress);
+      vector_t center_prime = path->calculate_slope(path_progress);
+
+      double dt = time - last.c.t;
+      bool first = (dt < 0.00000001); // to avoid dt = 0 errors
+
+      double angle = atan2(center_prime[1], center_prime[0]);
+      double d_angle = atan2(sin(angle - last.a[0]), cos(angle - last.a[0]));
+
+      double angular_velocity = first ? 0 : d_angle / dt;
+      double angular_acceleration = first ? 0 : (angular_velocity - last.a[1]) / dt;
+
+      // TODO: Expand this to N order
+
+      double differential_accel = angular_acceleration * _trackwidth / 2.0;
+      double max_accel = _limits[2] - abs(differential_accel);
+
+      double differential_vel = angular_velocity * _trackwidth / 2.0;
+      double max_vel = _limits[1] - abs(differential_vel);
+
+      profile_t::segment_t segment;
+      segment.time = last.c.t;
+      for (size_t i = 0; i < profile_t::ORDER; i++) {
+        segment.vect[i] = last.c.k[i];
+      }
+
+      profile->set_goal(path_len);
+      segment = profile->calculate(segment, time);
+
+      state output;
+      output.a[0] = angle;
+      output.a[1] = angular_velocity;
+      output.a[2] = angular_acceleration;
+      output.c.t = output.l.t = output.r.t = time;
+
+      output.c.k = segment.vect;
+      output.c.p = center;
+
+      // TODO: Expand this to N order
+
+      double lcoeff = angular_velocity <= 0 ? 1 : -1;
+      output.l.k[1] = output.c.k[1] + lcoeff * differential_vel;
+      output.r.k[1] = output.c.k[1] - lcoeff * differential_vel;
+
+      // TODO: Can we trust this, with gain scheduling on the profile?
+      // we should have a test for the kinematics here
+      lcoeff = angular_acceleration <= 0 ? 1 : -1;
+      output.l.k[2] = output.c.k[2] + lcoeff * differential_accel;
+      output.r.k[2] = output.c.k[2] - lcoeff * differential_accel;
+
+      //     out->left.acc = (out->left.vel - last->left.vel) / dt;
+      //     out->right.acc = (out->right.vel - last->right.vel) / dt;
+
+      double sina = sin(angle), cosa = cos(angle);
+      vector_t angle_modifiers { _trackwidth / 2.0 * sina, -_trackwidth / 2.0 * cosa };
+
+      output.l.p = output.c.p - angle_modifiers;
+      output.r.p = output.c.p + angle_modifiers;
+
+      output.l.k[0] = last.l.k[0] + output.l.k[1] * dt;
+      output.r.k[0] = last.r.k[0] + output.r.k[1] * dt;
+
+      output.done = done;
+      return output;
+    }
+
+  protected:
+    double _trackwidth;
+    vec_t _limits;
   };
 
   // class coupled_drivetrain {

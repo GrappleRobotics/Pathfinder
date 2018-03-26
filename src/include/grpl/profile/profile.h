@@ -23,14 +23,14 @@ namespace profile {
     void set_timeslice(double timeslice) { _timeslice = timeslice; }
     double get_timeslice() const { return _timeslice; }
 
-    void apply_constraint(int derivative_idx, double maximum) { _constraints[derivative_idx] = maximum; }
-    vec_t &get_constraints() { return _constraints; }
+    void apply_limits(int derivative_idx, double maximum) { _limits[derivative_idx] = maximum; }
+    vec_t &get_limits() { return _limits; }
 
     virtual segment_t calculate(segment_t &last, double time) const = 0;
 
   protected:
     double _goal, _timeslice = 0.001;
-    vec_t _constraints;
+    vec_t _limits;
   };
 
   template <typename UNIT_DIST, typename UNIT_TIME, typename UNIT_VEL, typename UNIT_ACC>

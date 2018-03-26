@@ -9,8 +9,8 @@ using namespace grpl::units;
 
 TEST(Profile, Trapezoidal) {
     trapezoidal1 pr;
-    pr.apply_constraint(1, 3);
-    pr.apply_constraint(2, 4);
+    pr.apply_limits(1, 3);
+    pr.apply_limits(2, 4);
     pr.set_goal(5);
     pr.set_timeslice((0.5*ms).as(s));
 

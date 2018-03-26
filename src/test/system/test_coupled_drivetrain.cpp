@@ -12,6 +12,37 @@ using namespace grpl::system;
 using namespace grpl::units;
 
 TEST(System, Coupled) {
+    using hermite_t = hermite<2>;
+    using profile_t = trapezoidal1;
+
+    coupled_drivetrain1<hermite_t, profile_t> cdt;
+
+    cdt.set_trackwidth(0.5);
+    hermite_t::waypoint     wp0 { hermite_t::vector_t{ 2, 0 }, hermite_t::vector_t{ 2, 0 } },
+                            wp1 { hermite_t::vector_t{ 0, 0 }, hermite_t::vector_t{ 0, -10 } };
+
+    hermite_t hermite(wp0, wp1, 100000);
+
+    profile_t profile;
+    profile.apply_limits(1, 3);
+    profile.apply_limits(2, 4);
+    profile.set_timeslice(0.001);
+
+    coupled_drivetrain1<hermite_t, profile_t>::state state;
+    state.done = false;
+
+    std::ofstream outfile("coupled.csv");   
+    outfile << "path,t,x,y,d,v,a,angle,anglev\n";
+
+    int i = 0;
+    const char *titles[3] = { "left", "center", "right" };
+    for (Time t = 0; !state.done; t+=1*ms) {
+        state = cdt.generate(&hermite, &profile, state, t.as(s));
+        for (auto &it : { state.l, state.c, state.r }) {
+            outfile << titles[(i++)%3] << "," << it.t << "," << it.p[0] << "," << it.p[1] << "," << it.k[0] << "," << it.k[1] << "," << it.k[2] << "," << state.a[0] << "," << state.a[1] << "\n";
+        }
+    }
+
     //coupled_drivetrain1<hermite<Distance, 2>, trapezoidal1> dt;
 //   using hermite_t = hermite < coupled_drivetrain::vec_t, Distance >;
 //   using profile_t = trapezoidal<Distance, Time, Velocity, Acceleration>;
