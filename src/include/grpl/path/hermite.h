@@ -10,6 +10,7 @@ namespace path {
   template <typename UNIT, size_t DIM>
   class hermite : public path<UNIT, DIM> {
   public:
+    using vector_t = typename path<UNIT, DIM>::vector_t;
     struct waypoint {
       vector_t point, tangent;
     };

@@ -31,6 +31,10 @@ model {
         kinematicsTest(GoogleTestTestSuiteSpec) {
             testing $.components.kinematics
             
+            binaries.all {
+                cppCompiler.args << '-std=c++14'
+            }
+
             sources.cpp {
                 source {
                     srcDir 'src/test'

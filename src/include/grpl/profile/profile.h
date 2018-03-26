@@ -6,11 +6,11 @@
 namespace grpl {
 namespace profile {
 
-  template <size_t ORDER>
+  template <size_t ORD>
   class profile1 {
   public:
-    using vec_t = blaze::StaticVector<double, ORDER, blaze::columnVector>;
-    static const size_t ORDER = ORDER;
+    using vec_t = blaze::StaticVector<double, ORD, blaze::columnVector>;
+    static const size_t ORDER = ORD;
 
     struct segment_t {
       vec_t vect;

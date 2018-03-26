@@ -11,8 +11,8 @@ using namespace grpl::path;
 
 TEST(Path, Hermite) {
   using hermite_t = hermite<Distance, 2>;
-  hermite_t::waypoint wp0 = { hermite_t::vector_t{ 2, 2 }, hermite_t::vector_t{ 5, 0 } },
-                      wp1 = { hermite_t::vector_t{ 3, 5 }, hermite_t::vector_t{ -5, 0 } };
+  hermite_t::waypoint wp0 { hermite_t::vector_t{ 2, 2 }, hermite_t::vector_t{ 5, 0 } },
+                      wp1 { hermite_t::vector_t{ 3, 5 }, hermite_t::vector_t{ -5, 0 } };
 
   hermite_t hermite(wp0, wp1, 100000);
   std::ofstream outfile("hermite.csv");
