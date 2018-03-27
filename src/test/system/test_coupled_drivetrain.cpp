@@ -23,10 +23,11 @@ TEST(System, Coupled) {
     cdt.apply_limit(2, 4); // 2nd derivative (acceleration) limit
 
     cdt.set_trackwidth(0.5);
-    hermite_t::waypoint     wp0 { vec_cart(0, 0), vec_polar(5, 0) },
-                            wp1 { vec_cart(4, 4), vec_polar(5, 3.14159265/2) };
+    hermite_t::waypoint     wp0 { vec_cart(0, 0), vec_polar(15, 0) },
+                            wp1 { vec_cart(4, 4), vec_polar(15, 3.14159265/2) },
+                            wp2 { vec_cart(0, 2), vec_cart(-5, 5) };
 
-    hermite_t hermite(wp0, wp1, 100000);
+    hermite_t hermite(wp0, wp2, 100000);
 
     profile_t profile;
     profile.set_timeslice(0.001);
@@ -44,6 +45,8 @@ TEST(System, Coupled) {
         for (auto &it : { state.c, state.l, state.r }) {
             ASSERT_LE(it.k[1], cdt.get_limits()[1]);    // by being under the set derivative limit, we can imply the function is continuous
             ASSERT_LE(it.k[2], cdt.get_limits()[2]);
+            ASSERT_GE(it.k[1], -cdt.get_limits()[1]);
+            ASSERT_GE(it.k[2], -cdt.get_limits()[2]);
         }
         for (auto &it : { state.l, state.c, state.r }) {
             outfile << titles[(i++)%3] << "," << it.t << "," << it.p[0] << "," << it.p[1] << "," << it.k[0] << "," << it.k[1] << "," << it.k[2] << "," << state.a[0] << "," << state.a[1] << "\n";
