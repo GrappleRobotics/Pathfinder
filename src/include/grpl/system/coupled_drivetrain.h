@@ -62,7 +62,7 @@ namespace system {
       double differential_vel = angular_velocity * _trackwidth / 2.0;
       double max_vel = _limits[1] - abs(differential_vel);
 
-      profile_t::segment_t segment;
+      typename profile_t::segment_t segment;
       segment.time = last.c.t;
       for (size_t i = 0; i < profile_t::ORDER; i++) {
         segment.vect[i] = last.c.k[i];
