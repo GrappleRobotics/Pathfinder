@@ -32,7 +32,9 @@ model {
             testing $.components.kinematics
             
             binaries.all {
-                cppCompiler.args << '-std=c++14'
+                cppCompiler.args << '-std=c++14' << '-g'
+                if (toolChain instanceof VisualCpp)
+                    cppCompiler.args << '/DEBUG'
             }
 
             sources.cpp {

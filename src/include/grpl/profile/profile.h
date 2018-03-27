@@ -23,8 +23,9 @@ namespace profile {
     void set_timeslice(double timeslice) { _timeslice = timeslice; }
     double get_timeslice() const { return _timeslice; }
 
-    void apply_limits(int derivative_idx, double maximum) { _limits[derivative_idx] = maximum; }
+    void apply_limit(int derivative_idx, double maximum) { _limits[derivative_idx] = maximum; }
     vec_t &get_limits() { return _limits; }
+    void set_limits(vec_t &other) { _limits = other; }
 
     virtual segment_t calculate(segment_t &last, double time) const = 0;
 
