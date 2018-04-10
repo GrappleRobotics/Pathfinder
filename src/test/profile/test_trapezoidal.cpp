@@ -8,18 +8,29 @@ using namespace grpl::profile;
 using namespace grpl::units;
 
 TEST(Profile, Trapezoidal) {
+    double sim_position = 0, sim_velocity = 0;
+    double dt = (1*ms).as(s);
+
     trapezoidal1 pr;
     pr.apply_limit(1, 3);
     pr.apply_limit(2, 4);
     pr.set_goal(5);
-    pr.set_timeslice((0.5*ms).as(s));
+    pr.set_timeslice(dt);
 
     trapezoidal1::segment_t seg;
     std::ofstream outfile("profile_trap.csv");
+    std::ofstream outfile_sim("profile_trap_simulated.csv");
     outfile << "time,dist,vel,acc\n";
+    outfile_sim << "time,dist\n";
 
-    for (Time t = 0*s; t < 3*s; t+=10*ms) {
+    for (Time t = 0*s; t < 3*s; t+=dt) {
         seg = pr.calculate(seg, t.as(s));
+        sim_velocity += seg.vect[2] * dt;
+        sim_position += sim_velocity * dt;
+
+        // TODO: Check sim matches theoretical
+
+        outfile_sim << seg.time << "," << sim_position << "\n";
         outfile << seg.time << "," << seg.vect[0] << "," << seg.vect[1] << "," << seg.vect[2] << "\n";
     }
 }

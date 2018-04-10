@@ -22,12 +22,15 @@ namespace profile {
 
       segment_t seg = last;
 
+      double start_time = seg.time;
+
       for (int i = 1; i <= slice_count; i++) {
-        double t = seg.time + _timeslice;
+        double t = start_time + (i * _timeslice);
+        if (t > time) t = time;
         dt = t - seg.time;
 
         double error = seg.vect[0] - _goal;
-        double accel = (error < 0 ? accel_max : -accel_max);
+        double accel = abs(error) < 0.000001 ? 0 : (error < 0 ? accel_max : -accel_max);
 
         // TODO: Find point at which we reach v_max and if it's less than dt, split
         // this slice into half.
@@ -45,6 +48,8 @@ namespace profile {
         bool decel_not_in_progress = (error < 0 && seg.vect[1] > 0) || (error > 0 && seg.vect[1] < 0);
         if (decel_cross_error_zeros && decel_not_in_progress)
           accel = -accel;
+        else if (abs(seg.vect[1] - vel_max) < 0.000001)
+          accel = 0;
 
         double vel = seg.vect[1] + (accel * dt);
         seg.vect[0] = seg.vect[0] + (seg.vect[1] * dt) + (0.5 * accel * dt * dt);
