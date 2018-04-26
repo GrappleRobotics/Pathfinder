@@ -15,10 +15,10 @@ using namespace grpl::units;
 using namespace grpl;
 
 template<typename profile_t, typename path_t>
-void run_kinematics_test(std::string filename, coupled_drivetrain1<path_t, profile_t> &cdt, profile_t &profile, path_t &path) {
-    path_t::vector_t pos_l, pos_r, pos_c, vel_c;
+void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profile_t> &cdt, profile_t &profile, path_t &path) {
+    typename path_t::vector_t pos_l, pos_r, pos_c, vel_c;
 
-    coupled_drivetrain1<path_t, profile_t>::state state;
+    typename coupled_drivetrain<path_t, profile_t>::state state;
     state.done = false;
 
     std::ofstream outfile(filename + ".csv");
@@ -44,7 +44,7 @@ void run_kinematics_test(std::string filename, coupled_drivetrain1<path_t, profi
         // TODO: check wheelbase position vectors are trackwidth apart
         // TODO: when moving to k = matrix, check they are parallel at any given time
 
-        path_t::vector_t rv_a;
+        typename path_t::vector_t rv_a;
         // Check acceleration kinematics match with velocity kinematics
         // rv_a = robot_vel + vec_polar((state.l.k[2] + state.r.k[2]) / 2, state.a[0]) * (1*ms).as(s);
         // robot_vel = vec_polar((state.l.k[1] + state.r.k[2]) / 2, state.a[0]);
@@ -94,9 +94,9 @@ void run_kinematics_test(std::string filename, coupled_drivetrain1<path_t, profi
 
 TEST(System, Coupled) {
     using hermite_t = hermite<2>;
-    using profile_t = trapezoidal1;
+    using profile_t = trapezoidal;
 
-    coupled_drivetrain1<hermite_t, profile_t> cdt;
+    coupled_drivetrain<hermite_t, profile_t> cdt;
     cdt.apply_limit(1, 3); // 1st derivative (velocity) limit
     cdt.apply_limit(2, 4); // 2nd derivative (acceleration) limit
 

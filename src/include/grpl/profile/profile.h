@@ -7,7 +7,7 @@ namespace grpl {
 namespace profile {
 
   template <size_t ORD>
-  class profile1 {
+  class profile {
   public:
     using vec_t = blaze::StaticVector<double, ORD, blaze::columnVector>;
     static const size_t ORDER = ORD;

@@ -2,7 +2,10 @@
 
 #include "grpl/profile/profile.h"
 #include "grpl/path/path.h"
+#include "grpl/util/vec.h"
 #include "grpl/util/constants.h"
+
+#include "blaze/Math.h"
 
 #include <cmath>
 #include <iostream>
@@ -11,7 +14,7 @@ namespace grpl {
 namespace system {
 
   template <typename path_t, typename profile_t>
-  class coupled_drivetrain1 {
+  class coupled_drivetrain {
   public:
     static_assert(path_t::DIMENSIONS == 2, "Path must function in exactly 2 Dimensions for Coupled Drivetrain!");
     using kinematics_t = blaze::StaticMatrix<double, path_t::DIMENSIONS, profile_t::ORDER>;
@@ -28,7 +31,6 @@ namespace system {
     struct coupled_side {
       double t;
       double d;
-      // TODO: We should move k into a matrix instead of giving only the magnitude
       kinematics_t k;
       // vector_t p;
     };

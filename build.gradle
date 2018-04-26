@@ -13,6 +13,9 @@ apply plugin: 'visual-studio'
 model {
     components {
         kinematics(NativeLibrarySpec) {
+            binaries.all {
+                cppCompiler.args << '-std=c++14' << '-g'
+            }
             sources.cpp {
                 source {
                     srcDir 'src/cpp'

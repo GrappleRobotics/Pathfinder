@@ -8,7 +8,7 @@ namespace profile {
   // TODO: can I expand this to be n-dimensional?
   // that is, expand it so that ORDER is the derivative
   // that is capable of changing instantly (acceleration for trapezoidal)
-  class trapezoidal1 : public profile1<3> {
+  class trapezoidal : public profile<3> {
   public:
     segment_t calculate(segment_t &last, double time) const override {
       double dt = time - last.time;

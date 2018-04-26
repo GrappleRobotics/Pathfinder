@@ -11,13 +11,13 @@ TEST(Profile, Trapezoidal) {
     double sim_position = 0, sim_velocity = 0;
     double dt = (1*ms).as(s);
 
-    trapezoidal1 pr;
+    trapezoidal pr;
     pr.apply_limit(1, 3);
     pr.apply_limit(2, 4);
     pr.set_goal(5);
     pr.set_timeslice(dt);
 
-    trapezoidal1::segment_t seg;
+    trapezoidal::segment_t seg;
     std::ofstream outfile("profile_trap.csv");
     std::ofstream outfile_sim("profile_trap_simulated.csv");
     outfile << "time,dist,vel,acc\n";

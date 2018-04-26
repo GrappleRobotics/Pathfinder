@@ -8,7 +8,7 @@ namespace path {
   template <size_t DIM>
   class path {
   public:
-    using vector_t = blaze::StaticVector<double, DIM, blaze::columnVector>;
+    using vector_t = typename blaze::StaticVector<double, DIM, blaze::columnVector>;
 
     static const size_t DIMENSIONS = DIM;
 
@@ -22,6 +22,8 @@ namespace path {
   template <size_t DIM>
   class path_set : public path<DIM> {
   public:
+    using vector_t = typename path<DIM>::vector_t;
+
     struct path_index {
       size_t index;
       double t;
@@ -88,7 +90,7 @@ namespace path {
     }
 
     void set_path(size_t idx, PATHTYPE &path) {
-      _paths[i] = path;
+      _paths[idx] = path;
     }
   protected:
     PATHTYPE _paths[COUNT];
