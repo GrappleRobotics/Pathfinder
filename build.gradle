@@ -35,9 +35,12 @@ model {
             testing $.components.kinematics
             
             binaries.all {
-                cppCompiler.args << '-std=c++14' << '-g' << '-pthread' << '-O2'
                 if (toolChain instanceof VisualCpp)
                     cppCompiler.args << '/DEBUG' << '/O2' << '/arch:avx'
+                else {
+                    cppCompiler.args << '-std=c++14' << '-O2'
+                    linker.args << '-pthread'
+                }
             }
 
             sources.cpp {

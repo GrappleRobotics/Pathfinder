@@ -5,7 +5,7 @@
 #include "grpl/util/vec.h"
 #include "grpl/util/constants.h"
 
-#include "blaze/Math.h"
+#include <Eigen/Dense>
 
 #include <cmath>
 #include <iostream>
@@ -17,7 +17,7 @@ namespace system {
   class coupled_drivetrain {
   public:
     static_assert(path_t::DIMENSIONS == 2, "Path must function in exactly 2 Dimensions for Coupled Drivetrain!");
-    using kinematics_t = blaze::StaticMatrix<double, path_t::DIMENSIONS, profile_t::ORDER>;
+    using kinematics_t = Eigen::Matrix<double, path_t::DIMENSIONS, profile_t::ORDER>;
     using vec_t = typename profile_t::vec_t;
     using vector_t = typename path_t::vector_t;
 
@@ -32,7 +32,6 @@ namespace system {
       double t;
       double d;
       kinematics_t k;
-      // vector_t p;
     };
 
     struct state {
@@ -73,12 +72,13 @@ namespace system {
 
       // Half of difference between left and right side for each of { vel, acc, etc }
       vec_t differentials = output.a * _trackwidth / 2.0;
-      vec_t new_limits = _limits - abs(differentials);
+      vec_t new_limits = _limits - differentials.cwiseAbs();
 
       typename profile_t::segment_t segment;
       segment.time = last.c.t;
       for (size_t i = 0; i < profile_t::ORDER; i++) {
-        segment.vect[i] = dot(column(last.c.k, i), unit_angle);
+        segment.vect[i] = last.c.k.col(i).dot(unit_angle);
+        // segment.vect[i] = dot(column(last.c.k, i), unit_angle);
       }
       segment.vect[0] = cur_distance;
 
@@ -88,17 +88,26 @@ namespace system {
 
       output.c.t = output.l.t = output.r.t = time;
 
-      output.c.k = unit_angle * trans(segment.vect);
+      // output.c.k = unit_angle * trans(segment.vect);
+      output.c.k = unit_angle * segment.vect.transpose();
       output.c.d = segment.vect[0];
       
-      output.l.k = output.c.k - tw_angle * trans(output.a);
-      output.r.k = output.c.k + tw_angle * trans(output.a);
+      // output.l.k = output.c.k - tw_angle * trans(output.a);
+      // output.r.k = output.c.k + tw_angle * trans(output.a);
+      output.l.k = output.c.k - tw_angle * output.a.transpose();
+      output.r.k = output.c.k + tw_angle * output.a.transpose();
 
-      column(output.c.k, 0) = center;
-      column(output.l.k, 0) = column(output.c.k, 0) - vec_polar(_trackwidth / 2.0, output.a[0] - PI/2.0);
-      column(output.r.k, 0) = column(output.c.k, 0) + vec_polar(_trackwidth / 2.0, output.a[0] - PI/2.0);
-      output.l.d = last.l.d + dot(column(output.l.k, 1), unit_angle) * dt; // TODO: These have to be projected, not just find length
-      output.r.d = last.r.d + dot(column(output.r.k, 1), unit_angle) * dt;
+      // column(output.c.k, 0) = center;
+      output.c.k.col(0) = center;
+      // column(output.l.k, 0) = column(output.c.k, 0) - vec_polar(_trackwidth / 2.0, output.a[0] - PI/2.0);
+      // column(output.r.k, 0) = column(output.c.k, 0) + vec_polar(_trackwidth / 2.0, output.a[0] - PI/2.0);
+      // output.l.d = last.l.d + dot(column(output.l.k, 1), unit_angle) * dt; // TODO: These have to be projected, not just find length
+      // output.r.d = last.r.d + dot(column(output.r.k, 1), unit_angle) * dt;
+      output.l.k.col(0) = output.c.k.col(0) - vec_polar(_trackwidth / 2.0, output.a[0] - PI/2.0);
+      output.r.k.col(0) = output.c.k.col(0) + vec_polar(_trackwidth / 2.0, output.a[0] - PI/2.0);
+
+      output.l.d = last.l.d + output.l.k.col(1).dot(unit_angle)*dt;
+      output.r.d = last.r.d + output.r.k.col(1).dot(unit_angle)*dt;
 
       output.done = false;
       return output;

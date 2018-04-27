@@ -1,7 +1,6 @@
 #pragma once
 
 #include "grpl/path/path.h"
-#include "grpl/util/vec.h"
 
 namespace grpl {
 namespace path {
