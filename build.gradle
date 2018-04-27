@@ -26,7 +26,7 @@ model {
                     include '**/*.h'
                 }
                 lib project: ':libs', library: "units", linkage: "api"
-                lib project: ':libs', library: "blaze", linkage: "api"
+                lib project: ':libs', library: "eigen", linkage: "api"
             }
         }
     }
@@ -35,9 +35,9 @@ model {
             testing $.components.kinematics
             
             binaries.all {
-                cppCompiler.args << '-std=c++14' << '-g'
+                cppCompiler.args << '-std=c++14' << '-g' << '-pthread' << '-O2'
                 if (toolChain instanceof VisualCpp)
-                    cppCompiler.args << '/DEBUG'
+                    cppCompiler.args << '/DEBUG' << '/O2' << '/arch:avx'
             }
 
             sources.cpp {
@@ -46,7 +46,7 @@ model {
                     include '**/*.cpp'
                 }
                 lib project: ':libs', library: "units", linkage: "api"
-                lib project: ':libs', library: "blaze", linkage: "api"
+                lib project: ':libs', library: "eigen", linkage: "api"
             }
         }
     }

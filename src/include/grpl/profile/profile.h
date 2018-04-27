@@ -1,6 +1,6 @@
 #pragma once
 
-#include <blaze/Math.h>
+#include <Eigen/Dense>
 #include "grpl/units.h"
 
 namespace grpl {
@@ -9,7 +9,7 @@ namespace profile {
   template <size_t ORD>
   class profile {
   public:
-    using vec_t = blaze::StaticVector<double, ORD, blaze::columnVector>;
+    using vec_t = Eigen::Matrix<double, ORD, 1>;
     static const size_t ORDER = ORD;
 
     struct segment_t {

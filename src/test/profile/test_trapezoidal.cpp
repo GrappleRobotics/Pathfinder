@@ -30,10 +30,12 @@ TEST(Profile, Trapezoidal) {
 
         // TODO: Check sim matches theoretical
 
-        outfile_sim << seg.time << "," << sim_position << "\n";
-        outfile << seg.time << "," << seg.vect[0] << "," << seg.vect[1] << "," << seg.vect[2] << "\n";
+        // outfile_sim << seg.time << "," << sim_position << "\n";
+        // outfile << seg.time << "," << seg.vect[0] << "," << seg.vect[1] << "," << seg.vect[2] << "\n";
     }
 }
+
+//// ---- BREAK ---- //
 
 // void test_trapezoidal(Velocity max_v, Acceleration max_a, Distance goal, Time timeslice, std::string fname) {
 //   using profile_t = trapezoidal<Distance, Time, Velocity, Acceleration>;

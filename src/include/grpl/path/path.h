@@ -1,6 +1,6 @@
 #pragma once
 
-#include <blaze/Math.h>
+#include <Eigen/Dense>
 
 namespace grpl {
 namespace path {
@@ -8,7 +8,8 @@ namespace path {
   template <size_t DIM>
   class path {
   public:
-    using vector_t = typename blaze::StaticVector<double, DIM, blaze::columnVector>;
+    // using vector_t = typename blaze::StaticVector<double, DIM, blaze::columnVector>;
+    using vector_t = typename Eigen::Matrix<double, DIM, 1>;  // col vector
 
     static const size_t DIMENSIONS = DIM;
 
