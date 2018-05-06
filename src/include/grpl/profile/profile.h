@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include "grpl/units.h"
 
 namespace grpl {
 namespace profile {
@@ -9,11 +8,11 @@ namespace profile {
   template <size_t ORD>
   class profile {
   public:
-    using vec_t = Eigen::Matrix<double, ORD, 1>;
+    using kinematics_1d_t = Eigen::Matrix<double, 1, ORD>;
     static const size_t ORDER = ORD;
 
     struct segment_t {
-      vec_t vect;
+      kinematics_1d_t k;
       double time;
     };
 
@@ -25,14 +24,14 @@ namespace profile {
 
     // TODO: Set limits mask ?
     void apply_limit(int derivative_idx, double maximum) { _limits[derivative_idx] = maximum; }
-    vec_t &get_limits() { return _limits; }
-    void set_limits(vec_t &other) { _limits = other; }
+    kinematics_1d_t &get_limits() { return _limits; }
+    void set_limits(kinematics_1d_t &other) { _limits = other; }
 
     virtual segment_t calculate(segment_t &last, double time) const = 0;
 
   protected:
     double _goal, _timeslice = 0.001;
-    vec_t _limits;
+    kinematics_1d_t _limits;
   };
   
 } // namespace grpl

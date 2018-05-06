@@ -132,15 +132,12 @@ namespace path {
       );
     }
 
-    // This uses matrix 'batches' to become highly parallelized for faster computation
     double get_arc_length() override {
       if (!_al_calculated) {
         double t = 0, dt = (1.0 / _al_samples);
 
         double last_integrand = 0, arc_length = 0;
         for (t = 0; t <= 1; t += dt) {
-          // Calculate derivative points at each batch. This is where the optimization
-          // comes in
           vector_t R = M * basis_1st(t);
 
           // Arc length calculation

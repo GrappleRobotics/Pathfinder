@@ -4,6 +4,8 @@
 #include <grpl/system/coupled_drivetrain.h>
 #include <grpl/util/vec.h>
 
+#include <grpl/units.h>
+
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -63,14 +65,13 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
         // vel_r += acc_r*dt;
 
         // vel_c += column(state.c.k, 2)*dt;
-        vel_c = state.c.k.col(2) * dt;
 
         // TODO: Check this in the profile too, it might be a problem there.
         // pos_l += column(state.l.k, 1)*dt;
         // pos_r += column(state.r.k, 1)*dt;
         pos_l += state.l.k.col(1) * dt;
         pos_r += state.r.k.col(1) * dt;
-        pos_c += vel_c*dt;
+        pos_c += state.c.k.col(1) * dt;
 
         // TODO: I have a feeling this is failing because the velocity and acceleration angles are not necessarily the
         // same as the path angle.
@@ -114,7 +115,7 @@ TEST(System, Coupled) {
                             wp2 { vec_cart(0, 2), vec_cart(-5, 5) },
                             wp3 { vec_cart(6, 0), vec_polar(0, 0) };
 
-    hermite_t hermite(wp0, wp2, 100000);
+    hermite_t hermite(wp0, wp1, 100000);
 
     profile_t profile;
     profile.set_timeslice(0.001);

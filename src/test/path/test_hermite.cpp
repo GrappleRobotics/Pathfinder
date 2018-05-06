@@ -22,7 +22,7 @@ TEST(Hermite, Cubic) {
 
   for (double t = 0; t <= 1; t += 0.001) {
     auto pt = hermite.calculate(t);
-    // outfile << t << "," << pt[0] << "," << pt[1] << "," << hermite.calculate_curvature(t) << std::endl;
+    outfile << t << "," << pt[0] << "," << pt[1] << "," << hermite.calculate_curvature(t) << std::endl;
   }
 }
 
@@ -39,7 +39,7 @@ TEST(Hermite, Quintic) {
 
   for (double t = 0; t <= 1; t += 0.001) {
     auto pt = hermite.calculate(t);
-    // outfile << t << "," << pt[0] << "," << pt[1] << "," << hermite.calculate_curvature(t) << std::endl;
+    outfile << t << "," << pt[0] << "," << pt[1] << "," << hermite.calculate_curvature(t) << std::endl;
   }
 }
 
