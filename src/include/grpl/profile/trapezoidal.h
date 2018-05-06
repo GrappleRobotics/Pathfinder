@@ -2,6 +2,8 @@
 
 #include "grpl/profile/profile.h"
 
+#include <iostream>
+
 namespace grpl {
 namespace profile {
 
@@ -55,9 +57,9 @@ namespace profile {
 
         if (decel_cross_error_zeros && decel_not_in_progress)
           accel = -accel;
-        else if (abs(seg.k[1] - vel_max) < 0.000001)
+        else if (fabs(seg.k[1] - vel_max) < 0.0001) {
           accel = 0;
-        else if (abs(error) < 0.000001)
+        } else if (fabs(error) < 0.0001)
           accel = 0;
 
         double vel = seg.k[1] + (accel * dt);

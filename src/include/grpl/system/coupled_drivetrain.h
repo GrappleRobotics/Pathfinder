@@ -57,7 +57,7 @@ namespace system {
       vector_t center_prime = path->calculate_slope(path_progress);
 
       double dt = time - last.c.t;
-      bool first = (dt < 0.00000001); // to avoid dt = 0 errors
+      bool first = (dt < 0.00000001);
 
       double angle = atan2(center_prime[1], center_prime[0]);
       vector_t  unit_angle = vec_polar(1, angle),

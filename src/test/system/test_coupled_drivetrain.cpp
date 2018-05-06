@@ -115,7 +115,7 @@ TEST(System, Coupled) {
                             wp2 { vec_cart(0, 2), vec_cart(-5, 5) },
                             wp3 { vec_cart(6, 0), vec_polar(0, 0) };
 
-    hermite_t hermite(wp0, wp1, 100000);
+    hermite_t hermite(wp0, wp2, 100000);
 
     profile_t profile;
     profile.set_timeslice(0.001);
