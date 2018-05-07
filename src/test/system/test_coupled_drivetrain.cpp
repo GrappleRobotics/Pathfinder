@@ -18,7 +18,7 @@ using namespace grpl;
 
 template<typename profile_t, typename path_t>
 void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profile_t> &cdt, profile_t &profile, path_t &path) {
-    typename path_t::vector_t pos_l, pos_r, pos_c, vel_c;
+    typename path_t::vector_t pos_l, pos_r, pos_c, vel_l, vel_r, vel_c;
 
     typename coupled_drivetrain<path_t, profile_t>::state state;
     state.done = false;
@@ -34,9 +34,6 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
     for (Time t = 0; !state.done; t+=dt) {
         state = cdt.generate(&path, &profile, state, t.as(s));
         if (t == 0*s) {
-            // pos_l = column(state.l.k, 0);
-            // pos_r = column(state.r.k, 0);
-            // pos_c = column(state.c.k, 0);
             pos_l = state.l.k.col(0);
             pos_r = state.r.k.col(0);
             pos_c = state.c.k.col(0);
@@ -69,17 +66,21 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
         // TODO: Check this in the profile too, it might be a problem there.
         // pos_l += column(state.l.k, 1)*dt;
         // pos_r += column(state.r.k, 1)*dt;
-        pos_l += state.l.k.col(1) * dt;
-        pos_r += state.r.k.col(1) * dt;
-        pos_c += state.c.k.col(1) * dt;
+        vel_l = state.l.k.col(1);
+        vel_r = state.r.k.col(1);
+        vel_c = state.c.k.col(1);
+
+        pos_l += vel_l * dt;
+        pos_r += vel_r * dt;
+        pos_c += vel_c * dt;
 
         // TODO: I have a feeling this is failing because the velocity and acceleration angles are not necessarily the
         // same as the path angle.
         // Yup, just verified by having the path be a straight line.
 
-        outfile_sim << "left,"   << t.as(s) << "," << pos_l[0] << "," << pos_l[1] << "," << "0,0" << std::endl;
-        outfile_sim << "right,"  << t.as(s) << "," << pos_r[0] << "," << pos_r[1] << "," << "0,0" << std::endl;
-        outfile_sim << "center,"  << t.as(s) << "," << pos_c[0] << "," << pos_c[1] << "," << "0,0" << std::endl;
+        outfile_sim << "left,"   << t.as(s) << "," << pos_l[0] << "," << pos_l[1] << "," << vel_l.norm() << ",0" << std::endl;
+        outfile_sim << "right,"  << t.as(s) << "," << pos_r[0] << "," << pos_r[1] << "," << vel_r.norm() << ",0" << std::endl;
+        outfile_sim << "center,"  << t.as(s) << "," << pos_c[0] << "," << pos_c[1] << "," << vel_c.norm() << ",0" << std::endl;
 
         // for (auto &it : { state.c, state.l, state.r }) {
         //     EXPECT_LE(it.k[1], cdt.get_limits()[1]);    // by being under the set derivative limit, we can imply the function is continuous
