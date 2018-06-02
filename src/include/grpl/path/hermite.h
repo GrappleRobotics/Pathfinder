@@ -5,13 +5,14 @@
 namespace grpl {
 namespace path {
 
-  template <size_t DIM, size_t ORDER=3>
+  template <size_t DIM, size_t ORDER = 3>
   class hermite : public path<DIM> {
-  public:
-    using vector_t  = typename path<DIM>::vector_t;
-    using basis_t   = typename Eigen::Matrix<double, ORDER+1, 1>;
+   public:
+    using vector_t = typename path<DIM>::vector_t;
+    using basis_t = typename Eigen::Matrix<double, ORDER + 1, 1>;
 
-    static_assert(ORDER == 3 || ORDER == 5, "ORDER must be either 3 (cubic) or 5 (quintic)");
+    static_assert(ORDER == 3 || ORDER == 5,
+                  "ORDER must be either 3 (cubic) or 5 (quintic)");
 
     struct waypoint {
       vector_t point, tangent, tangent_slope;
@@ -19,9 +20,7 @@ namespace path {
 
     hermite() {}
 
-    hermite(size_t arclength_samples) {
-      set_samples(arclength_samples);
-    }
+    hermite(size_t arclength_samples) { set_samples(arclength_samples); }
 
     hermite(waypoint &wp0, waypoint &wp1, size_t arclength_samples) {
       set_samples(arclength_samples);
@@ -54,19 +53,16 @@ namespace path {
     inline basis_t basis(double t) const {
       basis_t b;
       if (ORDER == 3) {
-        b <<
-          (2 * t*t*t - 3 * t*t + 1),
-          (t*t*t - 2 * t*t + t),
-          (-2 * t*t*t + 3 * t*t),
-          (t*t*t - t*t);
+        b << (2 * t * t * t - 3 * t * t + 1), (t * t * t - 2 * t * t + t),
+            (-2 * t * t * t + 3 * t * t), (t * t * t - t * t);
       } else {
-        b <<
-          (1 - 10*t*t*t + 15*t*t*t*t - 6*t*t*t*t*t),
-          (t - 6*t*t*t + 8*t*t*t*t - 3*t*t*t*t*t),
-          (0.5*t*t - 1.5*t*t*t + 1.5*t*t*t*t - 0.5*t*t*t*t*t),
-          (10*t*t*t - 15*t*t*t*t + 6*t*t*t*t*t),
-          (7*t*t*t*t - 4*t*t*t - 3*t*t*t*t*t),
-          (0.5*t*t*t - t*t*t*t + 0.5*t*t*t*t*t);
+        b << (1 - 10 * t * t * t + 15 * t * t * t * t - 6 * t * t * t * t * t),
+            (t - 6 * t * t * t + 8 * t * t * t * t - 3 * t * t * t * t * t),
+            (0.5 * t * t - 1.5 * t * t * t + 1.5 * t * t * t * t -
+             0.5 * t * t * t * t * t),
+            (10 * t * t * t - 15 * t * t * t * t + 6 * t * t * t * t * t),
+            (7 * t * t * t * t - 4 * t * t * t - 3 * t * t * t * t * t),
+            (0.5 * t * t * t - t * t * t * t + 0.5 * t * t * t * t * t);
       }
       return b;
     }
@@ -74,19 +70,15 @@ namespace path {
     inline basis_t basis_1st(double t) const {
       basis_t b;
       if (ORDER == 3) {
-        b << 
-          (6 * t*t - 6 * t),
-          (3*t*t - 4 * t + 1),
-          (-6 * t*t + 6 * t),
-          (3 * t*t - 2 * t);
+        b << (6 * t * t - 6 * t), (3 * t * t - 4 * t + 1), (-6 * t * t + 6 * t),
+            (3 * t * t - 2 * t);
       } else {
-        b << 
-          (-30*t*t + 60*t*t*t - 30*t*t*t*t),
-          (1 - 18*t*t + 32*t*t*t - 15*t*t*t*t),
-          (t - 4.5*t*t + 6*t*t*t - 2.5*t*t*t*t),
-          (30*t*t - 60*t*t*t + 30*t*t*t*t),
-          (28*t*t*t - 12*t*t - 15*t*t*t*t),
-          (1.5*t*t - 4*t*t*t + 2.5*t*t*t*t);
+        b << (-30 * t * t + 60 * t * t * t - 30 * t * t * t * t),
+            (1 - 18 * t * t + 32 * t * t * t - 15 * t * t * t * t),
+            (t - 4.5 * t * t + 6 * t * t * t - 2.5 * t * t * t * t),
+            (30 * t * t - 60 * t * t * t + 30 * t * t * t * t),
+            (28 * t * t * t - 12 * t * t - 15 * t * t * t * t),
+            (1.5 * t * t - 4 * t * t * t + 2.5 * t * t * t * t);
       }
       return b;
     }
@@ -94,42 +86,26 @@ namespace path {
     inline basis_t basis_2nd(double t) const {
       basis_t b;
       if (ORDER == 3) {
-        b <<
-          (12 * t - 6),
-          (6*t - 4),
-          (-12 * t + 6),
-          (6 * t - 2);
+        b << (12 * t - 6), (6 * t - 4), (-12 * t + 6), (6 * t - 2);
       } else {
-        b << 
-          (-60*t + 180*t*t - 120*t*t*t),
-          (-36*t + 96*t*t - 60*t*t*t),
-          (1 - 9*t + 18*t*t - 10*t*t*t),
-          (60*t - 180*t*t + 120*t*t*t),
-          (84*t*t - 24*t - 60*t*t*t),
-          (3*t - 12*t*t + 10*t*t*t);
+        b << (-60 * t + 180 * t * t - 120 * t * t * t),
+            (-36 * t + 96 * t * t - 60 * t * t * t),
+            (1 - 9 * t + 18 * t * t - 10 * t * t * t),
+            (60 * t - 180 * t * t + 120 * t * t * t),
+            (84 * t * t - 24 * t - 60 * t * t * t), (3 * t - 12 * t * t + 10 * t * t * t);
       }
       return b;
     }
 
-    vector_t calculate(double t) override {
-      return M * basis(t);
-    }
-
-    vector_t calculate_slope(double t) override {
-      return M * basis_1st(t);
-    }
-
-    vector_t calculate_slope_second(double t) {
-      return M * basis_2nd(t);
-    }
+    vector_t calculate(double t) override { return M * basis(t); }
+    vector_t calculate_slope(double t) override { return M * basis_1st(t); }
+    vector_t calculate_slope_second(double t) { return M * basis_2nd(t); }
 
     double calculate_curvature(double t) override {
       vector_t h_p = calculate_slope(t), h_pp = calculate_slope_second(t);
 
-      return (
-        sqrt( h_p.squaredNorm()*h_pp.squaredNorm() - pow(h_p.dot(h_pp), 2) )
-        / pow(h_p.norm(), 3)
-      );
+      return (sqrt(h_p.squaredNorm() * h_pp.squaredNorm() - pow(h_p.dot(h_pp), 2)) /
+              pow(h_p.norm(), 3));
     }
 
     double get_arc_length() override {
@@ -152,13 +128,11 @@ namespace path {
       return _al_last;
     }
 
-    void reset_arc_length() override {
-      _al_calculated = false;
-    }
+    void reset_arc_length() override { _al_calculated = false; }
 
-  protected:
+   protected:
     waypoint _wp0, _wp1;
-    Eigen::Matrix<double, DIM, ORDER+1> M;
+    Eigen::Matrix<double, DIM, ORDER + 1> M;
     size_t _al_samples = 10000;
     bool _al_calculated = false;
     double _al_last = 0;
@@ -166,20 +140,21 @@ namespace path {
 
   namespace hermite_factory {
     template <typename hermite_t, typename waypoint_t>
-    size_t generate(waypoint_t *wps, size_t waypoint_count, hermite_t *hermite_out, size_t out_size) {
+    size_t generate(waypoint_t *wps, size_t waypoint_count, hermite_t *hermite_out,
+                    size_t out_size) {
       size_t num_hermite = waypoint_count - 1;
       if (num_hermite < out_size) return 0;
 
       size_t hermite_id = 0;
       for (size_t wpid = 1; wpid < waypoint_count; wpid++) {
-        waypoint_t wp0 = wps[wpid-1], wp1 = wps[wpid];
-        waypoint_t wp1_new = { wp1.point, -wp1.tangent, -wp1.tangent_slope };
+        waypoint_t wp0 = wps[wpid - 1], wp1 = wps[wpid];
+        waypoint_t wp1_new = {wp1.point, -wp1.tangent, -wp1.tangent_slope};
 
         hermite_out[hermite_id++].set_waypoints(wp0, wp1);
       }
       return num_hermite;
     }
-  }
+  }  // namespace hermite_factory
 
-}
-}
+}  // namespace path
+}  // namespace grpl

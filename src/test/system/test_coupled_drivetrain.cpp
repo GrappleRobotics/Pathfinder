@@ -31,7 +31,7 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
     int i = 0;
     const char *titles[3] = { "left", "center", "right" };
     double dt = (1*ms).as(s);
-    for (Time t = 0; !state.done; t+=dt) {
+    for (Time t = 0; !state.done && t < 10*s; t+=dt) {
         state = cdt.generate(&path, &profile, state, t.as(s));
         if (t == 0*s) {
             pos_l = state.l.k.col(0);
@@ -78,9 +78,11 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
         // same as the path angle.
         // Yup, just verified by having the path be a straight line.
 
-        outfile_sim << "left,"   << t.as(s) << "," << pos_l[0] << "," << pos_l[1] << "," << vel_l.norm() << ",0" << std::endl;
-        outfile_sim << "right,"  << t.as(s) << "," << pos_r[0] << "," << pos_r[1] << "," << vel_r.norm() << ",0" << std::endl;
-        outfile_sim << "center,"  << t.as(s) << "," << pos_c[0] << "," << pos_c[1] << "," << vel_c.norm() << ",0" << std::endl;
+        typename path_t::vector_t unit_angle = vec_polar(1, state.a[0]);
+
+        outfile_sim << "left,"   << t.as(s) << "," << pos_l[0] << "," << pos_l[1] << "," << vel_l.dot(unit_angle) << ",0" << std::endl;
+        outfile_sim << "right,"  << t.as(s) << "," << pos_r[0] << "," << pos_r[1] << "," << vel_r.dot(unit_angle) << ",0" << std::endl;
+        outfile_sim << "center,"  << t.as(s) << "," << pos_c[0] << "," << pos_c[1] << "," << vel_c.dot(unit_angle) << ",0" << std::endl;
 
         // for (auto &it : { state.c, state.l, state.r }) {
         //     EXPECT_LE(it.k[1], cdt.get_limits()[1]);    // by being under the set derivative limit, we can imply the function is continuous
@@ -94,7 +96,7 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
             //     << it.t << "," << it.p[0] << "," << it.p[1] << "," << it.k[0] << "," << it.k[1] << "," << it.k[2] << "," 
             //     << state.a[0] << "," << state.a[1] << "\n";
             outfile << titles[(i++)%3] << "," << it.t << "," << it.k(0, 0) << "," << it.k(1, 0) << ","
-                    << it.d << "," << it.k.col(1).norm() << "," << it.k.col(2).norm() << ","
+                    << it.d << "," << it.k.col(1).dot(unit_angle) << "," << it.k.col(2).dot(unit_angle) << ","
                     << state.a[0] << "," << state.a[1] << std::endl;
         }
     }

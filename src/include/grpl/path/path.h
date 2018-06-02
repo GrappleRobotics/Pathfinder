@@ -4,10 +4,10 @@
 
 namespace grpl {
 namespace path {
-  
+
   template <size_t DIM>
   class path {
-  public:
+   public:
     // using vector_t = typename blaze::StaticVector<double, DIM, blaze::columnVector>;
     using vector_t = typename Eigen::Matrix<double, DIM, 1>;  // col vector
 
@@ -22,7 +22,7 @@ namespace path {
 
   template <size_t DIM>
   class path_set : public path<DIM> {
-  public:
+   public:
     using vector_t = typename path<DIM>::vector_t;
 
     struct path_index {
@@ -74,44 +74,35 @@ namespace path {
     }
 
     void reset_arc_length() {
-      for (size_t i = 0; i < get_path_count(); i++)
-        get_path(i)->reset_arc_length();
+      for (size_t i = 0; i < get_path_count(); i++) get_path(i)->reset_arc_length();
     }
   };
 
   template <typename PATHTYPE, size_t COUNT, size_t DIM>
   class static_path_set : public path_set<DIM> {
-  public:
-    path<DIM> *get_path(size_t idx) override {
-      return _paths[idx];
-    }
+   public:
+    path<DIM> *get_path(size_t idx) override { return _paths[idx]; }
 
-    size_t get_path_count() override {
-      return COUNT;
-    }
+    size_t get_path_count() override { return COUNT; }
 
-    void set_path(size_t idx, PATHTYPE &path) {
-      _paths[idx] = path;
-    }
-  protected:
+    void set_path(size_t idx, PATHTYPE &path) { _paths[idx] = path; }
+
+   protected:
     PATHTYPE _paths[COUNT];
   };
 
   template <typename PATHTYPE, size_t DIM>
   class wrapper_path_set : public path_set<DIM> {
-  public:
+   public:
     wrapper_path_set(PATHTYPE *paths, size_t size) : _paths(paths), _size(size) {}
 
-    path<DIM> *get_path(size_t idx) override {
-      return &_paths[idx];
-    }
+    path<DIM> *get_path(size_t idx) override { return &_paths[idx]; }
 
-    size_t get_path_count() override {
-      return _size;
-    }
-  protected:
+    size_t get_path_count() override { return _size; }
+
+   protected:
     PATHTYPE *_paths;
     size_t _size;
   };
-}
-}
+}  // namespace path
+}  // namespace grpl

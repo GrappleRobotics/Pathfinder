@@ -11,7 +11,7 @@ namespace profile {
   // that is, expand it so that ORDER is the derivative
   // that is capable of changing instantly (acceleration for trapezoidal)
   class trapezoidal : public profile<3> {
-  public:
+   public:
     segment_t calculate(segment_t &last, double time) const override {
       double dt = time - last.time;
       double timestep = dt;
@@ -19,9 +19,11 @@ namespace profile {
 
       if (_timeslice > 0) {
         double slice_count_d = static_cast<double>(dt / _timeslice);
+
         slice_count = static_cast<int>(slice_count_d);
         if (slice_count_d - slice_count > 0.9) slice_count++;
         if (slice_count < 1) slice_count++;
+
         timestep = _timeslice;
       }
 
@@ -42,18 +44,23 @@ namespace profile {
 
         // TODO: Find point at which we reach v_max and if it's less than dt, split
         // this slice into half.
-        double v_projected = seg.k[1] + accel*dt;
-        v_projected = v_projected > vel_max ? vel_max : v_projected < -vel_max ? -vel_max : v_projected;
+        double v_projected = seg.k[1] + accel * dt;
+        v_projected = v_projected > vel_max
+                          ? vel_max
+                          : v_projected < -vel_max ? -vel_max : v_projected;
 
         double decel_time = v_projected / accel;
-        double decel_dist = v_projected * decel_time - 0.5*accel*decel_time*decel_time;
+        double decel_dist =
+            v_projected * decel_time - 0.5 * accel * decel_time * decel_time;
         double decel_error = seg.k[0] + decel_dist - _goal;
 
         // TODO: make this better
         // If we decelerate now, do we cross the zero of the error function?
-        bool decel_cross_error_zeros = (error > 0 && decel_error < 0) || (error < 0 && decel_error > 0);
+        bool decel_cross_error_zeros =
+            (error > 0 && decel_error < 0) || (error < 0 && decel_error > 0);
         // Are we not currently decelerating?
-        bool decel_not_in_progress = (error < 0 && seg.k[1] > 0) || (error > 0 && seg.k[1] < 0);
+        bool decel_not_in_progress =
+            (error < 0 && seg.k[1] > 0) || (error > 0 && seg.k[1] < 0);
 
         if (decel_cross_error_zeros && decel_not_in_progress)
           accel = -accel;
@@ -72,5 +79,5 @@ namespace profile {
     }
   };
 
-} // namespace profile
-} // namespace grpl
+}  // namespace profile
+}  // namespace grpl

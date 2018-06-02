@@ -1,0 +1,9 @@
+﻿---
+BasedOnStyle: Google
+AlignOperands: 'true'
+ColumnLimit: '90'
+NamespaceIndentation: Inner
+TabWidth: '2'
+UseTab: Never
+
+...
