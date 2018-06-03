@@ -70,6 +70,15 @@
         "map": "cpp",
         "set": "cpp",
         "valarray": "cpp",
-        "xtree": "cpp"
+        "xtree": "cpp",
+        "hash_set": "cpp",
+        "*.tcc": "cpp",
+        "cctype": "cpp",
+        "clocale": "cpp",
+        "cstdarg": "cpp",
+        "cwctype": "cpp",
+        "forward_list": "cpp",
+        "unordered_set": "cpp",
+        "cinttypes": "cpp"
     }
 }

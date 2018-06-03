@@ -25,8 +25,10 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
 
     std::ofstream outfile(filename + ".csv");
     std::ofstream outfile_sim(filename + "_simulated.csv");
+    std::ofstream outfile_vecinfo(filename + "_vecinfo.csv");
     outfile << "path,t,x,y,d,v,a,angle,anglev\n";
     outfile_sim << "path,t,x,y,v,a\n";
+    outfile_vecinfo << "path,t,x,y,d,vx,vy,ax,ay,angle,anglev\n";
 
     int i = 0;
     const char *titles[3] = { "left", "center", "right" };
@@ -97,6 +99,10 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
             //     << state.a[0] << "," << state.a[1] << "\n";
             outfile << titles[(i++)%3] << "," << it.t << "," << it.k(0, 0) << "," << it.k(1, 0) << ","
                     << it.d << "," << it.k.col(1).dot(unit_angle) << "," << it.k.col(2).dot(unit_angle) << ","
+                    << state.a[0] << "," << state.a[1] << std::endl;
+
+            outfile_vecinfo << titles[(i++)%3] << "," << it.t << "," << it.k(0, 0) << "," << it.k(1, 0) << ","
+                    << it.d << "," << it.k.col(1)[0] << "," << it.k.col(1)[1] << "," << it.k.col(2)[0] << "," << it.k.col(2)[1] << ","
                     << state.a[0] << "," << state.a[1] << std::endl;
         }
     }
