@@ -16,11 +16,15 @@ using namespace grpl::system;
 using namespace grpl::units;
 using namespace grpl;
 
+void write_vecinfo(std::ofstream &out, std::string path, double t, hermite<2>::vector_t p, hermite<2>::vector_t v, hermite<2>::vector_t a, double angle, double anglev, double curvature_radius, hermite<2>::vector_t curvcenter) {
+    out << path << ", " << t << "," << p[0] << "," << p[1] << "," << v[0] << "," << v[1] << "," << a[0] << "," << a[1] << "," << angle << "," << anglev << "," << curvature_radius << "," << curvcenter[0] << "," << curvcenter[1] << "\n";
+}
+
 template<typename profile_t, typename path_t>
 void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profile_t> &cdt, profile_t &profile, path_t &path) {
-    typename path_t::vector_t pos_l, pos_r, pos_c, vel_l, vel_r, vel_c;
+    typename path_t::vector_t pos_c_v, pos_c_a, vel_c_a, pos_l, pos_c, pos_r, vel_l, vel_c, vel_r, vel_c_p;
 
-    typename coupled_drivetrain<path_t, profile_t>::state state;
+    typename coupled_drivetrain<path_t, profile_t>::state state, lastState;
     state.done = false;
 
     std::ofstream outfile(filename + ".csv");
@@ -28,7 +32,7 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
     std::ofstream outfile_vecinfo(filename + "_vecinfo.csv");
     outfile << "path,t,x,y,d,v,a,angle,anglev\n";
     outfile_sim << "path,t,x,y,v,a\n";
-    outfile_vecinfo << "path,t,x,y,d,vx,vy,ax,ay,angle,anglev\n";
+    outfile_vecinfo << "path,t,x,y,vx,vy,ax,ay,angle,anglev,curvature_radius,curvature_x,curvature_y\n";
 
     int i = 0;
     const char *titles[3] = { "left", "center", "right" };
@@ -36,38 +40,16 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
     for (Time t = 0; !state.done && t < 10*s; t+=dt) {
         state = cdt.generate(&path, &profile, state, t.as(s));
         if (t == 0*s) {
+            pos_c_v = pos_c_a = state.c.k.col(0);
+            pos_c = state.c.k.col(0);
             pos_l = state.l.k.col(0);
             pos_r = state.r.k.col(0);
-            pos_c = state.c.k.col(0);
+            vel_c_a = { 0, 0 };
+            vel_c_p = { 0, 0 };
+        } else {
+            vel_c_p = (state.c.k.col(0) - lastState.c.k.col(0)) / dt;
         }
 
-        // Check conformity to coupled system constraints TODO: angles
-        // EXPECT_NEAR((state.l.k[1] + state.r.k[1]) / 2, state.c.k[1], 0.0001);
-        // EXPECT_NEAR((state.l.k[2] + state.r.k[2]) / 2, state.c.k[2], 0.0001);
-
-        // TODO: check wheelbase position vectors are trackwidth apart
-        // TODO: when moving to k = matrix, check they are parallel at any given time
-
-        typename path_t::vector_t rv_a;
-        // Check acceleration kinematics match with velocity kinematics
-        // rv_a = robot_vel + vec_polar((state.l.k[2] + state.r.k[2]) / 2, state.a[0]) * (1*ms).as(s);
-        // robot_vel = vec_polar((state.l.k[1] + state.r.k[2]) / 2, state.a[0]);
-        // bool taok  = length(rv_a - robot_vel) < 0.0001; // TODO:
-        // Check velocity kinematics match
-
-        // acc_l = vec_polar(state.l.k[2], state.a[0]);
-        // acc_r = vec_polar(state.r.k[2], state.a[0]);
-
-        // // vel_l = vec_polar(state.l.k[1], state.a[0]);
-        // // vel_r = vec_polar(state.r.k[1], state.a[0]);
-        // vel_l += acc_l*dt;
-        // vel_r += acc_r*dt;
-
-        // vel_c += column(state.c.k, 2)*dt;
-
-        // TODO: Check this in the profile too, it might be a problem there.
-        // pos_l += column(state.l.k, 1)*dt;
-        // pos_r += column(state.r.k, 1)*dt;
         vel_l = state.l.k.col(1);
         vel_r = state.r.k.col(1);
         vel_c = state.c.k.col(1);
@@ -86,13 +68,6 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
         outfile_sim << "right,"  << t.as(s) << "," << pos_r[0] << "," << pos_r[1] << "," << vel_r.dot(unit_angle) << ",0" << std::endl;
         outfile_sim << "center,"  << t.as(s) << "," << pos_c[0] << "," << pos_c[1] << "," << vel_c.dot(unit_angle) << ",0" << std::endl;
 
-        // for (auto &it : { state.c, state.l, state.r }) {
-        //     EXPECT_LE(it.k[1], cdt.get_limits()[1]);    // by being under the set derivative limit, we can imply the function is continuous
-        //     EXPECT_LE(it.k[2], cdt.get_limits()[2]);
-        //     EXPECT_GE(it.k[1], -cdt.get_limits()[1]);
-        //     EXPECT_GE(it.k[2], -cdt.get_limits()[2]);
-        // }
-
         for (auto &it : { state.l, state.c, state.r }) {
             // outfile << titles[(i++)%3] << "," 
             //     << it.t << "," << it.p[0] << "," << it.p[1] << "," << it.k[0] << "," << it.k[1] << "," << it.k[2] << "," 
@@ -101,10 +76,27 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
                     << it.d << "," << it.k.col(1).dot(unit_angle) << "," << it.k.col(2).dot(unit_angle) << ","
                     << state.a[0] << "," << state.a[1] << std::endl;
 
-            outfile_vecinfo << titles[(i++)%3] << "," << it.t << "," << it.k(0, 0) << "," << it.k(1, 0) << ","
-                    << it.d << "," << it.k.col(1)[0] << "," << it.k.col(1)[1] << "," << it.k.col(2)[0] << "," << it.k.col(2)[1] << ","
-                    << state.a[0] << "," << state.a[1] << std::endl;
+            // outfile_vecinfo << titles[(i++)%3] << "," << it.t << "," << it.k(0, 0) << "," << it.k(1, 0) << ","
+            //         << it.d << "," << it.k.col(1)[0] << "," << it.k.col(1)[1] << "," << it.k.col(2)[0] << "," << it.k.col(2)[1] << ","
+            //         << state.a[0] << "," << state.a[1] << std::endl;
         }
+
+        pos_c_v += state.c.k.col(1) * dt;
+        vel_c_a += state.c.k.col(2)*dt;
+        pos_c_a += vel_c*dt;
+
+        double radius = 1.0 / state.curvature;
+
+        hermite<2>::vector_t curv_center = state.c.k.col(0) + vec_polar(radius, state.a[0] + (state.a[1] > 0 ? 1 : -1)*PI/2.0);
+        write_vecinfo(outfile_vecinfo, "posrel", t.as(s), state.c.k.col(0), vel_c_p, state.c.k.col(2), state.a[0], state.a[1], radius, curv_center);
+
+        curv_center = pos_c_v + vec_polar(radius, state.a[0] + (state.a[1] > 0 ? 1 : -1)*PI/2.0);
+        write_vecinfo(outfile_vecinfo, "velrel", t.as(s), pos_c_v, state.c.k.col(1), state.c.k.col(2), state.a[0], state.a[1], radius, curv_center);
+
+        curv_center = pos_c_a + vec_polar(radius, state.a[0] + (state.a[1] > 0 ? 1 : -1)*PI/2.0);
+        write_vecinfo(outfile_vecinfo, "accrel", t.as(s), pos_c_a, vel_c_a, state.c.k.col(2), state.a[0], state.a[1], radius, curv_center);
+
+        lastState = state;
     }
 }
 

@@ -41,6 +41,7 @@ namespace system {
     struct state {
       coupled_side_t l, c, r;
       kinematics_1d_t a;
+      double curvature;
       bool done;
     };
 
@@ -62,6 +63,7 @@ namespace system {
 
       vector_t center = path->calculate(path_progress);
       vector_t center_slope = path->calculate_slope(path_progress);
+      double curvature = path->calculate_curvature(path_progress);
       double angle = atan2(center_slope[1], center_slope[0]);
       vector_t unit_heading = vec_polar(1, angle);
 
@@ -90,6 +92,7 @@ namespace system {
       segment = profile->calculate(segment, time);
 
       // Set output values
+      output.curvature = curvature;
       output.c.t = output.l.t = output.r.t = time;
 
       output.c.k = unit_heading * segment.k;
@@ -117,7 +120,7 @@ namespace system {
       // TODO: I suspect the issue has to do with acceleration being in the wrong direction and not accounting for
       // the 'pull in' effect
 
-      double radius = 1.0 / (path->calculate_curvature(path_progress));
+      double radius = 1.0 / curvature;
       double acc_in = (output.c.k.col(1).squaredNorm())/radius;
       acc_in *= (output.a[1] > 0 ? 1 : -1);
       output.c.k.col(2) += vec_polar(acc_in, output.a[0] + PI / 2.0);
