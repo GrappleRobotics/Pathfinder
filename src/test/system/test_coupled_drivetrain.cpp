@@ -22,7 +22,7 @@ void write_vecinfo(std::ofstream &out, std::string path, double t, hermite<2>::v
 
 template<typename profile_t, typename path_t>
 void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profile_t> &cdt, profile_t &profile, path_t &path) {
-    typename path_t::vector_t pos_c_v, pos_c_a, vel_c_a, pos_l, pos_c, pos_r, vel_l, vel_c, vel_r, vel_c_p;
+    typename path_t::vector_t pos_c_v, pos_c_a, vel_c_a, pos_l, pos_c, pos_r, vel_l, vel_c, vel_r, vel_c_p, acc_c_p;
 
     typename coupled_drivetrain<path_t, profile_t>::state state, lastState;
     state.done = false;
@@ -47,7 +47,9 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
             vel_c_a = { 0, 0 };
             vel_c_p = { 0, 0 };
         } else {
+            typename path_t::vector_t last_vel = vel_c_p;
             vel_c_p = (state.c.k.col(0) - lastState.c.k.col(0)) / dt;
+            acc_c_p = (vel_c_p - last_vel) / dt;
         }
 
         vel_l = state.l.k.col(1);
@@ -87,8 +89,10 @@ void run_kinematics_test(std::string filename, coupled_drivetrain<path_t, profil
 
         double radius = 1.0 / state.curvature;
 
+        std::cout << state.c.k.col(2).dot(vec_polar(1, state.a[0])) << "," << acc_c_p.dot(vec_polar(1, state.a[0])) << std::endl;
+
         hermite<2>::vector_t curv_center = state.c.k.col(0) + vec_polar(radius, state.a[0] + (state.a[1] > 0 ? 1 : -1)*PI/2.0);
-        write_vecinfo(outfile_vecinfo, "posrel", t.as(s), state.c.k.col(0), vel_c_p, state.c.k.col(2), state.a[0], state.a[1], radius, curv_center);
+        write_vecinfo(outfile_vecinfo, "posrel", t.as(s), state.c.k.col(0), vel_c_p, acc_c_p, state.a[0], state.a[1], radius, curv_center);
 
         curv_center = pos_c_v + vec_polar(radius, state.a[0] + (state.a[1] > 0 ? 1 : -1)*PI/2.0);
         write_vecinfo(outfile_vecinfo, "velrel", t.as(s), pos_c_v, state.c.k.col(1), state.c.k.col(2), state.a[0], state.a[1], radius, curv_center);
@@ -119,7 +123,7 @@ TEST(System, Coupled) {
     hermite_t hermite(wp0, wp2, 100000);
 
     profile_t profile;
-    profile.set_timeslice(0.001);
+    profile.set_timeslice(0);
 
     run_kinematics_test("coupled", cdt, profile, hermite);
 }

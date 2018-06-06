@@ -80,7 +80,7 @@ namespace system {
       kinematics_1d_t new_limits = _limits - differentials.cwiseAbs();
 
       profile->set_goal(path_len);
-      profile->set_limits(new_limits);
+      profile->set_limits(_limits);
 
       // Calculate velocity profile
       typename profile_t::segment_t segment;
@@ -97,6 +97,12 @@ namespace system {
 
       output.c.k = unit_heading * segment.k;
       output.c.d = segment.k[0];
+
+      // Progress: profile isn't respecting max acceleration as shown by delta of 
+      // position. This means either the profile is wrong (probs not), or the spline
+      // length calculation / reference isn't working properly (more likely).
+      // How's our parameterization?
+      // This is probably because of the non-equidistant points in the path (not parameterized to length)
 
       // Center kinematics + circular kinematics
       // output.l.k = output.c.k - (trackradius * unit_heading) * output.a;
@@ -121,9 +127,14 @@ namespace system {
       // the 'pull in' effect
 
       double radius = 1.0 / curvature;
-      double acc_in = (output.c.k.col(1).squaredNorm())/radius;
-      acc_in *= (output.a[1] > 0 ? 1 : -1);
-      output.c.k.col(2) += vec_polar(acc_in, output.a[0] + PI / 2.0);
+      // double acc_in = (output.c.k.col(1).squaredNorm())/radius;
+      // acc_in *= (output.a[1] > 0 ? 1 : -1);
+      // output.c.k.col(2) += vec_polar(acc_in, output.a[0] + PI / 2.0);
+
+      // double acc_in = (output.c.k.col(1).squaredNorm())/trackradius;
+
+      double acc_in = output.a[1]*output.a[1]*radius;
+      output.c.k.col(2) += vec_polar(acc_in, output.a[0] + (output.a[1] > 0 ? 1 : -1) * PI / 2.0);
 
       // Test new curvature-related derivation
       // double curvature = path->calculate_curvature(path_progress);

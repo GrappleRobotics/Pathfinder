@@ -26,14 +26,14 @@ namespace profile {
     void apply_limit(int derivative_idx, double maximum) {
       _limits[derivative_idx] = maximum;
     }
-    
+
     kinematics_1d_t &get_limits() { return _limits; }
     void set_limits(kinematics_1d_t &other) { _limits = other; }
 
     virtual segment_t calculate(segment_t &last, double time) const = 0;
 
    protected:
-    double _goal, _timeslice = 0.001;
+    double _goal, _timeslice = 0.001, _timeslice_enabled = 0;
     kinematics_1d_t _limits;
   };
 

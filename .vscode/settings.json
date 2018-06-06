@@ -79,6 +79,22 @@
         "cwctype": "cpp",
         "forward_list": "cpp",
         "unordered_set": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "core": "cpp",
+        "superlusupport": "cpp",
+        "adolcforward": "cpp",
+        "autodiff": "cpp",
+        "bvh": "cpp",
+        "fft": "cpp",
+        "kroneckerproduct": "cpp",
+        "mprealsupport": "cpp",
+        "numericaldiff": "cpp",
+        "openglsupport": "cpp",
+        "splines": "cpp",
+        "*.evaluator": "cpp",
+        "*.traits": "cpp",
+        "threadpool": "cpp",
+        "eulerangles": "cpp",
+        "specialfunctions": "cpp"
     }
 }
