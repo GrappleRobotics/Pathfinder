@@ -1,6 +1,7 @@
 #pragma once
 
 #include "grpl/path/path.h"
+#include "grpl/util/constants.h"
 
 namespace grpl {
 namespace path {
