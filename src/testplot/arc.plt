@@ -2,7 +2,7 @@ set term png size 1800,600 enhanced
 set output "arc.png"
 set multiplot layout 1, 3 title "Arc"
 
-set xrange [-7:0]
+set xrange [-1:6]
 set yrange [0:7]
 
 set title "Path"
