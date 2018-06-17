@@ -5,6 +5,8 @@ ColumnLimit: '90'
 NamespaceIndentation: Inner
 TabWidth: '2'
 UseTab: Never
-AllowShortFunctionsOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Inline
+AlignConsecutiveAssignments: 'true'
+AlignConsecutiveDeclarations: 'true'
 
 ...

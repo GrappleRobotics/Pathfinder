@@ -13,9 +13,9 @@ namespace profile {
   class trapezoidal : public profile<3> {
    public:
     segment_t calculate(segment_t &last, double time) const override {
-      double dt = time - last.time;
-      double timestep = dt;
-      int slice_count = 1;
+      double dt          = time - last.time;
+      double timestep    = dt;
+      int    slice_count = 1;
 
       if (_timeslice > 0) {
         double slice_count_d = static_cast<double>(dt / _timeslice);
@@ -27,7 +27,7 @@ namespace profile {
         timestep = _timeslice;
       }
 
-      double vel_max = _limits[1];
+      double vel_max   = _limits[1];
       double accel_max = _limits[2];
 
       segment_t seg = last;
@@ -45,7 +45,7 @@ namespace profile {
         // TODO: Find point at which we reach v_max and if it's less than dt, split
         // this slice into half.
         double v_projected = seg.k[1] + accel * dt;
-        v_projected = v_projected > vel_max
+        v_projected        = v_projected > vel_max
                           ? vel_max
                           : v_projected < -vel_max ? -vel_max : v_projected;
 
@@ -70,10 +70,10 @@ namespace profile {
           accel = 0;
 
         double vel = seg.k[1] + (accel * dt);
-        seg.k[0] = seg.k[0] + (seg.k[1] * dt) + (0.5 * accel * dt * dt);
-        seg.k[1] = vel > vel_max ? vel_max : vel < -vel_max ? -vel_max : vel;
-        seg.k[2] = accel;
-        seg.time = t;
+        seg.k[0]   = seg.k[0] + (seg.k[1] * dt) + (0.5 * accel * dt * dt);
+        seg.k[1]   = vel > vel_max ? vel_max : vel < -vel_max ? -vel_max : vel;
+        seg.k[2]   = accel;
+        seg.time   = t;
       }
       return seg;
     }

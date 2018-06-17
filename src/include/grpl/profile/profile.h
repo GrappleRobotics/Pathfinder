@@ -9,17 +9,18 @@ namespace profile {
   class profile {
    public:
     using kinematics_1d_t = Eigen::Matrix<double, 1, ORD>;
+
     static const size_t ORDER = ORD;
 
     struct segment_t {
       kinematics_1d_t k;
-      double time;
+      double          time;
     };
 
-    void set_goal(double sp) { _goal = sp; }
+    void   set_goal(double sp) { _goal = sp; }
     double get_goal() const { return _goal; }
 
-    void set_timeslice(double timeslice) { _timeslice = timeslice; }
+    void   set_timeslice(double timeslice) { _timeslice = timeslice; }
     double get_timeslice() const { return _timeslice; }
 
     // TODO: Set limits mask ?
@@ -28,12 +29,12 @@ namespace profile {
     }
 
     kinematics_1d_t &get_limits() { return _limits; }
-    void set_limits(kinematics_1d_t &other) { _limits = other; }
+    void             set_limits(kinematics_1d_t &other) { _limits = other; }
 
     virtual segment_t calculate(segment_t &last, double time) const = 0;
 
    protected:
-    double _goal, _timeslice = 0.001, _timeslice_enabled = 0;
+    double          _goal, _timeslice = 0.001, _timeslice_enabled = 0;
     kinematics_1d_t _limits;
   };
 
