@@ -16,7 +16,7 @@ namespace path {
 
     virtual vector_t calculate_derivative(double t) = 0;
 
-    virtual double calculate_curvature(double t) = 0;
+    virtual double curvature(double t) = 0;
   };
 
 }  // namespace path

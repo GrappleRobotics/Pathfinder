@@ -41,7 +41,7 @@ TEST(Hermite, Cubic) {
     // Assert simulations match actual readings
     ASSERT_LT((position - pt).norm(), 0.02);
 
-    outfile << t << "," << pt[0] << "," << pt[1] << "," << hermite.calculate_curvature(t)
+    outfile << t << "," << pt[0] << "," << pt[1] << "," << hermite.curvature(t)
             << std::endl;
   }
 }
@@ -90,7 +90,7 @@ TEST(Hermite, Quintic) {
     ASSERT_LT((derivative - deriv).norm(), 0.02);
     ASSERT_LT((position_second - pt).norm(), 0.02);
 
-    outfile << t << "," << pt[0] << "," << pt[1] << "," << hermite.calculate_curvature(t)
+    outfile << t << "," << pt[0] << "," << pt[1] << "," << hermite.curvature(t)
             << std::endl;
   }
 }

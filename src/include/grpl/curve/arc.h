@@ -36,15 +36,15 @@ namespace curve {
       return _center + vector_t{_radius * cos(angle), _radius * sin(angle)};
     }
 
-    vector_t calculate_derivative(const double s) const {
+    vector_t calculate_derivative(const double s) const override {
       double angle = _angle_start + (s / _radius) * _sign;
       // Angle is normal to path
       return vector_t{cos(angle + _sign * PI / 2), sin(angle + _sign * PI / 2)};
     }
 
-    double curvature(const double s) const { return 1.0 / _radius; }
+    double curvature(const double s) const override { return 1.0 / _radius; }
 
-    double length() const { return fabs((_angle_end - _angle_start)) * _radius; }
+    double length() const override { return fabs((_angle_end - _angle_start)) * _radius; }
 
    private:
     vector_t _center;
