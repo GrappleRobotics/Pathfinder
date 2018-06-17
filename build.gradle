@@ -26,7 +26,6 @@ model {
                     srcDir 'src/include'
                     include '**/*.h'
                 }
-                lib project: ':libs', library: "units", linkage: "api"
                 lib project: ':libs', library: "eigen", linkage: "api"
             }
         }

@@ -89,12 +89,12 @@ namespace path {
 
     vector_t calculate(double t) override { return M * basis(t); }
 
-    vector_t calculate_slope(double t) override { return M * basis_1st(t); }
+    vector_t calculate_derivative(double t) override { return M * basis_1st(t); }
 
-    vector_t calculate_slope_second(double t) { return M * basis_2nd(t); }
+    vector_t calculate_second_derivative(double t) { return M * basis_2nd(t); }
 
     double calculate_curvature(double t) override {
-      vector_t h_p = calculate_slope(t), h_pp = calculate_slope_second(t);
+      vector_t h_p = calculate_derivative(t), h_pp = calculate_second_derivative(t);
 
       return (sqrt(h_p.squaredNorm() * h_pp.squaredNorm() - pow(h_p.dot(h_pp), 2)) /
               pow(h_p.norm(), 3));
