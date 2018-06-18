@@ -1,7 +1,7 @@
 #pragma once
 
 #include "grpl/curve/arc.h"
-#include "grpl/path/path.h"
+#include "grpl/spline/spline.h"
 
 namespace grpl {
 namespace param {
@@ -42,6 +42,7 @@ namespace param {
   class arc_parameterizer {
    public:
     using vector_t = typename Eigen::Matrix<double, 2, 1>;
+    using curve_t  = augmented_arc2d;
 
     arc_parameterizer() {}
 
@@ -52,40 +53,41 @@ namespace param {
 
     bool has_overrun() { return _has_overrun; }
 
-    size_t curve_count(grpl::path::path<2> *path, double tLo = 0, double tHi = 1,
+    size_t curve_count(grpl::spline::spline<2> *spline, double tLo = 0, double tHi = 1,
                        size_t count = 0) const {
       double tMid = (tHi + tLo) / 2.0;
 
-      augmented_arc2d current_arc(path->calculate(tLo), path->calculate(tMid),
-                                  path->calculate(tHi));
+      augmented_arc2d current_arc(spline->calculate(tLo), spline->calculate(tMid),
+                                  spline->calculate(tHi));
 
-      double kLo = path->curvature(tLo);
-      double kHi = path->curvature(tHi);
+      double kLo = spline->curvature(tLo);
+      double kHi = spline->curvature(tHi);
 
       bool subdivide = (fabs(kHi - kLo) > _max_delta_curvature) ||
                        (current_arc.length() > _max_arc_length);
 
       if (subdivide) {
-        count = curve_count(path, tLo, tMid, count);
-        count = curve_count(path, tMid, tHi, count);
+        count = curve_count(spline, tLo, tMid, count);
+        count = curve_count(spline, tMid, tHi, count);
         return count;
       } else {
         return count + 1;
       }
     }
 
-    template <typename iterator_path_t>
-    size_t curve_count(iterator_path_t path_begin, iterator_path_t path_end,
+    template <typename iterator_spline_t>
+    size_t curve_count(iterator_spline_t spline_begin, iterator_spline_t spline_end,
                        size_t count = 0) const {
       size_t total_count = 0;
-      for (iterator_path_t it = path_begin; it != path_end; it++) {
-        total_count += curve_count((grpl::path::path<2> *)it);
+      for (iterator_spline_t it = spline_begin; it != spline_end; it++) {
+        total_count += curve_count((grpl::spline::spline<2> *)it);
       }
       return total_count;
     }
 
+    // Must call .resize() on dynamic containers before calling this function.
     template <typename iterator_curve_t>
-    iterator_curve_t parameterize(grpl::path::path<2> *path, iterator_curve_t curve_begin,
+    iterator_curve_t parameterize(grpl::spline::spline<2> *spline, iterator_curve_t curve_begin,
                                   iterator_curve_t curve_end, double tLo = 0,
                                   double tHi = 1) {
       _has_overrun = false;
@@ -96,20 +98,19 @@ namespace param {
 
       double tMid = (tHi + tLo) / 2.0;
 
-      augmented_arc2d current_arc(path->calculate(tLo), path->calculate(tMid),
-                                  path->calculate(tHi));
+      augmented_arc2d current_arc(spline->calculate(tLo), spline->calculate(tMid),
+                                  spline->calculate(tHi));
 
-      double kLo = path->curvature(tLo);
-      double kHi = path->curvature(tHi);
+      double kLo = spline->curvature(tLo);
+      double kHi = spline->curvature(tHi);
 
       bool subdivide = (fabs(kHi - kLo) > _max_delta_curvature) ||
                        (current_arc.length() > _max_arc_length);
 
       if (subdivide) {
-        iterator_curve_t new_begin =
-            parameterize_path(path, curve_begin, curve_end, tLo, tMid);
-        new_begin = parameterize_path(path, new_begin, curve_end, tMid, tHi);
-        return new_begin;
+        curve_begin = parameterize(spline, curve_begin, curve_end, tLo, tMid);
+        curve_begin = parameterize(spline, curve_begin, curve_end, tMid, tHi);
+        return curve_begin;
       } else {
         current_arc.set_curvature(kLo, kHi);
         *curve_begin = current_arc;
@@ -117,13 +118,13 @@ namespace param {
       }
     }
 
-    template <typename iterator_curve_t, typename iterator_path_t>
-    iterator_curve_t parameterize(iterator_path_t path_begin, iterator_path_t path_end,
+    template <typename iterator_curve_t, typename iterator_spline_t>
+    iterator_curve_t parameterize(iterator_spline_t spline_begin, iterator_spline_t spline_end,
                                   iterator_curve_t curve_begin,
                                   iterator_curve_t curve_end) {
       iterator_curve_t head = curve_begin;
-      for (iterator_path_t it = path_begin; it != path_end; it++) {
-        head = parameterize((grpl::path::path<2> *)it, head, curve_end);
+      for (iterator_spline_t it = spline_begin; it != spline_end; it++) {
+        head = parameterize((grpl::spline::spline<2> *)it, head, curve_end);
       }
       return head;
     }

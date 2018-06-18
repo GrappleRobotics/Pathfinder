@@ -3,10 +3,10 @@
 #include <Eigen/Dense>
 
 namespace grpl {
-namespace path {
+namespace spline {
 
   template <size_t DIM>
-  class path {
+  class spline {
    public:
     using vector_t = typename Eigen::Matrix<double, DIM, 1>;
 
@@ -19,5 +19,5 @@ namespace path {
     virtual double curvature(double t) = 0;
   };
 
-}  // namespace path
+}  // namespace spline
 }  // namespace grpl

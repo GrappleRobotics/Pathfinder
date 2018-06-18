@@ -1,4 +1,4 @@
-#include <grpl/path/hermite.h>
+#include <grpl/spline/hermite.h>
 #include <grpl/units.h>
 #include <gtest/gtest.h>
 
@@ -7,7 +7,7 @@
 
 using namespace grpl;
 using namespace grpl::units;
-using namespace grpl::path;
+using namespace grpl::spline;
 
 TEST(Hermite, Cubic) {
   using hermite_t = hermite<2>;

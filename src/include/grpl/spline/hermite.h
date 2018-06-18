@@ -1,15 +1,15 @@
 #pragma once
 
-#include "grpl/path/path.h"
+#include "grpl/spline/spline.h"
 #include "grpl/util/constants.h"
 
 namespace grpl {
-namespace path {
+namespace spline {
 
   template <size_t DIM, size_t ORDER = 3>
-  class hermite : public path<DIM> {
+  class hermite : public spline<DIM> {
    public:
-    using vector_t = typename path<DIM>::vector_t;
+    using vector_t = typename spline<DIM>::vector_t;
     using basis_t  = typename Eigen::Matrix<double, ORDER + 1, 1>;
 
     static_assert(ORDER == 3 || ORDER == 5,
@@ -105,5 +105,5 @@ namespace path {
     Eigen::Matrix<double, DIM, ORDER + 1> M;
   };
 
-}  // namespace path
+}  // namespace spline
 }  // namespace grpl
