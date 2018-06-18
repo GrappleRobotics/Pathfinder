@@ -1,7 +1,7 @@
 #pragma once
 
 #include "grpl/curve/arc.h"
-#include "grpl/param/param.h"
+#include "grpl/path/path.h"
 
 namespace grpl {
 namespace param {
@@ -39,25 +39,24 @@ namespace param {
     bool   _curvature_set = false;
   };
 
-  class arc_parameterizer : public parameterizer<2, augmented_arc2d> {
+  class arc_parameterizer {
    public:
+    using vector_t = typename Eigen::Matrix<double, 2, 1>;
+
     arc_parameterizer() {}
-    arc_parameterizer(grpl::path::path<2> *path) : parameterizer(path) {}
 
     void configure(double max_arc_length, double max_delta_curvature) {
       _max_arc_length      = max_arc_length;
       _max_delta_curvature = max_delta_curvature;
     }
 
-    // Recurse, assumes path exists
-    // TODO: Error condition if we reach max curves, continue with a valid output, but
-    // signal an error of some kind.
-    size_t parameterize_step(augmented_arc2d *curves, size_t max_curves,
-                             size_t current_curves, double tLo, double tHi) const {
+    bool has_overrun() { return _has_overrun; }
+
+    size_t curve_count(grpl::path::path<2> *path, double tLo = 0, double tHi = 1,
+                       size_t count = 0) const {
       double tMid = (tHi + tLo) / 2.0;
 
-      grpl::path::path<2> *path = get_path();
-      augmented_arc2d      current_arc(path->calculate(tLo), path->calculate(tMid),
+      augmented_arc2d current_arc(path->calculate(tLo), path->calculate(tMid),
                                   path->calculate(tHi));
 
       double kLo = path->curvature(tLo);
@@ -66,33 +65,73 @@ namespace param {
       bool subdivide = (fabs(kHi - kLo) > _max_delta_curvature) ||
                        (current_arc.length() > _max_arc_length);
 
-      // TODO: Better job at detecting when we're near the end
-      if (subdivide && current_curves < max_curves) {
-        // Bisect at half-way point of t
-        current_curves =
-            parameterize_step(curves, max_curves, current_curves, tLo, tMid);
-        current_curves =
-            parameterize_step(curves, max_curves, current_curves, tMid, tHi);
-        return current_curves;
+      if (subdivide) {
+        count = curve_count(path, tLo, tMid, count);
+        count = curve_count(path, tMid, tHi, count);
+        return count;
       } else {
-        // Either we shouldn't subdivide, or we're 1 item away from capacity
-        // Insert this current curve
-        current_arc.set_curvature(kLo, kHi);
-        *(curves + current_curves) = current_arc;  // Copy arc
-        return current_curves + 1;
+        return count + 1;
       }
     }
 
-    size_t parameterize(augmented_arc2d *curves, size_t max_curves) override {
-      if (has_path())
-        return parameterize_step(curves, max_curves, 0, 0, 1);
-      else
-        return 0;
+    template <typename iterator_path_t>
+    size_t curve_count(iterator_path_t path_begin, iterator_path_t path_end,
+                       size_t count = 0) const {
+      size_t total_count = 0;
+      for (iterator_path_t it = path_begin; it != path_end; it++) {
+        total_count += curve_count((grpl::path::path<2> *)it);
+      }
+      return total_count;
+    }
+
+    template <typename iterator_curve_t>
+    iterator_curve_t parameterize(grpl::path::path<2> *path, iterator_curve_t curve_begin,
+                                  iterator_curve_t curve_end, double tLo = 0,
+                                  double tHi = 1) {
+      _has_overrun = false;
+      if (curve_begin == curve_end) {
+        _has_overrun = true;
+        return curve_end;
+      }
+
+      double tMid = (tHi + tLo) / 2.0;
+
+      augmented_arc2d current_arc(path->calculate(tLo), path->calculate(tMid),
+                                  path->calculate(tHi));
+
+      double kLo = path->curvature(tLo);
+      double kHi = path->curvature(tHi);
+
+      bool subdivide = (fabs(kHi - kLo) > _max_delta_curvature) ||
+                       (current_arc.length() > _max_arc_length);
+
+      if (subdivide) {
+        iterator_curve_t new_begin =
+            parameterize_path(path, curve_begin, curve_end, tLo, tMid);
+        new_begin = parameterize_path(path, new_begin, curve_end, tMid, tHi);
+        return new_begin;
+      } else {
+        current_arc.set_curvature(kLo, kHi);
+        *curve_begin = current_arc;
+        return ++curve_begin;
+      }
+    }
+
+    template <typename iterator_curve_t, typename iterator_path_t>
+    iterator_curve_t parameterize(iterator_path_t path_begin, iterator_path_t path_end,
+                                  iterator_curve_t curve_begin,
+                                  iterator_curve_t curve_end) {
+      iterator_curve_t head = curve_begin;
+      for (iterator_path_t it = path_begin; it != path_end; it++) {
+        head = parameterize((grpl::path::path<2> *)it, head, curve_end);
+      }
+      return head;
     }
 
    private:
     double _max_arc_length;
     double _max_delta_curvature;
+    bool   _has_overrun;
   };
 }  // namespace param
 }  // namespace grpl

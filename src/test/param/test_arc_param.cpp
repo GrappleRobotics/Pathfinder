@@ -15,14 +15,17 @@ TEST(ArcParam, Hermite) {
   hermite_t::waypoint start{{2, 2}, {5, 0}, {0, 0}}, end{{5, 5}, {5, 5}, {0, 0}};
   hermite_t           hermite(start, end);
 
-  augmented_arc2d curves[128];
+  std::array<augmented_arc2d, 128> curves;
 
-  arc_parameterizer param(&hermite);
+  arc_parameterizer param;
   param.configure(0.1, 0.1);
 
-  size_t numcurves = param.parameterize(curves, 100);
+  size_t numcurves_required = param.curve_count(&hermite);
+  auto curves_end = param.parameterize(&hermite, curves.begin(), curves.end());
+  size_t numcurves = std::distance(curves.begin(), curves_end);
 
-  std::cout << numcurves << std::endl;
+  ASSERT_EQ(numcurves, numcurves_required);
+  ASSERT_FALSE(param.has_overrun());
 
   std::ofstream outfile("arcparam.csv");
   outfile << "curveid,s,x,y,curvature\n";
@@ -49,4 +52,23 @@ TEST(ArcParam, Hermite) {
       si = 0;
     }
   }
+}
+
+TEST(ArcParam, Overrun) {
+  using hermite_t = hermite<2, 5>;
+
+  hermite_t::waypoint start{{2, 2}, {5, 0}, {0, 0}}, end{{5, 5}, {5, 5}, {0, 0}};
+  hermite_t           hermite(start, end);
+
+  std::array<augmented_arc2d, 1> curves;
+
+  arc_parameterizer param;
+  param.configure(0.1, 0.1);
+
+  size_t numcurves_required = param.curve_count(&hermite);
+  auto curves_end = param.parameterize(&hermite, curves.begin(), curves.end());
+  size_t numcurves = std::distance(curves.begin(), curves_end);
+
+  ASSERT_GT(numcurves_required, numcurves);
+  ASSERT_TRUE(param.has_overrun());
 }
