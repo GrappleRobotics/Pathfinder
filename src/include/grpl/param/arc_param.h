@@ -80,7 +80,7 @@ namespace param {
                        size_t count = 0) const {
       size_t total_count = 0;
       for (iterator_spline_t it = spline_begin; it != spline_end; it++) {
-        total_count += curve_count((grpl::spline::spline<2> *)it);
+        total_count += curve_count((grpl::spline::spline<2> *)&*it);
       }
       return total_count;
     }
@@ -123,7 +123,7 @@ namespace param {
                         output_iterator_t &&curve_begin, const size_t max_curve_count) {
       size_t len = 0;
       for (iterator_spline_t it = spline_begin; it != spline_end; it++) {
-        len += parameterize((grpl::spline::spline<2> *)it, curve_begin,
+        len += parameterize((grpl::spline::spline<2> *)&*it, curve_begin,
                             max_curve_count - len);
       }
       return len;

@@ -48,6 +48,10 @@ model {
                     srcDir 'src/test'
                     include '**/*.cpp'
                 }
+                exportedHeaders {
+                    srcDir 'src/test'
+                    include '**/*.h'
+                }
                 lib project: ':libs', library: "units", linkage: "api"
                 lib project: ':libs', library: "eigen", linkage: "api"
             }

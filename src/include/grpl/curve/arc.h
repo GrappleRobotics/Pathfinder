@@ -3,6 +3,8 @@
 #include "grpl/curve/curve.h"
 #include "grpl/util/constants.h"
 
+#include <iostream>
+
 namespace grpl {
 namespace curve {
 
@@ -19,37 +21,62 @@ namespace curve {
 
       coeffmatrix << 2 * (start[0] - end[0]), 2 * (start[1] - end[1]),
           2 * (start[0] - mid[0]), 2 * (start[1] - mid[1]);
-      rvec << start.squaredNorm() - end.squaredNorm(),
-          start.squaredNorm() - mid.squaredNorm();
 
-      _center = coeffmatrix.inverse() * rvec;
-      _radius = (start - _center).norm();
+      if (coeffmatrix.determinant() == 0) {
+        // start, mid and end are all colinear, therefore
+        // this arc is, in fact, a straight line.
+        _curvature = 0;
+        _ref       = start;
+        _delta     = end - start;
+        _length    = _delta.norm();
+      } else {
+        rvec << start.squaredNorm() - end.squaredNorm(),
+            start.squaredNorm() - mid.squaredNorm();
 
-      _angle_start = atan2((start - _center)[1], (start - _center)[0]);
-      _angle_end   = atan2((end - _center)[1], (end - _center)[0]);
+        _ref       = coeffmatrix.inverse() * rvec;
+        _curvature = 1.0 / (start - _ref).norm();
 
-      _sign = ((_angle_end - _angle_start) < 0 ? -1 : 1);
+        _angle_offset = atan2((start - _ref)[1], (start - _ref)[0]);
+        double angle1 = atan2((end - _ref)[1], (end - _ref)[0]);
+
+        _length = fabs((angle1 - _angle_offset)) / _curvature;
+        _sign   = ((angle1 - _angle_offset) < 0 ? -1 : 1);  // Sign for curvature
+      }
     }
 
     vector_t calculate(const double s) const override {
-      double angle = _angle_start + (s / _radius) * _sign;
-      return _center + vector_t{_radius * cos(angle), _radius * sin(angle)};
+      if (_curvature != 0) {
+        double angle = _angle_offset + (s * _curvature) * _sign;
+        return _ref + vector_t{cos(angle) / _curvature, sin(angle) / _curvature};
+      } else {
+        return _ref + _delta * (s / _length);
+      }
     }
 
     vector_t calculate_derivative(const double s) const override {
-      double angle = _angle_start + (s / _radius) * _sign;
-      // Angle is normal to path
-      return vector_t{cos(angle + _sign * PI / 2), sin(angle + _sign * PI / 2)};
+      if (_curvature != 0) {
+        double angle = _angle_offset + (s * _curvature) * _sign;
+        return vector_t{cos(angle + _sign * PI / 2), sin(angle + _sign * PI / 2)};
+      } else {
+        return _delta;
+      }
     }
 
-    double curvature(const double s) const override { return 1.0 / _radius; }
+    double curvature(const double s) const override { return _curvature; }
 
-    double length() const override { return fabs((_angle_end - _angle_start)) * _radius; }
+    double length() const override { return _length; }
 
    private:
-    vector_t _center;
-    double   _radius, _sign;
-    double   _angle_start, _angle_end;
+    // Line: Initial point, Arc: Center Point
+    vector_t _ref;
+    // Line uses delta (more efficient, no trig calcs),
+    // whilst circle uses angle offset.
+    vector_t _delta;
+    double   _angle_offset;
+    // Remaining values consistent.
+    double _curvature;
+    double _sign;
+    double _length;
   };
 
 }  // namespace curve

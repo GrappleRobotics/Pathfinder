@@ -6,8 +6,8 @@
 #include <iostream>
 
 #include <array>
-#include <vector>
 #include <list>
+#include <vector>
 
 using namespace grpl;
 using namespace grpl::spline;
@@ -53,10 +53,14 @@ TEST(ArcParam, Overrun) {
 TEST(ArcParam, Multispline) {
   using hermite_t = hermite<2, 5>;
 
-  hermite_t::waypoint      wp0{{2, 2}, {5, 0}, {0, 0}};
-  hermite_t::waypoint      wp1{{5, 5}, {5, 5}, {0, 0}};
-  hermite_t::waypoint      wp2{{8, 8}, {2, 0}, {0, 0}};
-  std::array<hermite_t, 2> hermites{hermite_t{wp0, wp1}, hermite_t{wp1, wp2}};
+  std::array<hermite_t::waypoint, 4> wps{hermite_t::waypoint{{2, 2}, {5, 0}, {0, 0}},
+                                         hermite_t::waypoint{{3, 5}, {0, 5}, {0, 0}},
+                                         hermite_t::waypoint{{5, 7}, {2, 2}, {0, 0}},
+                                         hermite_t::waypoint{{7, 9}, {5, -5}, {0, 0}}};
+
+  std::vector<hermite_t> hermites;
+  hermite_factory::generate<hermite_t>(wps.begin(), wps.end(),
+                                       std::back_inserter(hermites), hermites.max_size());
 
   std::vector<arc_parameterizer::curve_t> curves;
 
@@ -86,6 +90,8 @@ TEST(ArcParam, Multispline) {
     auto c    = curves[curve];
     auto pos  = c.calculate(si);
     auto curv = c.curvature(si);
+
+    ASSERT_FALSE(std::isnan(c.length()));
 
     outfile << curve << "," << s << "," << pos[0] << "," << pos[1] << "," << curv
             << std::endl;

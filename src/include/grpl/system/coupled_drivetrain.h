@@ -45,13 +45,42 @@ namespace system {
       bool            done;
     };
 
-    state generate(curve_t *curve, profile_t *profile, state &last, double time) {
+    state zero_state() {
+      state s;
+      s.curvature = 0;
+      s.done = false;
+      s.r.t = 0;
+      s.r.d = 0;
+      s.r.k.setZero();
+      s.l = s.c = s.r;
+      return s;
+    }
+
+    template <typename iterator_curve_t>
+    state generate(const iterator_curve_t curve_begin, const iterator_curve_t curve_end,
+                   profile_t &profile, state &last, double time) {
       state  output;
-      double curve_len = curve->length();
 
       double cur_distance = last.c.d;
-      if (cur_distance >= curve_len) {
-        output      = last;
+      double local_distance = cur_distance;
+
+      iterator_curve_t curve;
+      double length, total_length = 0;
+      bool curve_exists = false;
+
+      // Find curve
+      for (iterator_curve_t it = curve_begin; it != curve_end; it++) {
+        length = it->length();
+        if (!curve_exists && (length + total_length) >= cur_distance) {
+          local_distance = cur_distance - total_length;
+          curve_exists = true;
+          curve = it;
+        }
+        total_length += length;
+      }
+
+      if (!curve_exists) {
+        output = last;
         output.done = true;
         return output;
       }
@@ -60,9 +89,9 @@ namespace system {
       double dt          = time - last.c.t;
       bool   isFirst     = (dt < 0.0001);
 
-      vector_t center       = curve->calculate(cur_distance);
-      vector_t center_slope = curve->calculate_derivative(cur_distance);
-      double   curvature    = curve->curvature(cur_distance);
+      vector_t center       = curve->calculate(local_distance);
+      vector_t center_slope = curve->calculate_derivative(local_distance);
+      double   curvature    = curve->curvature(local_distance);
       double   angle        = atan2(center_slope[1], center_slope[0]);
       vector_t unit_heading = vec_polar(1, angle);
 
@@ -78,8 +107,8 @@ namespace system {
       kinematics_1d_t differentials = output.a * trackradius;
       kinematics_1d_t new_limits    = _limits - differentials.cwiseAbs();
 
-      profile->set_goal(curve_len);
-      profile->set_limits(new_limits);  // TODO: new limits
+      profile.set_goal(total_length);
+      profile.set_limits(new_limits);  // TODO: new limits
 
       // Calculate velocity profile
       typename profile_t::segment_t segment;
@@ -88,7 +117,7 @@ namespace system {
         segment.k[i] = last.c.k.col(i).dot(unit_heading);
       }
       segment.k[0] = cur_distance;
-      segment      = profile->calculate(segment, time);
+      segment      = profile.calculate(segment, time);
 
       // Set output values
       output.curvature = curvature;
