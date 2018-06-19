@@ -101,9 +101,28 @@ namespace spline {
     }
 
    protected:
-    waypoint                              _wp0, _wp1;
+    waypoint _wp0, _wp1;
+
     Eigen::Matrix<double, DIM, ORDER + 1> M;
   };
+
+  namespace hermite_factory {
+    template <typename hermite_t, typename output_iterator_t, typename iterator_wp_t>
+    size_t generate(const iterator_wp_t wp_begin, const iterator_wp_t wp_end,
+                    output_iterator_t &&out, size_t max_size) {
+      if (wp_begin == wp_end) return 0;
+      if (max_size < std::distance(wp_begin, wp_end)) return 0;  // Not enough space!
+
+      size_t        size    = 0;
+      iterator_wp_t last_wp = wp_begin, start = wp_begin;
+      for (iterator_wp_t it = ++start; it != wp_end; it++) {
+        *(out++) = hermite_t{*last_wp, *it};
+        last_wp  = it;
+        size++;
+      }
+      return size;
+    }
+  }  // namespace hermite_factory
 
 }  // namespace spline
 }  // namespace grpl

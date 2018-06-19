@@ -5,6 +5,10 @@
 #include <fstream>
 #include <iostream>
 
+#include <array>
+#include <vector>
+#include <list>
+
 using namespace grpl;
 using namespace grpl::spline;
 using namespace grpl::param;
@@ -15,15 +19,14 @@ TEST(ArcParam, Hermite) {
   hermite_t::waypoint start{{2, 2}, {5, 0}, {0, 0}}, end{{5, 5}, {5, 5}, {0, 0}};
   hermite_t           hermite(start, end);
 
-  std::vector<arc_parameterizer::curve_t> curves;
+  std::list<arc_parameterizer::curve_t> curves;
 
   arc_parameterizer param;
   param.configure(0.1, 0.1);
 
   size_t numcurves_required = param.curve_count(&hermite);
-  curves.resize(numcurves_required);
-  auto   curves_end = param.parameterize(&hermite, curves.begin(), curves.end());
-  size_t numcurves  = std::distance(curves.begin(), curves_end);
+  size_t numcurves =
+      param.parameterize(&hermite, std::back_inserter(curves), curves.max_size());
 
   ASSERT_EQ(numcurves, numcurves_required);
   ASSERT_FALSE(param.has_overrun());
@@ -41,8 +44,7 @@ TEST(ArcParam, Overrun) {
   param.configure(0.1, 0.1);
 
   size_t numcurves_required = param.curve_count(&hermite);
-  auto   curves_end         = param.parameterize(&hermite, curves.begin(), curves.end());
-  size_t numcurves          = std::distance(curves.begin(), curves_end);
+  size_t numcurves = param.parameterize(&hermite, curves.begin(), curves.max_size());
 
   ASSERT_GT(numcurves_required, numcurves);
   ASSERT_TRUE(param.has_overrun());
@@ -62,10 +64,8 @@ TEST(ArcParam, Multispline) {
   param.configure(0.5, 0.5);
 
   size_t numcurves_required = param.curve_count(hermites.begin(), hermites.end());
-  curves.resize(numcurves_required);
-  auto curves_end =
-      param.parameterize(hermites.begin(), hermites.end(), curves.begin(), curves.end());
-  size_t numcurves = std::distance(curves.begin(), curves_end);
+  size_t numcurves          = param.parameterize(hermites.begin(), hermites.end(),
+                                        std::back_inserter(curves), curves.max_size());
 
   ASSERT_EQ(numcurves, numcurves_required);
   ASSERT_FALSE(param.has_overrun());

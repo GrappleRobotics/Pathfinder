@@ -94,3 +94,53 @@ TEST(Hermite, Quintic) {
             << std::endl;
   }
 }
+
+template <typename hermite_t>
+void multitest(std::string name) {
+  using waypoint_t = typename hermite_t::waypoint;
+
+  std::vector<waypoint_t> wps;
+  wps.push_back(waypoint_t{{2, 2}, {5, 0}, {0, 0}});
+  wps.push_back(waypoint_t{{3, 5}, {0, 5}, {0, 0}});
+  wps.push_back(waypoint_t{{5, 7}, {2, 2}, {0, 0}});
+  wps.push_back(waypoint_t{{7, 9}, {5, -5}, {0, 0}});
+
+  std::vector<hermite_t> hermites;
+
+  size_t num_hermites = hermite_factory::generate<hermite_t>(
+      wps.begin(), wps.end(), std::back_inserter(hermites), hermites.max_size());
+
+  ASSERT_EQ(num_hermites, wps.size() - 1);
+
+  std::ofstream outfile("hermite_" + name + ".csv");
+  outfile << "t,x,y,curvature\n";
+
+  for (size_t i = 0; i < num_hermites; i++) {
+    for (double t = 0; t <= 1; t += 0.001) {
+      auto pt = hermites[i].calculate(t);
+      outfile << (t + i) << "," << pt[0] << "," << pt[1] << ","
+              << hermites[i].curvature(t) << std::endl;
+    }
+  }
+}
+
+TEST(Hermite, MultiCubic) {
+  multitest<hermite<2, 3>>("multicubic");
+}
+
+TEST(Hermite, MultiQuintic) {
+  multitest<hermite<2, 5>>("multiquintic");
+}
+
+TEST(Hermite, MultiZeroWP) {
+  using hermite_t = hermite<2, 5>;
+  std::vector<hermite_t::waypoint> wps;
+  wps.push_back(hermite_t::waypoint{});
+
+  std::array<hermite_t, 10> hermites;
+
+  size_t num_hermites = hermite_factory::generate<hermite_t>(
+      wps.begin(), wps.end(), hermites.begin(), hermites.max_size());
+
+  ASSERT_EQ(num_hermites, 0);
+}

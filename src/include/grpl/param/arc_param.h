@@ -85,15 +85,13 @@ namespace param {
       return total_count;
     }
 
-    // Must call .resize() on dynamic containers before calling this function.
-    template <typename iterator_curve_t>
-    iterator_curve_t parameterize(grpl::spline::spline<2> *spline, iterator_curve_t curve_begin,
-                                  iterator_curve_t curve_end, double tLo = 0,
-                                  double tHi = 1) {
+    template <typename output_iterator_t>
+    size_t parameterize(grpl::spline::spline<2> *spline, output_iterator_t &&curve_begin,
+                        const size_t max_curve_count, double tLo = 0, double tHi = 1) {
       _has_overrun = false;
-      if (curve_begin == curve_end) {
+      if (max_curve_count <= 0) {
         _has_overrun = true;
-        return curve_end;
+        return 0;
       }
 
       double tMid = (tHi + tLo) / 2.0;
@@ -108,25 +106,27 @@ namespace param {
                        (current_arc.length() > _max_arc_length);
 
       if (subdivide) {
-        curve_begin = parameterize(spline, curve_begin, curve_end, tLo, tMid);
-        curve_begin = parameterize(spline, curve_begin, curve_end, tMid, tHi);
-        return curve_begin;
+        output_iterator_t head = curve_begin;
+
+        size_t len = parameterize(spline, head, max_curve_count, tLo, tMid);
+        len += parameterize(spline, head, max_curve_count - len, tMid, tHi);
+        return len;
       } else {
         current_arc.set_curvature(kLo, kHi);
-        *curve_begin = current_arc;
-        return ++curve_begin;
+        *(curve_begin++) = current_arc;
+        return 1;
       }
     }
 
-    template <typename iterator_curve_t, typename iterator_spline_t>
-    iterator_curve_t parameterize(iterator_spline_t spline_begin, iterator_spline_t spline_end,
-                                  iterator_curve_t curve_begin,
-                                  iterator_curve_t curve_end) {
-      iterator_curve_t head = curve_begin;
+    template <typename output_iterator_t, typename iterator_spline_t>
+    size_t parameterize(const iterator_spline_t spline_begin, const iterator_spline_t spline_end,
+                        output_iterator_t &&curve_begin, const size_t max_curve_count) {
+      size_t len = 0;
       for (iterator_spline_t it = spline_begin; it != spline_end; it++) {
-        head = parameterize((grpl::spline::spline<2> *)it, head, curve_end);
+        len += parameterize((grpl::spline::spline<2> *)it, curve_begin,
+                            max_curve_count - len);
       }
-      return head;
+      return len;
     }
 
    private:
