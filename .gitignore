@@ -17,6 +17,7 @@ Thumbs.db
 *.vcxproj
 *.vcxproj.*
 .vs/
+.vscode/
 
 # Gradle
 .gradle/
