@@ -22,9 +22,7 @@ namespace system {
     using kinematics_1d_t = typename profile_t::kinematics_1d_t;
     using vector_t        = typename curve_t::vector_t;
 
-    void apply_limit(int derivative_idx, double maximum) {
-      _limits[derivative_idx] = maximum;
-    }
+    void apply_limit(int derivative_idx, double maximum) { _limits[derivative_idx] = maximum; }
 
     kinematics_1d_t &get_limits() { return _limits; }
     void             set_limits(kinematics_1d_t &other) { _limits = other; }
@@ -48,39 +46,49 @@ namespace system {
     state zero_state() {
       state s;
       s.curvature = 0;
-      s.done = false;
-      s.r.t = 0;
-      s.r.d = 0;
+      s.done      = false;
+      s.r.t       = 0;
+      s.r.d       = 0;
       s.r.k.setZero();
       s.l = s.c = s.r;
       return s;
     }
 
     template <typename iterator_curve_t>
-    state generate(const iterator_curve_t curve_begin, const iterator_curve_t curve_end,
-                   profile_t &profile, state &last, double time) {
-      state  output;
+    inline bool find_curve(double targ_len, const iterator_curve_t curve_begin,
+                           const iterator_curve_t curve_end, iterator_curve_t &curve_out,
+                           double &curve_len_out, double &total_len_out) {
+      curve_len_out = targ_len;
+      total_len_out = 0;
+      bool found    = false;
 
-      double cur_distance = last.c.d;
-      double local_distance = cur_distance;
+      for (iterator_curve_t it = curve_begin; it != curve_end; it++) {
+        double len = it->length();
+        // If we haven't found a curve, and the current length of the curve will put us ahead
+        // of our distance target.
+        if (!found && (len + total_len_out) >= targ_len) {
+          found         = true;
+          curve_len_out = targ_len - total_len_out;
+          curve_out     = it;
+        }
+        total_len_out += len;
+      }
+      return found;
+    }
+
+    template <typename iterator_curve_t>
+    state generate(const iterator_curve_t curve_begin, const iterator_curve_t curve_end, profile_t &profile,
+                   state &last, double time) {
+      state output;
 
       iterator_curve_t curve;
-      double length, total_length = 0;
-      bool curve_exists = false;
+      double           total_length, curve_distance;
+      double           distance = last.c.d;
 
-      // Find curve
-      for (iterator_curve_t it = curve_begin; it != curve_end; it++) {
-        length = it->length();
-        if (!curve_exists && (length + total_length) >= cur_distance) {
-          local_distance = cur_distance - total_length;
-          curve_exists = true;
-          curve = it;
-        }
-        total_length += length;
-      }
+      bool curve_found = find_curve(distance, curve_begin, curve_end, curve, curve_distance, total_length);
 
-      if (!curve_exists) {
-        output = last;
+      if (!curve_found) {
+        output      = last;
         output.done = true;
         return output;
       }
@@ -89,16 +97,30 @@ namespace system {
       double dt          = time - last.c.t;
       bool   isFirst     = (dt < 0.0001);
 
-      vector_t center       = curve->calculate(local_distance);
-      vector_t center_slope = curve->calculate_derivative(local_distance);
-      double   curvature    = curve->curvature(local_distance);
-      double   angle        = atan2(center_slope[1], center_slope[0]);
+      vector_t center = curve->calculate(curve_distance);
+      // TODO: We can't trust derivative to be continuous across curves.
+      vector_t center_slope = curve->calculate_derivative(curve_distance);
+      double curvature = curve->curvature(curve_distance);
+      double angle     = curve->angle(curve_distance);
+      // double   angle        = atan2(center_slope[1], center_slope[0]);
       vector_t unit_heading = vec_polar(1, angle);
 
+      size_t spl = std::distance(curve_begin, curve);
       // Determine angle and derivatives
-      output.a[0] = angle;
+      output.a[0] = angle;  // TODO: use small change to get angular vel/acc
+      double cdist = 0.0001;
+      kinematics_1d_t cangles;
+      cangles[0] = curve->angle(curve_distance+cdist);
+
+      // If I can find the period of rotation for the outer track, 
+      // I can also find the period of rotation for inner and center track.
+      // From that, I can then gaint he differential velocity?
+
       for (size_t i = 1; i < profile_t::ORDER; i++) {
         double diff = output.a[i - 1] - last.a[i - 1];
+        // if (i == 1)
+        //   std::cout << spl << "," << time << "," << dt << "," << angle << " - " << last.a[0] << " = " <<
+        //   diff << std::endl;
         output.a[i] = (isFirst) ? 0 : diff / dt;
       }
 
@@ -116,7 +138,7 @@ namespace system {
       for (size_t i = 0; i < profile_t::ORDER; i++) {
         segment.k[i] = last.c.k.col(i).dot(unit_heading);
       }
-      segment.k[0] = cur_distance;
+      segment.k[0] = distance;
       segment      = profile.calculate(segment, time);
 
       // Set output values
@@ -127,10 +149,8 @@ namespace system {
       output.c.k = unit_heading * segment.k;
 
       output.c.k.col(0) = center;
-      output.l.k.col(0) =
-          output.c.k.col(0) - vec_polar(trackradius, output.a[0] - PI / 2.0);
-      output.r.k.col(0) =
-          output.c.k.col(0) + vec_polar(trackradius, output.a[0] - PI / 2.0);
+      output.l.k.col(0) = output.c.k.col(0) - vec_polar(trackradius, output.a[0] - PI / 2.0);
+      output.r.k.col(0) = output.c.k.col(0) + vec_polar(trackradius, output.a[0] - PI / 2.0);
 
       // a = v^2 / r
       // TODO: Accel for outer tracks

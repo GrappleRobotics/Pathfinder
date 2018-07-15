@@ -19,7 +19,7 @@ TEST(ArcParam, Hermite) {
   hermite_t::waypoint start{{2, 2}, {5, 0}, {0, 0}}, end{{5, 5}, {5, 5}, {0, 0}};
   hermite_t           hermite(start, end);
 
-  std::list<arc_parameterizer::curve_t> curves;
+  std::vector<arc_parameterizer::curve_t> curves;
 
   arc_parameterizer param;
   param.configure(0.1, 0.1);
@@ -30,6 +30,17 @@ TEST(ArcParam, Hermite) {
 
   ASSERT_EQ(numcurves, numcurves_required);
   ASSERT_FALSE(param.has_overrun());
+
+  // Check that curvature and tangent angle is continuous across curves
+  for (size_t c = 1; c < numcurves; c++) {
+    auto it = curves[c];
+    auto last = curves[c-1];
+    ASSERT_DOUBLE_EQ(it.curvature(0), last.curvature(last.length()));
+
+    auto ait = it.angle(0);
+    auto alst = last.angle(last.length());
+    ASSERT_DOUBLE_EQ(ait, alst);
+  }
 }
 
 TEST(ArcParam, Overrun) {

@@ -16,6 +16,11 @@ namespace spline {
 
     virtual vector_t calculate_derivative(double t) = 0;
 
+    double angle(double t) {
+      vector_t deriv = calculate_derivative(t);
+      return atan2(deriv[1], deriv[0]);
+    }
+
     virtual double curvature(double t) = 0;
   };
 

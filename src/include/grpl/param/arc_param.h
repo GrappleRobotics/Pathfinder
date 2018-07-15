@@ -27,6 +27,11 @@ namespace param {
       _curvature_set   = true;
     }
 
+    void set_angle(double start_a, double end_a) {
+      _angle = start_a;
+      _angle_da_dt = (end_a - start_a) / length();  // TODO: bound properly
+    }
+
     double curvature(const double s) const override {
       if (_curvature_set)
         return _curvature + s * _curvature_dk_ds;
@@ -34,8 +39,13 @@ namespace param {
         return grpl::curve::arc2d::curvature(s);
     }
 
+    double angle(const double s) const {
+      return _angle + s*_angle_da_dt;
+    }
+
    private:
     double _curvature, _curvature_dk_ds;
+    double _angle, _angle_da_dt;
     bool   _curvature_set = false;
   };
 
@@ -113,6 +123,7 @@ namespace param {
         return len;
       } else {
         current_arc.set_curvature(kLo, kHi);
+        current_arc.set_angle(spline->angle(tLo), spline->angle(tHi));
         *(curve_begin++) = current_arc;
         return 1;
       }

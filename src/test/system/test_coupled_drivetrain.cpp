@@ -50,36 +50,41 @@ class CoupledDrivetrainTest : public ::testing::Test {
     std::ofstream simfile(filename + "_simulated.csv");
     std::ofstream vecfile(filename + "_vecsim.csv");
 
-    pathfile << "path,t,x,y,d,v,a,angle,anglev,curvature\n";
+    pathfile << "path,t,x,y,d,v,a,angle,anglev,anglea,curvature,curveid\n";
     simfile << "path,control,t,x,y,v\n";
     vecfile << "path,control,t,x,y,vx,vy,ax,ay\n";
 
     for (double t = 0; !state.done && t < timeout; t += dt) {
-      state = cdt.generate(curves.begin(), curves.end(), profile, state, t);
+      state                              = cdt.generate(curves.begin(), curves.end(), profile, state, t);
       typename curve_t::vector_t heading = vec_polar(1, state.a[0]);
 
-      for (size_t pid = 0; pid < 3; pid++) {
-        typename cdt_t::coupled_side_t side =
-            (pid == 0 ? state.c : pid == 1 ? state.l : state.r);
-        std::string path = (pid == 0 ? "center" : pid == 1 ? "left" : "right");
+      // Curve finding, for graphing.
+      typename std::vector<curve_t>::iterator selected_curve;
+      double                                  curve_len, total_len;
+      bool                                    has_curve =
+          cdt.find_curve(state.c.d, curves.begin(), curves.end(), selected_curve, curve_len, total_len);
+      size_t curveid = has_curve ? std::distance(curves.begin(), selected_curve) : 0;
 
-        vecfile << path << ",ref" << t << "," << csv(side.k.col(0)) << ","
-                << csv(side.k.col(1)) << "," << csv(side.k.col(2)) << std::endl;
+      for (size_t pid = 0; pid < 3; pid++) {
+        typename cdt_t::coupled_side_t side = (pid == 0 ? state.c : pid == 1 ? state.l : state.r);
+        std::string                    path = (pid == 0 ? "center" : pid == 1 ? "left" : "right");
+
+        vecfile << path << ",ref" << t << "," << csv(side.k.col(0)) << "," << csv(side.k.col(1)) << ","
+                << csv(side.k.col(2)) << std::endl;
 
         for (size_t o = 0; o < profile_t::ORDER; o++) {
           auto &sim = sims[pid][o];
           sim.write(side.k.col(o), o, dt);
-          vecfile << path << ",o" << o << "," << t << "," << csv(sim.get(0)) << ","
-                  << csv(sim.get(1)) << "," << csv(sim.get(2)) << std::endl;
+          vecfile << path << ",o" << o << "," << t << "," << csv(sim.get(0)) << "," << csv(sim.get(1)) << ","
+                  << csv(sim.get(2)) << std::endl;
           // TODO: Sim should function purely off of 1d velocities/accels, no vectors.
-          simfile << path << ",o" << o << "," << t << "," << sim.get(0).dot(heading)
-                  << "," << sim.get(1).dot(heading) << "," << sim.get(2).dot(heading)
-                  << std::endl;
+          simfile << path << ",o" << o << "," << t << "," << sim.get(0).dot(heading) << ","
+                  << sim.get(1).dot(heading) << "," << sim.get(2).dot(heading) << std::endl;
         }
 
         pathfile << path << "," << t << "," << csv(side.k.col(0)) << "," << side.d << ","
-                 << side.k.col(1).dot(heading) << "," << side.k.col(2).dot(heading) << ","
-                 << state.a[0] << "," << state.a[1] << "," << state.curvature
+                 << side.k.col(1).dot(heading) << "," << side.k.col(2).dot(heading) << "," << state.a[0]
+                 << "," << state.a[1] << "," << state.a[2] << "," << state.curvature << "," << curveid
                  << std::endl;
       }
     }
@@ -112,13 +117,12 @@ TEST_F(CDTest, Basic) {
   //  hermite_t::waypoint{{7, 9}, {5, -5}, {0, 0}}};
 
   std::vector<hermite_t> hermites;
-  hermite_factory::generate<hermite_t>(wps.begin(), wps.end(),
-                                       std::back_inserter(hermites), hermites.max_size());
+  hermite_factory::generate<hermite_t>(wps.begin(), wps.end(), std::back_inserter(hermites),
+                                       hermites.max_size());
 
   arc_parameterizer param;
-  param.configure(0.5, 0.5);
-  param.parameterize(hermites.begin(), hermites.end(), std::back_inserter(curves),
-                     curves.max_size());
+  param.configure(0.1, 0.1);
+  param.parameterize(hermites.begin(), hermites.end(), std::back_inserter(curves), curves.max_size());
 
   //   arc2d::vector_t start = {0, 0}, mid = {4, 2}, end = {5, 5}, end2 = { 6, 8 }, end3 =
   //   {10, 10}; curves.emplace_back(start, mid, end); curves.emplace_back(end, end2,
