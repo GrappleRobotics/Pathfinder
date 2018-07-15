@@ -12,11 +12,27 @@ apply plugin: 'google-test-test-suite'
 apply plugin: 'visual-studio'
 
 model {
+    toolChains {
+        // Define Clang first - for ASAN
+        clang(Clang)
+        gcc(Gcc)
+    }
+    binaries{
+        all {
+            if (!(toolChain instanceof Clang))
+                println "WARNING: Not using Clang. Additional warnings and sanitation may be missing."
+            
+            if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                cppCompiler.args << '-std=c++14' << '-g' << '-O2' << '-Werror'
+            } else {
+                // MSVC
+                cppCompiler.args << '/std:c++14'
+                cppCompiler.args << '/DEBUG' << '/O2'
+            }
+        }
+    }
     components {
         kinematics(NativeLibrarySpec) {
-            binaries.all {
-                cppCompiler.args << '-std=c++14' << '-g'
-            }
             sources.cpp {
                 source {
                     srcDir 'src/cpp'
@@ -35,11 +51,13 @@ model {
             testing $.components.kinematics
             
             binaries.all {
-                if (toolChain instanceof VisualCpp)
-                    cppCompiler.args << '/DEBUG' << '/O2' << '/arch:SSE2'
-                else {
-                    cppCompiler.args << '-std=c++14' << '-O2'
+                if (toolChain instanceof Gcc || toolChain instanceof Clang) {
                     linker.args << '-pthread'
+
+                    if (toolChain instanceof Clang) {
+                        cppCompiler.args << '-fsanitize=address'
+                        linker.args << '-fsanitize=address'
+                    }
                 }
             }
 
@@ -59,7 +77,7 @@ model {
     }
 }
 
-task plotTask() {
+task plot() {
     doLast {
         def usePlot = true
         try {
@@ -90,9 +108,9 @@ task cleanTestTask() {
     }
 }
 
-check.finalizedBy plotTask
+check.finalizedBy plot
 assemble.finalizedBy cleanTestTask
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.5.1'
+    gradleVersion = '4.8.1'
 }
