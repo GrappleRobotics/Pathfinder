@@ -9,6 +9,7 @@ dist: trusty
 matrix:
   include:
     - env: CI_COMPILER=CLANG
+      sudo: required  # Clang requires sudo for ptrace with address sanitizer
       addons:
         apt: 
           packages:
@@ -27,6 +28,12 @@ matrix:
             - gnuplot
           sources:
             - ubuntu-toolchain-r-test
+
+install:
+- sudo update-alternatives --remove-all gcc
+- sudo update-alternatives --remove-all g++
+- sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 10
+- sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 10
 
 script:
 - ./gradlew build --stacktrace --console=plain
