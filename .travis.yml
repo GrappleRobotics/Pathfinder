@@ -3,25 +3,33 @@ language: cpp
 jdk:
 - oraclejdk8
 
+os: linux
+dist: trusty
+
 matrix:
   include:
-    - os: linux
+    - env: CI_COMPILER=CLANG
       addons:
         apt: 
           packages:
             - clang-3.8
+            - g++-5
             - gnuplot
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.8
 
-    - os: linux
-      env: PREFER_GCC=true
+    - env: CI_COMPILER=GCC
       addons:
         apt:
           packages:
             - g++-5
             - gnuplot
+          sources:
+            - ubuntu-toolchain-r-test
 
 script:
-- ./gradlew build --stacktrace
+- ./gradlew build --stacktrace --console=plain
 
 notifications:
   email: false
