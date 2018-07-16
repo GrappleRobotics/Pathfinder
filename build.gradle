@@ -12,12 +12,18 @@ apply plugin: 'visual-studio'
 
 model {
     toolChains {
-        // Define Clang first - for ASAN
-        clang(Clang)
-        gcc(Gcc)
+        if (System.getenv("PREFER_GCC") != null) {
+            gcc(Gcc)
+            clang(Clang)
+        } else {
+            // Define Clang first - for ASAN (Default)
+            clang(Clang)
+            gcc(Gcc)
+        }
     }
     binaries{
         all {
+            println "Using Toolchain: ${toolChain.name}"
             if (!(toolChain instanceof Clang))
                 println "WARNING: Not using Clang. Additional warnings and sanitation may be missing."
             

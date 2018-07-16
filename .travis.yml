@@ -9,12 +9,19 @@ matrix:
       addons:
         apt: 
           packages:
-            - clang
-            - build-essential
+            - clang-3.8
+            - gnuplot
+
+    - os: linux
+      env: PREFER_GCC=true
+      addons:
+        apt:
+          packages:
+            - g++-5
             - gnuplot
 
 script:
-- ./gradlew build --scan --stacktrace
+- ./gradlew build --stacktrace
 
 notifications:
   email: false
