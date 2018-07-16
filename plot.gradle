@@ -1,0 +1,26 @@
+task plot()
+
+def plot_supported = true
+try {
+    exec {
+        commandLine 'gnuplot', '--version'
+    }
+} catch (e) {
+    println "GNUPlot Not Found!"
+    plot_supported = false;
+}
+
+if (plot_supported) {
+    def loadpath = file('src/testplot/')
+    fileTree(dir: loadpath, include: '**/*.plt').files.each { file ->
+        def t = tasks.create("plot${file.name.capitalize()}") {
+            doLast {
+                exec {
+                    workingDir new File(project.buildDir, "test-results/kinematicsTest")
+                    commandLine 'gnuplot', '-e', "set loadpath \"${loadpath.absolutePath}\";load \"settings.gp\"", file.absolutePath
+                }
+            }
+        }
+        plot.dependsOn t
+    }
+}

@@ -1,5 +1,4 @@
 project(":libs") {
-    apply plugin: "jaci.gradle.EmbeddedTools"
     apply plugin: "cpp"
 
     ext.libroot = new File(rootProject.rootDir, "libs")
