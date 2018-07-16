@@ -39,7 +39,7 @@ namespace param {
         return grpl::curve::arc2d::curvature(s);
     }
 
-    double angle(const double s) const {
+    double angle(const double s) const override {
       return _angle + s*_angle_da_dt;
     }
 
@@ -63,7 +63,7 @@ namespace param {
 
     bool has_overrun() { return _has_overrun; }
 
-    size_t curve_count(grpl::spline::spline<2> *spline, double tLo = 0, double tHi = 1,
+    size_t curve_count(grpl::spline::spline *spline, double tLo = 0, double tHi = 1,
                        size_t count = 0) const {
       double tMid = (tHi + tLo) / 2.0;
 
@@ -90,13 +90,13 @@ namespace param {
                        size_t count = 0) const {
       size_t total_count = 0;
       for (iterator_spline_t it = spline_begin; it != spline_end; it++) {
-        total_count += curve_count((grpl::spline::spline<2> *)&*it);
+        total_count += curve_count((grpl::spline::spline *)&*it);
       }
       return total_count;
     }
 
     template <typename output_iterator_t>
-    size_t parameterize(grpl::spline::spline<2> *spline, output_iterator_t &&curve_begin,
+    size_t parameterize(grpl::spline::spline *spline, output_iterator_t &&curve_begin,
                         const size_t max_curve_count, double tLo = 0, double tHi = 1) {
       _has_overrun = false;
       if (max_curve_count <= 0) {
@@ -134,7 +134,7 @@ namespace param {
                         output_iterator_t &&curve_begin, const size_t max_curve_count) {
       size_t len = 0;
       for (iterator_spline_t it = spline_begin; it != spline_end; it++) {
-        len += parameterize((grpl::spline::spline<2> *)&*it, curve_begin,
+        len += parameterize((grpl::spline::spline *)&*it, curve_begin,
                             max_curve_count - len);
       }
       return len;

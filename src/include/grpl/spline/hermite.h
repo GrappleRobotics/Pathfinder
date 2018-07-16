@@ -6,10 +6,10 @@
 namespace grpl {
 namespace spline {
 
-  template <size_t DIM, size_t ORDER = 3>
-  class hermite : public spline<DIM> {
+  template <size_t ORDER = 3>
+  class hermite : public spline {
    public:
-    using vector_t = typename spline<DIM>::vector_t;
+    using vector_t = typename spline::vector_t;
     using basis_t  = typename Eigen::Matrix<double, ORDER + 1, 1>;
 
     static_assert(ORDER == 3 || ORDER == 5,
@@ -96,14 +96,15 @@ namespace spline {
     double curvature(double t) override {
       vector_t h_p = calculate_derivative(t), h_pp = calculate_second_derivative(t);
 
-      return (sqrt(h_p.squaredNorm() * h_pp.squaredNorm() - pow(h_p.dot(h_pp), 2)) /
-              pow(h_p.norm(), 3));
+      return (h_p[0] * h_pp[1] - h_p[1] * h_pp[0]) / pow(h_p.norm(), 3);
+      // return (sqrt(h_p.squaredNorm() * h_pp.squaredNorm() - pow(h_p.dot(h_pp), 2)) /
+      //         pow(h_p.norm(), 3)) * (angle > 0 ? 1 : -1);
     }
 
    protected:
     waypoint _wp0, _wp1;
 
-    Eigen::Matrix<double, DIM, ORDER + 1> M;
+    Eigen::Matrix<double, 2, ORDER + 1> M;
   };
 
   namespace hermite_factory {

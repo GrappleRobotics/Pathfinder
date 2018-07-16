@@ -29,34 +29,38 @@ namespace curve {
         _ref       = start;
         _delta     = end - start;
         _length    = _delta.norm();
+        _angle_offset = atan2(_delta[1], _delta[0]);
       } else {
         rvec << start.squaredNorm() - end.squaredNorm(),
             start.squaredNorm() - mid.squaredNorm();
 
         _ref       = coeffmatrix.inverse() * rvec;
-        _curvature = 1.0 / (start - _ref).norm();
 
         _angle_offset = atan2((start - _ref)[1], (start - _ref)[0]);
         double angle1 = atan2((end - _ref)[1], (end - _ref)[0]);
 
+        _curvature = 1.0 / (start - _ref).norm();
         _length = fabs((angle1 - _angle_offset)) / _curvature;
-        _sign   = ((angle1 - _angle_offset) < 0 ? -1 : 1);  // Sign for curvature
+        _curvature *= ((angle1 - _angle_offset) < 0 ? -1 : 1);
       }
     }
 
     vector_t calculate(const double s) const override {
-      if (_curvature != 0) {
-        double angle = _angle_offset + (s * _curvature) * _sign;
-        return _ref + vector_t{cos(angle) / _curvature, sin(angle) / _curvature};
+      double curv = _curvature;
+      if (curv != 0) {
+        double angle = _angle_offset + (s * curv);
+        return _ref + vector_t{cos(angle) / fabs(curv), sin(angle) / fabs(curv)};
       } else {
         return _ref + _delta * (s / _length);
       }
     }
 
     vector_t calculate_derivative(const double s) const override {
-      if (_curvature != 0) {
-        double angle = _angle_offset + (s * _curvature) * _sign;
-        return vector_t{cos(angle + _sign * PI / 2), sin(angle + _sign * PI / 2)};
+      double curv = _curvature;
+      if (curv != 0) {
+        double sign = curv > 0 ? 1 : -1;
+        double angle = _angle_offset + (s * curv);
+        return vector_t{cos(angle + sign * PI / 2), sin(angle + sign * PI / 2)};
       } else {
         return _delta;
       }
@@ -66,16 +70,30 @@ namespace curve {
 
     double length() const override { return _length; }
 
+    double bound(double a) const {
+      a = fmod(a, 2*PI);
+      a = fmod(a+2*PI, 2*PI);
+      if (a > PI) a -= 2*PI;
+      return a;
+    }
+
+    double angle(const double s) const override {
+      // TODO: Broken
+      double curv = curvature(s);
+      double sign = curv >= 0 ? 1 : -1;
+      double a = bound(_angle_offset + (s * curv) + sign * PI / 2);
+      return a;
+    }
+
    private:
     // Line: Initial point, Arc: Center Point
     vector_t _ref;
     // Line uses delta (more efficient, no trig calcs),
     // whilst circle uses angle offset.
     vector_t _delta;
-    double   _angle_offset;
     // Remaining values consistent.
+    double _angle_offset;
     double _curvature;
-    double _sign;
     double _length;
   };
 

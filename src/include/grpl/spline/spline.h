@@ -5,12 +5,9 @@
 namespace grpl {
 namespace spline {
 
-  template <size_t DIM>
   class spline {
    public:
-    using vector_t = typename Eigen::Matrix<double, DIM, 1>;
-
-    static const size_t DIMENSIONS = DIM;
+    using vector_t = typename Eigen::Matrix<double, 2, 1>;
 
     virtual vector_t calculate(double t) = 0;
 

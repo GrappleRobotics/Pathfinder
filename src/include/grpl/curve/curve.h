@@ -18,6 +18,8 @@ namespace curve {
 
     virtual double curvature(const double s) const = 0;
 
+    virtual double angle(const double s) const = 0;
+
     virtual double length() const = 0;
   };
 
