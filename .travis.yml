@@ -1,0 +1,20 @@
+language: cpp
+
+jdk:
+- oraclejdk8
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt: 
+          packages:
+            - clang
+            - build-essential
+            - gnuplot
+
+script:
+- ./gradlew build --scan --stacktrace
+
+notifications:
+  email: false
