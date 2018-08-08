@@ -3,6 +3,7 @@
 #include "grpl/util/constants.h"
 
 #include <Eigen/Dense>
+#include <iostream>
 
 namespace grpl {
 namespace model {
@@ -35,6 +36,20 @@ namespace model {
       return current / kt;
     }
 
+    double get_current_2(double torque) const {
+      // I = kt * t
+      double kt = _stall_current / _stall_torque;
+      return kt * torque;
+    }
+
+    double get_voltage(double current, double angular_velocity) const {
+      double r_int = internal_resistance();
+      double kv    = (_v_nom - _free_current * r_int) / _free_speed;
+
+      // V = IR + kv*omega
+      return current * r_int + kv * angular_velocity;
+    }
+
    private:
     double _v_nom = 12;     // V
     double _free_speed;     // rad/s
@@ -55,6 +70,41 @@ namespace model {
 
     cdt_model(motor_model &motor, double max_voltage, double wheel_diam, double weight, double trackwidth) 
       : _motor(motor), _max_voltage(max_voltage), _wheel_r(wheel_diam / 2.0), _weight(weight), _trackwidth(trackwidth) {} 
+
+    void set_max_current(double cur_limit) {
+      _max_current = cur_limit;
+    }
+
+    struct limits calculate_limits_2(double angular_velocity, double dt) {
+      struct limits l;
+      double vel_diff = angular_velocity * _trackwidth/2.0;
+
+      Eigen::Matrix<double, 2, 1> diffs;
+      diffs << -vel_diff, vel_diff;
+
+      l.wheel_vels = (_vel + diffs) / (_wheel_r);
+
+      Eigen::Matrix<double, 2, 1> voltages;
+      voltages(0, 0) = _motor.get_voltage(_max_current, l.wheel_vels(0, 0));
+      voltages(1, 0) = _motor.get_voltage(_max_current, l.wheel_vels(1, 0));
+
+      if (voltages(0, 0) > _max_voltage || voltages(1, 0) > _max_voltage) {
+        voltages(0, 0) = _max_voltage;
+        voltages(1, 0) = _max_voltage;
+      }
+
+      l.current_limits(0, 0) = _motor.get_current(voltages(0, 0), l.wheel_vels(0, 0));
+      l.current_limits(1, 0) = _motor.get_current(voltages(1, 0), l.wheel_vels(1, 0));
+
+      l.torque_limits(0, 0) = _motor.get_torque(l.current_limits(0, 0));
+      l.torque_limits(1, 0) = _motor.get_torque(l.current_limits(1, 0));
+
+      l.accel_limits = l.torque_limits / _wheel_r / _weight;
+      // TODO: work backwards to fit in accel limits.
+      l.velocity_limits = l.accel_limits * dt;
+
+      return l;
+    }
 
     struct limits calculate_limits(double angular_velocity, double dt) {
       struct limits l;
@@ -88,6 +138,8 @@ namespace model {
     double      _max_voltage;
     double      _weight;
     double      _trackwidth;
+    // Other
+    double      _max_current;
     // State
     Eigen::Matrix<double, 2, 1> _vel;
   };
