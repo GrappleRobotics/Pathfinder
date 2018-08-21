@@ -62,6 +62,7 @@ namespace model {
    public:
     struct limits {
       Eigen::Matrix<double, 2, 1> wheel_vels;
+      Eigen::Matrix<double, 2, 1> voltages;
       Eigen::Matrix<double, 2, 1> current_limits;
       Eigen::Matrix<double, 2, 1> torque_limits;
       Eigen::Matrix<double, 2, 1> accel_limits;
@@ -79,28 +80,30 @@ namespace model {
       struct limits l;
       double vel_diff = angular_velocity * _trackwidth/2.0;
 
-      Eigen::Matrix<double, 2, 1> diffs;
-      diffs << -vel_diff, vel_diff;
+      Eigen::Matrix<double, 2, 1> diffs{ -vel_diff, vel_diff };
 
+      // Current thought train: 
+      // Both motors are equalling 40A, hence the accelerations and wheel velocities are the
+      // same. We need to split this out somehow...
+      // Currently, angular_velocity is acting as a sort of offset (i.e. current state),
+      // however we want it as our target state..
+      // We may need to drive acceleration using the angular_velocity instead.
       l.wheel_vels = (_vel + diffs) / (_wheel_r);
 
-      Eigen::Matrix<double, 2, 1> voltages;
-      voltages(0, 0) = _motor.get_voltage(_max_current, l.wheel_vels(0, 0));
-      voltages(1, 0) = _motor.get_voltage(_max_current, l.wheel_vels(1, 0));
+      l.voltages(0, 0) = _motor.get_voltage(_max_current, l.wheel_vels(0, 0));
+      l.voltages(1, 0) = _motor.get_voltage(_max_current, l.wheel_vels(1, 0));
 
-      if (voltages(0, 0) > _max_voltage || voltages(1, 0) > _max_voltage) {
-        voltages(0, 0) = _max_voltage;
-        voltages(1, 0) = _max_voltage;
+      if ((l.voltages.array() > _max_voltage).any()) {
+        l.voltages = (l.voltages / l.voltages.maxCoeff()) * _max_voltage;
       }
 
-      l.current_limits(0, 0) = _motor.get_current(voltages(0, 0), l.wheel_vels(0, 0));
-      l.current_limits(1, 0) = _motor.get_current(voltages(1, 0), l.wheel_vels(1, 0));
+      l.current_limits(0, 0) = _motor.get_current(l.voltages(0, 0), l.wheel_vels(0, 0));
+      l.current_limits(1, 0) = _motor.get_current(l.voltages(1, 0), l.wheel_vels(1, 0));
 
       l.torque_limits(0, 0) = _motor.get_torque(l.current_limits(0, 0));
       l.torque_limits(1, 0) = _motor.get_torque(l.current_limits(1, 0));
 
       l.accel_limits = l.torque_limits / _wheel_r / _weight;
-      // TODO: work backwards to fit in accel limits.
       l.velocity_limits = l.accel_limits * dt;
 
       return l;
@@ -130,6 +133,10 @@ namespace model {
 
     void set_vel(Eigen::Matrix<double, 2, 1> vel) {
       _vel = vel;
+    }
+
+    double get_trackwidth() const {
+      return _trackwidth;
     }
 
    private:
