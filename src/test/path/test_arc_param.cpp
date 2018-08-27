@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "grpl/param/arc_param.h"
-#include "grpl/spline/hermite.h"
+#include "grpl/path/arc_parameterizer.h"
+#include "grpl/path/hermite.h"
 
 #include <fstream>
 #include <iostream>
@@ -10,8 +10,7 @@
 #include <vector>
 
 using namespace grpl;
-using namespace grpl::spline;
-using namespace grpl::param;
+using namespace grpl::path;
 
 TEST(ArcParam, Hermite) {
   using hermite_t = hermite<5>;
@@ -24,8 +23,8 @@ TEST(ArcParam, Hermite) {
   arc_parameterizer param;
   param.configure(0.1, 0.1);
 
-  size_t numcurves_required = param.curve_count(&hermite);
-  size_t numcurves          = param.parameterize(&hermite, std::back_inserter(curves), curves.max_size());
+  size_t numcurves_required = param.curve_count(hermite);
+  size_t numcurves          = param.parameterize(hermite, std::back_inserter(curves), curves.max_size());
 
   ASSERT_EQ(numcurves, numcurves_required);
   ASSERT_FALSE(param.has_overrun());
@@ -35,10 +34,6 @@ TEST(ArcParam, Hermite) {
     auto it   = curves[c];
     auto last = curves[c - 1];
     ASSERT_DOUBLE_EQ(it.curvature(0), last.curvature(last.length()));
-
-    auto ait  = it.angle(0);
-    auto alst = last.angle(last.length());
-    ASSERT_DOUBLE_EQ(ait, alst);
   }
 }
 
@@ -53,8 +48,8 @@ TEST(ArcParam, Overrun) {
   arc_parameterizer param;
   param.configure(0.1, 0.1);
 
-  size_t numcurves_required = param.curve_count(&hermite);
-  size_t numcurves          = param.parameterize(&hermite, curves.begin(), curves.max_size());
+  size_t numcurves_required = param.curve_count(hermite);
+  size_t numcurves          = param.parameterize(hermite, curves.begin(), curves.max_size());
 
   ASSERT_GT(numcurves_required, numcurves);
   ASSERT_TRUE(param.has_overrun());
@@ -90,9 +85,10 @@ TEST(ArcParam, Multispline) {
   hermite_t::vector_t last_pos{2, 2};
   for (auto it = hermites.begin(); it != hermites.end(); it++) {
     for (double t = 0; t < 1; t += 0.001) {
-      auto pos = it->calculate(t);
+      auto pos = it->position(t);
+      auto rot = it->rotation(t);
       ps += (pos - last_pos).norm();
-      outfile << -100.0 << "," << ps << "," << pos[0] << "," << pos[1] << "," << it->curvature(t) << "," << (it->angle(t) * 180/PI) << std::endl;
+      outfile << -100.0 << "," << ps << "," << pos[0] << "," << pos[1] << "," << it->curvature(t) << "," << (atan2(rot.y(), rot.x()) * 180/PI) << std::endl;
       last_pos = pos;
     }
   }
@@ -101,9 +97,10 @@ TEST(ArcParam, Multispline) {
   double s = 0, si = 0;
   while (curve < numcurves) {
     auto c     = curves[curve];
-    auto pos   = c.calculate(si);
+    auto pos   = c.position(si);
     auto curv  = c.curvature(si);
-    auto angle = c.angle(si);
+    auto rot = c.rotation(si);
+    auto angle = atan2(rot.y(), rot.x());
 
     ASSERT_FALSE(std::isnan(c.length()));
 

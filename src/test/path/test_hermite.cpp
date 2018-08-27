@@ -1,16 +1,14 @@
-#include <grpl/spline/hermite.h>
-#include <grpl/units.h>
+#include <grpl/path/hermite.h>
 #include <gtest/gtest.h>
 
 #include <fstream>
 #include <iostream>
 
 using namespace grpl;
-using namespace grpl::units;
-using namespace grpl::spline;
+using namespace grpl::path;
 
 TEST(Hermite, Cubic) {
-  using hermite_t = hermite<3>;
+  using hermite_t = hermite_cubic;
 
   hermite_t::waypoint start{{2, 2}, {5, 0}}, end{{5, 5}, {0, 5}};
 
@@ -22,19 +20,19 @@ TEST(Hermite, Cubic) {
   hermite_t::vector_t position = start.point;
 
   // Check start and end points
-  auto t0 = hermite.calculate(0);
-  auto t1 = hermite.calculate(1);
+  auto t0 = hermite.position(0);
+  auto t1 = hermite.position(1);
   ASSERT_LT((t0 - start.point).norm(), 0.01) << t0;
   ASSERT_LT((t1 - end.point).norm(), 0.01) << t1;
   // Check start and end tangents
-  auto t0_d = hermite.calculate_derivative(0);
-  auto t1_d = hermite.calculate_derivative(1);
+  auto t0_d = hermite.velocity(0);
+  auto t1_d = hermite.velocity(1);
   ASSERT_LT((t0_d - start.tangent).norm(), 0.01) << t0;
   ASSERT_LT((t1_d - end.tangent).norm(), 0.01) << t1;
 
   for (double t = 0; t <= 1; t += 0.001) {
-    auto pt    = hermite.calculate(t);
-    auto deriv = hermite.calculate_derivative(t);
+    auto pt    = hermite.position(t);
+    auto deriv = hermite.velocity(t);
     auto curv  = hermite.curvature(t);
 
     position += deriv * 0.001;
@@ -50,7 +48,7 @@ TEST(Hermite, Cubic) {
 }
 
 TEST(Hermite, Quintic) {
-  using hermite_t = hermite<5>;
+  using hermite_t = hermite_quintic;
 
   hermite_t::waypoint start{{2, 2}, {5, 0}, {0, 0}}, end{{5, 5}, {0, 5}, {0, 0}};
 
@@ -63,25 +61,25 @@ TEST(Hermite, Quintic) {
   hermite_t::vector_t derivative = start.tangent;
 
   // Check start and end points
-  auto t0 = hermite.calculate(0);
-  auto t1 = hermite.calculate(1);
+  auto t0 = hermite.position(0);
+  auto t1 = hermite.position(1);
   ASSERT_LT((t0 - start.point).norm(), 0.01) << t0;
   ASSERT_LT((t1 - end.point).norm(), 0.01) << t1;
   // Check start and end tangents
-  auto t0_d = hermite.calculate_derivative(0);
-  auto t1_d = hermite.calculate_derivative(1);
+  auto t0_d = hermite.velocity(0);
+  auto t1_d = hermite.velocity(1);
   ASSERT_LT((t0_d - start.tangent).norm(), 0.01) << t0;
   ASSERT_LT((t1_d - end.tangent).norm(), 0.01) << t1;
   // Check start and end second derivatives
-  auto t0_sd = hermite.calculate_second_derivative(0);
-  auto t1_sd = hermite.calculate_second_derivative(1);
+  auto t0_sd = hermite.acceleration(0);
+  auto t1_sd = hermite.acceleration(1);
   ASSERT_LT((t0_sd - start.tangent_slope).norm(), 0.01) << t0;
   ASSERT_LT((t1_sd - end.tangent_slope).norm(), 0.01) << t1;
 
   for (double t = 0; t <= 1; t += 0.001) {
-    auto pt       = hermite.calculate(t);
-    auto deriv    = hermite.calculate_derivative(t);
-    auto deriv2nd = hermite.calculate_second_derivative(t);
+    auto pt       = hermite.position(t);
+    auto deriv    = hermite.velocity(t);
+    auto deriv2nd = hermite.acceleration(t);
     auto curv     = hermite.curvature(t);
 
     derivative += deriv2nd * 0.001;
@@ -102,7 +100,7 @@ TEST(Hermite, Quintic) {
 }
 
 TEST(Hermite, NegativeCurvature) {
-  using hermite_t = hermite<3>;
+  using hermite_t = hermite_cubic;
 
   hermite_t::waypoint start{{2, 2}, {5, 0}}, end{{5, -1}, {0, -5}};
 
@@ -114,19 +112,19 @@ TEST(Hermite, NegativeCurvature) {
   hermite_t::vector_t position = start.point;
 
   // Check start and end points
-  auto t0 = hermite.calculate(0);
-  auto t1 = hermite.calculate(1);
+  auto t0 = hermite.position(0);
+  auto t1 = hermite.position(1);
   ASSERT_LT((t0 - start.point).norm(), 0.01) << t0;
   ASSERT_LT((t1 - end.point).norm(), 0.01) << t1;
   // Check start and end tangents
-  auto t0_d = hermite.calculate_derivative(0);
-  auto t1_d = hermite.calculate_derivative(1);
+  auto t0_d = hermite.velocity(0);
+  auto t1_d = hermite.velocity(1);
   ASSERT_LT((t0_d - start.tangent).norm(), 0.01) << t0;
   ASSERT_LT((t1_d - end.tangent).norm(), 0.01) << t1;
 
   for (double t = 0; t <= 1; t += 0.001) {
-    auto pt    = hermite.calculate(t);
-    auto deriv = hermite.calculate_derivative(t);
+    auto pt    = hermite.position(t);
+    auto deriv = hermite.velocity(t);
     auto curv  = hermite.curvature(t);
 
     position += deriv * 0.001;
@@ -163,7 +161,7 @@ void multitest(std::string name) {
 
   for (size_t i = 0; i < num_hermites; i++) {
     for (double t = 0; t <= 1; t += 0.001) {
-      auto pt = hermites[i].calculate(t);
+      auto pt = hermites[i].position(t);
       outfile << (t + i) << "," << pt[0] << "," << pt[1] << ","
               << hermites[i].curvature(t) << std::endl;
     }
@@ -171,15 +169,15 @@ void multitest(std::string name) {
 }
 
 TEST(Hermite, MultiCubic) {
-  multitest<hermite<3>>("multicubic");
+  multitest<hermite_cubic>("multicubic");
 }
 
 TEST(Hermite, MultiQuintic) {
-  multitest<hermite<5>>("multiquintic");
+  multitest<hermite_quintic>("multiquintic");
 }
 
 TEST(Hermite, MultiZeroWP) {
-  using hermite_t = hermite<5>;
+  using hermite_t = hermite_quintic;
   std::vector<hermite_t::waypoint> wps;
   wps.push_back(hermite_t::waypoint{});
 
