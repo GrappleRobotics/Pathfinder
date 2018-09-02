@@ -114,6 +114,7 @@ namespace path {
   using hermite_cubic   = hermite<3>;
   using hermite_quintic = hermite<5>;
 
+  // TODO: More Hermite generation methods. Perhaps this should be in another file?
   namespace hermite_factory {
     template <typename hermite_t, typename output_iterator_t, typename iterator_wp_t>
     size_t generate(const iterator_wp_t wp_begin, const iterator_wp_t wp_end, output_iterator_t &&out,

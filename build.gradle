@@ -30,7 +30,7 @@ model {
                 println "WARNING: Not using Clang. Additional warnings and sanitation may be missing."
             
             if (toolChain instanceof Gcc || toolChain instanceof Clang) {
-                cppCompiler.args << '-std=c++14' << '-g' << '-O2' << '-Werror' << '-DEXCLUDE_CDT'
+                cppCompiler.args << '-std=c++14' << '-g' << '-O2' << '-Werror'
             } else {
                 // MSVC
                 cppCompiler.args << '/std:c++14'
@@ -58,6 +58,7 @@ model {
             testing $.components.kinematics
             
             binaries.all {
+                cppCompiler.args << '-DEIGEN_RUNTIME_NO_MALLOC'
                 if (toolChain instanceof Gcc || toolChain instanceof Clang) {
                     linker.args << '-pthread'
 

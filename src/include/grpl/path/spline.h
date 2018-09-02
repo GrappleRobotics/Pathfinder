@@ -17,7 +17,7 @@ namespace path {
 
     virtual vector_t rotation(double t) {
       vector_t deriv = velocity(t);
-      return deriv / deriv.norm();  // Normalize to rotation units
+      return deriv / deriv.norm();  // Normalize to unit vectors
     };
 
     virtual double curvature(double t) = 0;

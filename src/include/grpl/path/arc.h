@@ -73,7 +73,6 @@ namespace path {
     // Line uses delta (more efficient, no trig calcs),
     // whilst circle uses angle offset.
     vector_t _delta;
-    // Remaining values consistent.
     double _angle_offset;
     double _curvature;
     double _length;
