@@ -4,3 +4,6 @@
 [submodule "libs/eigen"]
 	path = libs/eigen
 	url = https://github.com/eigenteam/eigen-git-mirror.git
+[submodule "libs/googlebench"]
+	path = libs/googlebench
+	url = https://github.com/google/benchmark

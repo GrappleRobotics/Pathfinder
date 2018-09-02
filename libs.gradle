@@ -3,7 +3,7 @@ project(":libs") {
 
     ext.libroot = new File(rootProject.rootDir, "libs")
     ext.gtest_root = new File(libroot, "googletest/googletest")
-    ext.units_root = new File(libroot, "units")
+    ext.gbench_root = new File(libroot, "googlebench")
     ext.eigen_root = new File(libroot, "eigen")
 
     model {
@@ -18,6 +18,29 @@ project(":libs") {
                         srcDirs gtest_root, new File(gtest_root, "include")
                         include "**/*.hpp", "**/*.h"
                     }
+                }
+            }
+
+            googleBench(NativeLibrarySpec) {
+                binaries.all {
+                    if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                        cppCompiler.args << '-std=c++14'
+                    } else {
+                        cppCompiler.args << '/std:c++14'
+                    }
+                }
+                
+                sources.cpp {
+                    source {
+                        srcDir new File(gbench_root, "src")
+                        include "**/*.cc"
+                        exclude "**/benchmark_main.cc"
+                    }
+                    exportedHeaders {
+                        srcDirs new File(gbench_root, "src"), new File(gbench_root, "include")
+                        include "**/*.hpp", "**/*.h"
+                    }
+                    lib project: ':libs', library: "googleTest", linkage: "static"
                 }
             }
         }
