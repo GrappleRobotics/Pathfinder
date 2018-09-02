@@ -1,6 +1,3 @@
-[submodule "libs/units"]
-	path = libs/units
-	url = https://github.com/GrappleLabs/Units.git
 [submodule "libs/googletest"]
 	path = libs/googletest
 	url = https://github.com/google/googletest
