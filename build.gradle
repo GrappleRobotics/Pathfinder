@@ -10,6 +10,9 @@ apply plugin: 'cpp'
 apply plugin: 'google-test-test-suite'
 apply plugin: 'visual-studio'
 
+group = "grpl.pathfinder"
+version = "2.0.0-prealpha"
+
 model {
     toolChains {
         if (System.getenv("CI_COMPILER") != null) {

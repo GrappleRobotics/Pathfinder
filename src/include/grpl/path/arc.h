@@ -68,7 +68,7 @@ namespace path {
       }
     }
 
-    // Line: Initial point, Arc: Center Point
+    // Line: Initial point, Arc: Centre Point
     vector_t _ref;
     // Line uses delta (more efficient, no trig calcs),
     // whilst circle uses angle offset.

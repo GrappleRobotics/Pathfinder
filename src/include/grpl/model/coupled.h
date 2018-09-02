@@ -5,6 +5,7 @@
 #include "grpl/profile/profile.h"
 #include "grpl/util/constants.h"
 
+#include <iostream>
 #include <utility>
 
 namespace grpl {
@@ -30,19 +31,17 @@ namespace model {
       bool            finished;
     };
 
-    // TODO: Find a way to set the initial state accel based on motor limits
-    state initial_state(double max_acceleration) {
+    state initial_state() {
       state st;
-      st.time     = 0;
-      st.curvature = 0;
-      st.finished = false;
+      st.time             = 0;
+      st.curvature        = 0;
       st.configuration[0] = 0;
       st.configuration[1] = 0;
       st.configuration[2] = 0;
-      st.kinematics[0] = 0;
-      st.kinematics[1] = 0;
-      // Need to set max-acceleration here in order to validate accel constraints (see note 1)
-      st.kinematics[2] = max_acceleration;
+      st.kinematics[0]    = 0;
+      st.kinematics[1]    = 0;
+      st.kinematics[2]    = 0;
+      st.finished         = false;
       return st;
     }
 
@@ -194,31 +193,21 @@ namespace model {
 
       profile.set_goal(total_length);
 
-      vector_t center     = curve->position(curve_distance);
-      vector_t center_rot = curve->rotation(curve_distance);
+      vector_t centre     = curve->position(curve_distance);
+      vector_t centre_rot = curve->rotation(curve_distance);
       double   curvature  = curve->curvature(curve_distance);
 
-      double          heading = atan2(center_rot.y(), center_rot.x());
-      configuration_t config{center.x(), center.y(), heading};
+      double          heading = atan2(centre_rot.y(), centre_rot.x());
+      configuration_t config{centre.x(), centre.y(), heading};
       double          ds = config_distance(config, last.configuration);
 
       output.time          = time;
       output.configuration = config;
 
-      // TODO: V can't increase in the first case (accel = 0) (note 1)
-      // v^2 = u^2 + 2as
-      double max_vel = std::sqrt(last.kinematics[1] * last.kinematics[1] + 2.0 * last.kinematics[2] * ds);
-      double max_acc = 1e10;
-
-      // TODO: We definitely need an alternate way to fetch the minimum accel since otherwise
-      // it'll read zero when we're at max velocity and the max_vel calc above will fail to ever slow
-      // down!
-      max_vel = std::min(max_vel, linear_vel_limit(config, curvature));
-      max_acc = std::min(max_acc, acceleration_limits(config, curvature, max_vel).second);
-
-      // a = (v^2 - u^2) / (2*s)
-      double acc = (max_vel * max_vel - last.kinematics[1] * last.kinematics[1]) / (2.0 * ds);
-      max_acc    = std::min(acc, max_acc);
+      // TODO: Allow multiple constraints.
+      // TODO: Enforce minimum acceleration constraints in profiles.
+      double max_vel = linear_vel_limit(config, curvature);
+      double max_acc = acceleration_limits(config, curvature, last.kinematics[1]).second;
 
       Eigen::Matrix<double, 1, 3> limits{0, max_vel, max_acc};
       profile.set_limits(limits);
@@ -227,7 +216,8 @@ namespace model {
       segment.time       = last.time;
       segment.kinematics = last.kinematics;
 
-      segment           = profile.calculate(segment, time);
+      segment = profile.calculate(segment, time);
+
       output.kinematics = segment.kinematics;
       output.curvature  = curvature;
 
