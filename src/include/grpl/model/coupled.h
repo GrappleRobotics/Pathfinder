@@ -204,7 +204,7 @@ namespace model {
       output.time          = time;
       output.configuration = config;
 
-      // TODO: Allow multiple constraints.
+      // TODO: Allow multiple constraints (like current limits)
       // TODO: Enforce minimum acceleration constraints in profiles.
       double max_vel = linear_vel_limit(config, curvature);
       double max_acc = acceleration_limits(config, curvature, last.kinematics[1]).second;
@@ -223,6 +223,44 @@ namespace model {
 
       output.finished = false;
       return output;
+    }
+
+    // TODO: Custom type for side states (no need for heading)
+    std::pair<state, state> split(state centre) {
+      state left = initial_state(), right = initial_state();
+
+      left.time = right.time = centre.time;
+      left.curvature = right.curvature = centre.curvature;
+      left.finished = right.finished = centre.finished;
+
+      // Split positions
+      vector_t position{centre.configuration.x(), centre.configuration.y()};
+      double   heading = centre.configuration[2];
+      vector_t p_offset = vector_t{0, _track_r};
+
+      Eigen::Matrix<double, 2, 2> rotation;
+      rotation << cos(heading), -sin(heading), sin(heading), cos(heading);
+
+      vector_t p_left = position - rotation * p_offset;
+      vector_t p_right = position + rotation * p_offset;
+
+      left.configuration.x() = p_left.x();
+      left.configuration.y() = p_left.y();
+      right.configuration.x() = p_right.x();
+      right.configuration.y() = p_right.y();
+
+      left.configuration[2] = right.configuration[2] = 0;
+
+      // Split velocities
+      double v_linear       = centre.kinematics[1];
+      double v_angular      = v_linear * centre.curvature;
+      double v_differential = v_angular * _track_r;
+      left.kinematics[1]    = v_linear - v_differential;
+      right.kinematics[1]    = v_linear + v_differential;
+
+      // TODO: Acceleration
+
+      return std::pair<state, state>{left, right};
     }
 
    private:
