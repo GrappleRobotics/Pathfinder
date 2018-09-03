@@ -35,7 +35,7 @@ namespace path {
         return arc2d::curvature(s);
     }
 
-    double dcurvature(double s) const { return _dk_ds; }
+    double curvature_prime(double s) const override { return _dk_ds; }
 
    private:
     double _curvature, _dk_ds;

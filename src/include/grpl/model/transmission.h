@@ -6,6 +6,8 @@ namespace transmission {
   // TODO: Are there any cases where our transmission model isn't pure?
   class dc_transmission {
    public:
+    // TODO: Need more functions in order to work backwards from a known acceleration
+    // and velocity?
     virtual double get_current(double voltage, double speed) const = 0;
     virtual double get_torque(double current) const                = 0;
     virtual double get_free_speed(double voltage) const            = 0;

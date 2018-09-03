@@ -5,8 +5,8 @@ set multiplot layout 2, 3 title "CDT Model (Centre)"
 set title "Position"
 plot "cdt.csv" using 2:3 w p
 
-set title "Heading"
-plot "cdt.csv" using 1:4 w p
+set title "Heading (Deg)"
+plot "cdt.csv" using 1:($4*180/3.1415) w p
 
 set title "Distance"
 plot "cdt.csv" using 1:5 w p

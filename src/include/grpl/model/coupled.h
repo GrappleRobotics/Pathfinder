@@ -11,6 +11,7 @@
 namespace grpl {
 namespace model {
 
+  // TODO: The structure of this class needs some work. It's doing too much all at the same time.
   template <typename profile_t>
   class coupled {
    public:
@@ -25,10 +26,23 @@ namespace model {
     using trans_t  = transmission::dc_transmission;
 
     struct state {
-      double          time, curvature;
+      double          time, curvature, curvature_prime;
       configuration_t configuration;
       kinematics_t    kinematics;
       bool            finished;
+    };
+
+    struct wheel_state {
+      double   time;
+      vector_t position;
+      // We don't use kinematics_t since keeping track of distance invokes a memory on the system
+      // when split, since the distance of the sides can't be reasonably deduced from the instantaneous
+      // centre path alone. It's better to change the data structure than leave kinematics[0] as undefined
+      // behaviour.
+      // TODO: Actually, is bundling into kinematics better since it allows us to genericize passing into a control
+      // loop?
+      double velocity, acceleration;
+      bool   finished;
     };
 
     state initial_state() {
@@ -185,6 +199,8 @@ namespace model {
 
       bool curve_found = find_curve(distance, curve_begin, curve_end, curve, curve_distance, total_length);
 
+      // TODO: The epsilon of the profile causes this to never advance, meaning the path
+      // is never marked as 'finished' on some timesteps.
       if (!curve_found) {
         output          = last;
         output.finished = true;
@@ -196,6 +212,7 @@ namespace model {
       vector_t centre     = curve->position(curve_distance);
       vector_t centre_rot = curve->rotation(curve_distance);
       double   curvature  = curve->curvature(curve_distance);
+      double   dcurvature = curve->curvature_prime(curve_distance);
 
       double          heading = atan2(centre_rot.y(), centre_rot.x());
       configuration_t config{centre.x(), centre.y(), heading};
@@ -218,50 +235,64 @@ namespace model {
 
       segment = profile.calculate(segment, time);
 
-      output.kinematics = segment.kinematics;
-      output.curvature  = curvature;
+      output.kinematics      = segment.kinematics;
+      output.curvature       = curvature;
+      output.curvature_prime = dcurvature;
 
       output.finished = false;
       return output;
     }
 
-    // TODO: Custom type for side states (no need for heading)
-    std::pair<state, state> split(state centre) {
-      state left = initial_state(), right = initial_state();
+    std::pair<wheel_state, wheel_state> split(state centre) {
+      wheel_state left, right;
 
       left.time = right.time = centre.time;
-      left.curvature = right.curvature = centre.curvature;
       left.finished = right.finished = centre.finished;
 
       // Split positions
       vector_t position{centre.configuration.x(), centre.configuration.y()};
-      double   heading = centre.configuration[2];
+      double   heading  = centre.configuration[2];
       vector_t p_offset = vector_t{0, _track_r};
 
       Eigen::Matrix<double, 2, 2> rotation;
       rotation << cos(heading), -sin(heading), sin(heading), cos(heading);
 
-      vector_t p_left = position - rotation * p_offset;
-      vector_t p_right = position + rotation * p_offset;
-
-      left.configuration.x() = p_left.x();
-      left.configuration.y() = p_left.y();
-      right.configuration.x() = p_right.x();
-      right.configuration.y() = p_right.y();
-
-      left.configuration[2] = right.configuration[2] = 0;
+      // Rotate the wheel offsets by the heading of the robot, adding it to the
+      // centre position, this 'splits' the centre path into two paths constrained
+      // by the configuration (heading + position) and track radius.
+      left.position  = position - rotation * p_offset;
+      right.position = position + rotation * p_offset;
 
       // Split velocities
       double v_linear       = centre.kinematics[1];
       double v_angular      = v_linear * centre.curvature;
       double v_differential = v_angular * _track_r;
-      left.kinematics[1]    = v_linear - v_differential;
-      right.kinematics[1]    = v_linear + v_differential;
+      left.velocity         = v_linear - v_differential;
+      right.velocity        = v_linear + v_differential;
 
-      // TODO: Acceleration
+      // Split accelerations
+      double a_linear = centre.kinematics[2];
+      // This is a bit of a tricky one, so don't blink
+      // a_angular = dw / dt (where w = v_angular)
+      // a_angular = d/dt (v * k) (from v_angular above, w = vk)
+      // Then, by product rule:
+      //    a_angular = dv/dt * k + v * dk/dt     (note dv/dt is acceleration)
+      //    a_angular = a * k + v * dk/dt         [1]
+      // We don't have dk/dt, but we do have dk/ds. By chain rule:
+      //    dk/dt = dk/ds * ds/dt                 (note ds/dt is velocity)
+      //    dk/dt = dk/ds * v                     [2]
+      // Therefore, by composing [1] and [2],
+      //    a_angular = a * k + v^2 * dk/ds
+      // Isn't that just a gorgeous piece of math?
+      double a_angular      = a_linear * centre.curvature + v_linear * v_linear * centre.curvature_prime;
+      double a_differential = a_angular * _track_r;
+      left.acceleration     = a_linear - a_differential;
+      right.acceleration    = a_linear + a_differential;
 
-      return std::pair<state, state>{left, right};
+      return std::pair<wheel_state, wheel_state>{left, right};
     }
+
+    // TODO: Electrical Characteristics (Voltage and Current application)
 
    private:
     trans_t &_transmission_left, &_transmission_right;

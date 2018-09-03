@@ -36,6 +36,8 @@ namespace path {
 
     double curvature(const double s) const override { return _curvature; }
 
+    double curvature_prime(const double s) const override { return 0; }
+
     double length() const override { return _length; }
 
    private:

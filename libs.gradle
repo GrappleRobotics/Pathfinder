@@ -29,7 +29,7 @@ project(":libs") {
                         cppCompiler.args << '/std:c++14'
                     }
                 }
-                
+
                 sources.cpp {
                     source {
                         srcDir new File(gbench_root, "src")
@@ -46,10 +46,6 @@ project(":libs") {
         }
         repositories {
             libs(PrebuiltLibraries) {
-                units {
-                    headers.srcDir new File(units_root, "src")
-                    headers.include "**/*.h"
-                }
                 eigen {
                     headers.srcDir eigen_root
                     headers.include "**/*"

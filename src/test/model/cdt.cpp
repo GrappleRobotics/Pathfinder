@@ -16,10 +16,18 @@ void echo(std::ofstream &out, ST state, std::string id) {
       << state.kinematics[2] << "," << state.curvature << "," << id << std::endl;
 }
 
+template <typename ST>
+void echoWheel(std::ofstream &out, ST state, std::string id) {
+  out << state.time << "," << state.position.x() << "," << state.position.y() << ","
+      << "" << "," << "" << "," << state.velocity << ","
+      << state.acceleration << "," << "" << "," << id << std::endl;
+}
+
 TEST(CDT, basic) {
   using hermite_t = path::hermite_quintic;
   using profile_t = profile::trapezoidal;
   using state_t   = typename model::coupled<profile_t>::state;
+  using wheel_state_t = typename model::coupled<profile_t>::wheel_state;
 
   std::vector<path::augmented_arc2d> curves;
   std::array<hermite_t::waypoint, 2> wps{hermite_t::waypoint{{0, 0}, {5, 0}, {0, 0}},
@@ -45,12 +53,12 @@ TEST(CDT, basic) {
   std::ofstream pathfile("cdt.csv");
   pathfile << "t,x,y,heading,distance,velocity,acceleration,curvature,path\n";
 
-  for (double t = 0; !state.finished && t < 10; t += 0.01) {
+  for (double t = 0; !state.finished && t < 3; t += 0.01) {
     state = model.generate(curves.begin(), curves.end(), profile, state, t);
     echo(pathfile, state, "centre");
 
-    std::pair<state_t, state_t> split = model.split(state);
-    echo(pathfile, split.first, "left");
-    echo(pathfile, split.second, "right");
+    std::pair<wheel_state_t, wheel_state_t> split = model.split(state);
+    echoWheel(pathfile, split.first, "left");
+    echoWheel(pathfile, split.second, "right");
   }
 }

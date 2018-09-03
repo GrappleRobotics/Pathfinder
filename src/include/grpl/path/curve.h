@@ -21,6 +21,7 @@ namespace path {
     };
 
     virtual double curvature(double s) const = 0;
+    virtual double curvature_prime(double s) const = 0;
 
     virtual double length() const = 0;
   };
