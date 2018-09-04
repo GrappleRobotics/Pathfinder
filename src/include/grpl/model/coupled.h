@@ -39,9 +39,10 @@ namespace model {
       // when split, since the distance of the sides can't be reasonably deduced from the instantaneous
       // centre path alone. It's better to change the data structure than leave kinematics[0] as undefined
       // behaviour.
-      // TODO: Actually, is bundling into kinematics better since it allows us to genericize passing into a control
-      // loop?
+      // TODO: Actually, is bundling into kinematics better since it allows us to genericize passing into a
+      // control loop?
       double velocity, acceleration;
+      double voltage, current;
       bool   finished;
     };
 
@@ -59,12 +60,12 @@ namespace model {
       return st;
     }
 
-    coupled(trans_t &left, trans_t &right, double wheel_r, double track_r, double weight, double max_voltage)
+    coupled(trans_t &left, trans_t &right, double wheel_r, double track_r, double mass, double max_voltage)
         : _transmission_left(left),
           _transmission_right(right),
           _wheel_r(wheel_r),
           _track_r(track_r),
-          _weight(weight),
+          _mass(mass),
           _max_voltage(max_voltage) {}
 
     template <typename iterator_curve_t>
@@ -172,19 +173,39 @@ namespace model {
       // Ordered right, left.
       Eigen::Vector2d wheels{(linear + differential) / _wheel_r, (linear - differential) / _wheel_r};
 
-      // Calculate torque limits for each side
-      Eigen::Vector2d torque_limits{
+      // Calculate fwd torque limits for each side
+      Eigen::Vector2d fwd_torque_limits{
           _transmission_right.get_torque(_transmission_right.get_current(_max_voltage, wheels[0])),
           _transmission_left.get_torque(_transmission_left.get_current(_max_voltage, wheels[1]))};
 
-      // T = F * r, F = ma
-      // T = ma * r
-      // a = T / (m*r)
-      Eigen::Vector2d accel_limits = torque_limits / (_weight * _wheel_r);
+      Eigen::Vector2d fwd_accel_limits = fwd_torque_limits / (_mass * _wheel_r);
 
-      double max = accel_limits.sum() / 2.0;
-      // TODO: Reverse Accel
-      return std::pair<double, double>{-max, max};
+      double max = fwd_accel_limits.sum() / 2.0;
+
+      // Calculate rvs torque limits for each side
+      Eigen::Vector2d rvs_torque_limits{
+          _transmission_right.get_torque(-_transmission_right.get_current(_max_voltage, wheels[0])),
+          _transmission_left.get_torque(-_transmission_left.get_current(_max_voltage, wheels[1]))};
+      
+      Eigen::Vector2d rvs_accel_limits = rvs_torque_limits / (_mass * _wheel_r);
+
+      double min = rvs_accel_limits.sum() / 2.0;
+
+      return std::pair<double, double>{min, max};
+    }
+
+    void solve_electrical(wheel_state &wheel, trans_t &transmission) {
+      double speed        = wheel.velocity / _wheel_r;
+      double free_voltage = transmission.get_free_voltage(speed);
+
+      double torque          = _mass * wheel.acceleration * _wheel_r;
+      double current         = transmission.get_torque_current(torque);
+      double current_voltage = transmission.get_current_voltage(current);
+
+      double total_voltage = free_voltage + current_voltage;
+
+      wheel.voltage = total_voltage;
+      wheel.current = current;
     }
 
     double config_distance(configuration_t &c0, configuration_t &c1) const { return (c0 - c1).norm(); }
@@ -223,11 +244,12 @@ namespace model {
 
       // TODO: Allow multiple constraints (like current limits)
       // TODO: Enforce minimum acceleration constraints in profiles.
-      double max_vel = linear_vel_limit(config, curvature);
-      double max_acc = acceleration_limits(config, curvature, last.kinematics[1]).second;
+      // TODO: Does limiting jerk prevent oscillation
+      double limit_vel = linear_vel_limit(config, curvature);
+      std::pair<double, double> limit_acc = acceleration_limits(config, curvature, last.kinematics[1]);
 
-      Eigen::Matrix<double, 1, 3> limits{0, max_vel, max_acc};
-      profile.set_limits(limits);
+      profile.apply_limit(1, -limit_vel, limit_vel);
+      profile.apply_limit(2, limit_acc.first, limit_acc.second);
 
       typename profile_t::segment_t segment;
       segment.time       = last.time;
@@ -260,8 +282,8 @@ namespace model {
       // Rotate the wheel offsets by the heading of the robot, adding it to the
       // centre position, this 'splits' the centre path into two paths constrained
       // by the configuration (heading + position) and track radius.
-      left.position  = position - rotation * p_offset;
-      right.position = position + rotation * p_offset;
+      left.position  = position + rotation * p_offset;
+      right.position = position - rotation * p_offset;
 
       // Split velocities
       double v_linear       = centre.kinematics[1];
@@ -289,14 +311,15 @@ namespace model {
       left.acceleration     = a_linear - a_differential;
       right.acceleration    = a_linear + a_differential;
 
+      solve_electrical(left, _transmission_left);
+      solve_electrical(right, _transmission_right);
+
       return std::pair<wheel_state, wheel_state>{left, right};
     }
 
-    // TODO: Electrical Characteristics (Voltage and Current application)
-
    private:
     trans_t &_transmission_left, &_transmission_right;
-    double   _max_voltage, _wheel_r, _track_r, _weight;
+    double   _max_voltage, _wheel_r, _track_r, _mass;
   };
 }  // namespace model
 }  // namespace grpl

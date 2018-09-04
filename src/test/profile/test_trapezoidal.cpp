@@ -12,8 +12,8 @@ TEST(Profile, Trapezoidal) {
   double dt = 0.001;
 
   trapezoidal pr;
-  pr.apply_limit(1, 3);  // Velocity Limit = 3m/s
-  pr.apply_limit(2, 4);  // Acceleration limit = 5m/s
+  pr.apply_limit(1, -3, 3);  // Velocity Limit = -3 to 3m/s
+  pr.apply_limit(2, -3, 4);  // Acceleration limit = -3 to 4m/s
   pr.set_goal(5);        // Goal = 5m
   pr.set_timeslice(0);   // No Timeslice
 
