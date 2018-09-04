@@ -25,6 +25,7 @@ project(":libs") {
                 binaries.all {
                     if (toolChain instanceof Gcc || toolChain instanceof Clang) {
                         cppCompiler.args << '-std=c++14'
+                        linker.args << '-pthread'
                     } else {
                         cppCompiler.args << '/std:c++14'
                     }

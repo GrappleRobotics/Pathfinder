@@ -34,6 +34,7 @@ model {
             
             if (toolChain instanceof Gcc || toolChain instanceof Clang) {
                 cppCompiler.args << '-std=c++14' << '-g' << '-O2' << '-Werror'
+                linker.args << '-pthread'
             } else {
                 // MSVC
                 cppCompiler.args << '/std:c++14'
@@ -57,6 +58,19 @@ model {
         }
     }
     testSuites {
+        kinematicsBench(GoogleTestTestSuiteSpec) {
+            testing $.components.kinematics 
+
+            sources.cpp {
+                source {
+                    srcDir 'src/bench'
+                    include '**/*.cpp'
+                }
+                lib project: ':libs', library: 'googleBench', linkage: 'static'
+                lib project: ':libs', library: 'eigen', linkage: 'api'
+            }
+        }
+
         kinematicsTest(GoogleTestTestSuiteSpec) {
             testing $.components.kinematics
             
