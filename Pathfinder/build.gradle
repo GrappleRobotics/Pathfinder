@@ -1,0 +1,115 @@
+apply from: 'plot.gradle'
+
+apply plugin: 'cpp'
+apply plugin: 'google-test-test-suite'
+
+group = "grpl.pathfinder"
+version = "2.0.0-prealpha"
+
+model {
+    toolChains {
+        if (System.getenv("CI_COMPILER") != null) {
+            if (System.getenv("CI_COMPILER") == "GCC")
+                gcc(Gcc)
+            else
+                clang(Clang)
+        } else {
+            msvc(VisualCpp)
+            // Define Clang first - for ASAN (Default)
+            clang(Clang)
+            gcc(Gcc)
+        }
+    }
+    binaries{
+        all {
+            println "Using Toolchain: ${toolChain.name}"
+            if (!(toolChain instanceof Clang))
+                println "WARNING: Not using Clang. Additional warnings and sanitation may be missing."
+            
+            if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                cppCompiler.args << '-std=c++14' << '-g' << '-O2' << '-Werror'
+            } else {
+                // MSVC
+                cppCompiler.args << '/std:c++14'
+                cppCompiler.args << '/DEBUG' << '/O2'
+            }
+        }
+    }
+    components {
+        pathfinder(NativeLibrarySpec) {
+            sources.cpp {
+                source {
+                    srcDir 'src/cpp'
+                    include '**/*.cpp'
+                }
+                exportedHeaders {
+                    srcDir 'src/include'
+                    include '**/*.h'
+                }
+                lib project: ':libs', library: "eigen", linkage: "api"
+            }
+        }
+    }
+    testSuites {
+        if (project.hasProperty('withBench')) {
+            pathfinderBench(GoogleTestTestSuiteSpec) {
+                testing $.components.pathfinder 
+
+                binaries.all {
+                    linker.args << '-pthread'
+                    if (toolChain instanceof VisualCpp)
+                        linker.args << 'shlwapi.lib'
+                }
+
+                sources.cpp {
+                    source {
+                        srcDir 'src/bench'
+                        include '**/*.cpp'
+                    }
+                    lib project: ':libs', library: 'googleBench', linkage: 'static'
+                    lib project: ':libs', library: 'eigen', linkage: 'api'
+                }
+            }
+        }
+
+        pathfinderTest(GoogleTestTestSuiteSpec) {
+            testing $.components.pathfinder
+            
+            binaries.all {
+                cppCompiler.args << '-DEIGEN_RUNTIME_NO_MALLOC'
+                if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                    linker.args << '-pthread'
+
+                    if (toolChain instanceof Clang) {
+                        cppCompiler.args << '-fsanitize=address'
+                        linker.args << '-fsanitize=address'
+                    }
+                }
+            }
+
+            sources.cpp {
+                source {
+                    srcDir 'src/test'
+                    include '**/*.cpp'
+                }
+                exportedHeaders {
+                    srcDir 'src/test'
+                    include '**/*.h'
+                }
+                lib project: ':libs', library: "eigen", linkage: "api"
+            }
+        }
+    }
+}
+
+task cleanTestTask() {
+    doLast {
+        delete {
+            delete fileTree(dir: new File(project.buildDir, "test-results"), include: ["**/*.png", "**/*.csv"])
+        }
+    }
+}
+
+assemble.finalizedBy cleanTestTask
+check.mustRunAfter cleanTestTask
+check.finalizedBy plot

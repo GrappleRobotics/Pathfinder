@@ -6,6 +6,8 @@
 #include <gtest/gtest.h>
 
 #include <fstream>
+#include <array>
+#include <vector>
 
 using namespace grpl;
 

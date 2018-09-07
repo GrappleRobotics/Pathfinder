@@ -3,6 +3,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <array>
+#include <vector>
 
 using namespace grpl;
 using namespace grpl::path;
