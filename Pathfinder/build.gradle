@@ -38,13 +38,13 @@ model {
                 }
             } else {
                 // MSVC
-                cppCompiler.args << '/std:c++14' << '/O2' << '/FS'
+                cppCompiler.args << '/std:c++14' << '/O2'
 
                 if (buildType == buildTypes.debug) {
-                    cppCompiler.args '/Zi'
+                    cppCompiler.args << '/Zi' << '/FS'
                     cppCompiler.define 'DEBUG'
                     linker.args '/DEBUG'
-                }
+                } 
             }
         }
     }
@@ -89,7 +89,7 @@ model {
             testing $.components.pathfinder
             
             binaries.all {
-                cppCompiler.args << '-DEIGEN_RUNTIME_NO_MALLOC'
+                cppCompiler.define 'EIGEN_RUNTIME_NO_MALLOC'
                 if (toolChain instanceof Gcc || toolChain instanceof Clang) {
                     linker.args << '-pthread'
 
@@ -97,6 +97,11 @@ model {
                         cppCompiler.args << '-fsanitize=address'
                         linker.args << '-fsanitize=address'
                     }
+                } else {
+                    // Fucking windows breaks Eigen's alignment.
+                    // Fix your compiler.
+                    // https://forum.kde.org/viewtopic.php?f=74&t=97995&sid=cd769a78f5b8b159239b9f032e2b7432
+                    cppCompiler.define 'EIGEN_DONT_ALIGN_STATICALLY'
                 }
             }
 
