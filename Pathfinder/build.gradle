@@ -38,8 +38,7 @@ model {
                 }
             } else {
                 // MSVC
-                cppCompiler.args << '/std:c++14'
-                cppCompiler.args << '/O2'
+                cppCompiler.args << '/std:c++14' << '/O2' << '/FS'
 
                 if (buildType == buildTypes.debug) {
                     cppCompiler.args '/Zi'

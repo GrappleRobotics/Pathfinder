@@ -6,6 +6,10 @@ ext.gbench_root = new File(libroot, "googlebench")
 ext.eigen_root = new File(libroot, "eigen")
 
 model {
+    buildTypes {
+        release
+        debug
+    }
     components {
         googleTest(NativeLibrarySpec) {
             sources.cpp {
