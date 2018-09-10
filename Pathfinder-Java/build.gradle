@@ -1,0 +1,70 @@
+plugins {
+    id 'cpp'
+    id 'java'
+}
+
+def jniOutput = new File(project.buildDir, "generated/jni")
+def isNewJNI = org.gradle.api.JavaVersion.current().isJava9Compatible()
+
+model {
+    components {
+        pathfinderjni(NativeLibrarySpec) {
+            binaries.all {
+                tasks.withType(CppCompile) {
+                    dependsOn jniHeaders
+                    def javahome = org.gradle.internal.jvm.Jvm.current().javaHome
+                    def os = targetPlatform.operatingSystem
+
+                    includes = ["${javahome}/include", "${javahome}/include/win32", "${javahome}/include/darwin", "${javahome}/include/linux"]
+
+                    if (toolChain instanceof VisualCpp) {
+                        includes.each { i ->
+                            cppCompiler.args "/I:${i}"
+                        }
+                    } else {
+                        includes.each { i ->
+                            cppCompiler.args '-I', i
+                        }
+                    }
+                }
+            }
+
+            sources {
+                cpp {
+                    exportedHeaders {
+                        jniHeaders.outputs.files.each { f -> srcDirs f.getPath()}
+                    }
+                    lib project: ':Pathfinder', library: 'pathfinder', linkage: 'static'
+                    lib project: ':libs', library: 'eigen', linkage: 'api'
+                }
+            }
+        }
+    }
+}
+
+task jniHeaders {
+    description = "Generate JNI Headers for PathfinderJNI"
+    group = "Pathfinder"
+
+    inputs.files sourceSets.main.java
+    outputs.dir jniOutput
+
+    doLast {
+        jniOutput.mkdirs()
+        if (!isNewJNI) {
+            exec {
+                executable org.gradle.internal.jvm.Jvm.current().getExecutable('javah')
+                args '-d', outputFolder
+                args '-cp', sourceSets.main.output.classesDir
+                args 'grpl.pathfinder.PathfinderJNI'
+            }
+        }
+    }
+}
+
+if (isNewJNI) {
+    compileJava {
+        options.compilerArgs += ['-h', jniOutput]
+        dependsOn jniHeaders
+    }
+}
