@@ -16,7 +16,7 @@ if (plot_supported) {
         def t = tasks.create("plot${file.name.capitalize()}") {
             doLast {
                 exec {
-                    workingDir new File(project.buildDir, "test-results/pathfinderTest")
+                    workingDir new File(project.buildDir, "test-results/pathfinderTest/release")
                     commandLine 'gnuplot', '-e', "set loadpath \"${loadpath.absolutePath}\";load \"settings.gp\"", file.absolutePath
                 }
             }
