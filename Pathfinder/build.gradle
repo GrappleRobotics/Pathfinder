@@ -1,51 +1,15 @@
+plugins {
+    id 'cpp'
+    id 'google-test-test-suite'
+}
+
 apply from: 'plot.gradle'
 
-apply plugin: 'cpp'
-apply plugin: 'google-test-test-suite'
-
-group = "grpl.pathfinder"
-version = "2.0.0-prealpha"
-
 model {
-    buildTypes {
-        release
-        debug
-    }
-    toolChains {
-        if (System.getenv("CI_COMPILER") != null) {
-            if (System.getenv("CI_COMPILER") == "GCC")
-                gcc(Gcc)
-            else
-                clang(Clang)
-        } else {
-            msvc(VisualCpp)
-            // Define Clang first - for ASAN (Default)
-            clang(Clang)
-            gcc(Gcc)
-        }
-    }
-    binaries{
+    binaries {
         all {
-            println "Using Toolchain: ${toolChain.name}"
             if (!(toolChain instanceof Clang))
                 println "WARNING: Not using Clang. Additional warnings and sanitation may be missing."
-            
-            if (toolChain instanceof Gcc || toolChain instanceof Clang) {
-                cppCompiler.args << '-std=c++14' << '-O2' << '-Werror'
-
-                if (buildType == buildTypes.debug) {
-                    cppCompiler.args "-g"
-                }
-            } else {
-                // MSVC
-                cppCompiler.args << '/std:c++14' << '/O2'
-
-                if (buildType == buildTypes.debug) {
-                    cppCompiler.args << '/Zi' << '/FS'
-                    cppCompiler.define 'DEBUG'
-                    linker.args '/DEBUG'
-                } 
-            }
         }
     }
     components {
@@ -98,8 +62,7 @@ model {
                         linker.args << '-fsanitize=address'
                     }
                 } else {
-                    // Fucking windows breaks Eigen's alignment.
-                    // Fix your compiler.
+                    // Fucking windows breaks Eigen's static alignment.
                     // https://forum.kde.org/viewtopic.php?f=74&t=97995&sid=cd769a78f5b8b159239b9f032e2b7432
                     cppCompiler.define 'EIGEN_DONT_ALIGN_STATICALLY'
                 }

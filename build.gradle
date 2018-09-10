@@ -4,6 +4,49 @@ allprojects {
     plugins.withType(CppPlugin).whenPluginAdded {
         project.apply plugin: "visual-studio"
         rootProject.tasks.subclean.dependsOn tasks.clean
+
+        project.group = "grpl.pathfinder"
+        project.version = "2.0.0-prealpha"
+
+        project.model {
+            buildTypes {
+                release
+                debug
+            }
+            toolChains {
+                if (System.getenv("CI_COMPILER") != null) {
+                    if (System.getenv("CI_COMPILER") == "GCC")
+                        gcc(Gcc)
+                    else
+                        clang(Clang)
+                } else {
+                    msvc(VisualCpp)
+                    // Define Clang first - for ASAN (Default)
+                    clang(Clang)
+                    gcc(Gcc)
+                }
+            }
+            binaries {
+                withType(NativeBinarySpec) {
+                    if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                        cppCompiler.args << '-std=c++14' << '-O2' << '-Werror'
+
+                        if (buildType == buildTypes.debug) {
+                            cppCompiler.args "-g"
+                        }
+                    } else {
+                        // MSVC
+                        cppCompiler.args << '/std:c++14' << '/O2'
+
+                        if (buildType == buildTypes.debug) {
+                            cppCompiler.args << '/Zi' << '/FS'
+                            cppCompiler.define 'DEBUG'
+                            linker.args '/DEBUG'
+                        } 
+                    }
+                }
+            }
+        }
     }
     plugins.withType(GoogleTestPlugin).whenPluginAdded {
         model {
