@@ -36,7 +36,7 @@ install:
 - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 10 || true
 
 script:
-- ./gradlew build --stacktrace --console=plain
+- ./gradlew build --stacktrace --console=plain -PwithBench
 
 notifications:
   email: false
