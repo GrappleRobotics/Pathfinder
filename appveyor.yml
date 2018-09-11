@@ -6,12 +6,14 @@ image:
 # Install submodules
 install:
   - git submodule update --init
+  - set PATH="C:\Program Files\LLVM\bin";%PATH%
+  - set CC=clang-cl
+  - set CXX=clang-cl
+  - clang-cl -v
 
-build_script:
-  - gradlew.bat assemble testClasses --no-daemon
   
 test_script:
-  - gradlew.bat check --no-daemon
+  - gradlew.bat build --stacktrace --console=plain -PwithBench
 
 # Cache gradle downloads
 cache:
