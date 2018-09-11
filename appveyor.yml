@@ -1,0 +1,18 @@
+# Run tests with VS 2015 and VS 2017
+image:
+  - Visual Studio 2015
+  - Visual Studio 2017
+
+# Install submodules
+install:
+  - git submodule update --init
+
+build_script:
+  - gradlew.bat assemble testClasses --no-daemon
+  
+test_script:
+  - gradlew.bat check --no-daemon
+
+# Cache gradle downloads
+cache:
+  - C:\Users\appveyor\.gradle
