@@ -1,15 +1,17 @@
 # Run tests with Visual Studio 2017
 image: Visual Studio 2017
 
+environment:
+  matrix:
+    - CI_COMPILER: CLANG
+    - CI_COMPILER: MSVC
+
 # Install submodules
 install:
   - git submodule update --init
 
-  # Clang builds seem to break Google Bench and Google Test on Windows
-#  - set PATH="C:\Program Files\LLVM\bin";%PATH%
-#  - set CC=clang-cl
-#  - set CXX=clang-cl
-#  - clang-cl -v
+  - set PATH="C:\Program Files\LLVM\bin";%PATH%
+  - clang-cl -v
 
 build_script:
   - gradlew.bat build --stacktrace --console=plain -PwithBench
