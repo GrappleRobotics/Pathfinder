@@ -62,7 +62,7 @@ model {
                         linker.args << '-fsanitize=address'
                     }
                 } else {
-                    // Fucking windows breaks Eigen's static alignment.
+                    // Windows breaks Eigen's static alignment. Seems to be a compiler bug.
                     // https://forum.kde.org/viewtopic.php?f=74&t=97995&sid=cd769a78f5b8b159239b9f032e2b7432
                     cppCompiler.define 'EIGEN_DONT_ALIGN_STATICALLY'
                 }
