@@ -17,6 +17,8 @@ allprojects {
                 if (System.getenv("CI_COMPILER") != null) {
                     if (System.getenv("CI_COMPILER") == "GCC")
                         gcc(Gcc)
+                    else if (System.getenv("CI_COMPILER") == "MSVC")
+                        msvc(VisualCpp)
                     else
                         clang(Clang)
                 } else {
