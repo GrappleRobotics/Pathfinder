@@ -1,0 +1,17 @@
+# Run tests with Visual Studio 2017
+image: Visual Studio 2017
+
+environment:
+  matrix:
+    - CI_COMPILER: MSVC
+
+# Install submodules
+install:
+  - git submodule update --init
+
+build_script:
+  - gradlew.bat build --stacktrace --console=plain -PwithBench
+
+# Cache gradle downloads
+cache:
+  - C:\Users\appveyor\.gradle

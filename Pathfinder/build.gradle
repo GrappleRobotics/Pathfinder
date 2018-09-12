@@ -8,8 +8,10 @@ apply from: 'plot.gradle'
 model {
     binaries {
         all {
-            if (!(toolChain instanceof Clang))
+            if (!(toolChain instanceof Clang) && !targetPlatform.operatingSystem.windows)
                 println "WARNING: Not using Clang. Additional warnings and sanitation may be missing."
+            else if (toolChain instanceof Clang && targetPlatform.operatingSystem.windows)
+                println "WARNING: Clang on windows is not supported. Please install MSVC"
         }
     }
     components {
@@ -33,9 +35,12 @@ model {
                 testing $.components.pathfinder 
 
                 binaries.all {
-                    linker.args << '-pthread'
-                    if (toolChain instanceof VisualCpp)
+                    if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                        linker.args << '-pthread'
+                    } else {
+                        // MSVC
                         linker.args << 'shlwapi.lib'
+                    }
                 }
 
                 sources.cpp {

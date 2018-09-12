@@ -10,6 +10,7 @@ model {
         release
         debug
     }
+
     components {
         googleTest(NativeLibrarySpec) {
             sources.cpp {
@@ -28,10 +29,9 @@ model {
             binaries.all {
                 if (toolChain instanceof Gcc || toolChain instanceof Clang) {
                     cppCompiler.args << '-std=c++14'
-                    cppCompiler.args.remove('-Werror')
-                    cppCompiler.args << '-Wall'
                     linker.args << '-pthread'
                 } else {
+                    // MSVC
                     cppCompiler.args << '/std:c++14'
                     linker.args << 'shlwapi.lib'
                 }
