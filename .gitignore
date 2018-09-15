@@ -18,6 +18,11 @@ Thumbs.db
 *.vcxproj.*
 .vs/
 .vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
 
 # Gradle
 .gradle/
@@ -26,3 +31,4 @@ build/
 # Buildship
 .project
 .settings/
+bin/

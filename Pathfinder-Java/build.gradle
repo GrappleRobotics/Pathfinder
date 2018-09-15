@@ -1,38 +1,36 @@
 plugins {
     id 'cpp'
     id 'java'
+    id 'edu.wpi.first.GradleJni' version '0.3.0'
 }
 
 def jniOutput = new File(project.buildDir, "generated/jni")
 def isNewJNI = org.gradle.api.JavaVersion.current().isJava9Compatible()
 
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+repositories { 
+    mavenCentral()
+}
+
 model {
     components {
-        pathfinderjni(NativeLibrarySpec) {
-            binaries.all {
-                tasks.withType(CppCompile) {
-                    dependsOn jniHeaders
-                    def javahome = org.gradle.internal.jvm.Jvm.current().javaHome
-                    def os = targetPlatform.operatingSystem
+        pathfinderjni(JniNativeLibrarySpec) {
+            targetPlatform 'any32'
+            targetPlatform 'any64'
 
-                    includes = ["${javahome}/include", "${javahome}/include/win32", "${javahome}/include/darwin", "${javahome}/include/linux"]
-
-                    if (toolChain instanceof VisualCpp) {
-                        includes.each { i ->
-                            cppCompiler.args "/I:${i}"
-                        }
-                    } else {
-                        includes.each { i ->
-                            cppCompiler.args '-I', i
-                        }
-                    }
-                }
-            }
+            enableCheckTask true
+            javaCompileTasks << compileJava
 
             sources {
                 cpp {
+                    source {
+                        srcDir 'src/native/cpp'
+                        include '**/*.cpp'
+                    }
                     exportedHeaders {
-                        jniHeaders.outputs.files.each { f -> srcDirs f.getPath()}
+                        srcDirs 'src/native/include'
                     }
                     lib project: ':Pathfinder', library: 'pathfinder', linkage: 'static'
                     lib project: ':libs', library: 'eigen', linkage: 'api'
@@ -42,29 +40,23 @@ model {
     }
 }
 
-task jniHeaders {
-    description = "Generate JNI Headers for PathfinderJNI"
-    group = "Pathfinder"
+dependencies {
+    testImplementation(
+        'org.junit.jupiter:junit-jupiter-api:5.1.0'
+    )
+    testRuntimeOnly(
+        'org.junit.jupiter:junit-jupiter-engine:5.1.0'
+    )
+}
 
-    inputs.files sourceSets.main.java
-    outputs.dir jniOutput
-
-    doLast {
-        jniOutput.mkdirs()
-        if (!isNewJNI) {
-            exec {
-                executable org.gradle.internal.jvm.Jvm.current().getExecutable('javah')
-                args '-d', outputFolder
-                args '-cp', sourceSets.main.output.classesDir
-                args 'grpl.pathfinder.PathfinderJNI'
-            }
-        }
+test {
+    useJUnitPlatform()
+    // TODO: make this not-shit
+    def libPath = new File(project.buildDir, "libs/pathfinderjni/shared/any64/debug").absolutePath
+    systemProperties.put("java.library.path", libPath)
+    testLogging {
+        events "passed", "skipped", "failed"
     }
 }
 
-if (isNewJNI) {
-    compileJava {
-        options.compilerArgs += ['-h', jniOutput]
-        dependsOn jniHeaders
-    }
-}
+test.dependsOn assemble

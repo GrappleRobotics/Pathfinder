@@ -1,6 +1,7 @@
 task subclean();
 
 allprojects {
+    apply plugin: 'idea'
     plugins.withType(CppPlugin).whenPluginAdded {
         project.apply plugin: "visual-studio"
         rootProject.tasks.subclean.dependsOn tasks.clean
@@ -12,6 +13,14 @@ allprojects {
             buildTypes {
                 release
                 debug
+            }
+            platforms {
+                any32 {
+                    architecture 'x86'
+                }
+                any64 {
+                    architecture 'x86_64'
+                }
             }
             toolChains {
                 if (System.getenv("CI_COMPILER") != null) {

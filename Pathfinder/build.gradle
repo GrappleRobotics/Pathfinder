@@ -16,6 +16,9 @@ model {
     }
     components {
         pathfinder(NativeLibrarySpec) {
+            targetPlatform 'any32'
+            targetPlatform 'any64'
+
             sources.cpp {
                 source {
                     srcDir 'src/cpp'

@@ -7,7 +7,7 @@
 namespace grpl {
 namespace profile {
 
-  class trapezoidal : public profile<3> {
+  class trapezoidal : public profile<ACCELERATION> {
    public:
     segment_t calculate(segment_t &last, double time) const override {
       double dt          = time - last.time;
