@@ -30,7 +30,7 @@ JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractProfile_applyLimit(J
   jni_get_handle<profile_base>(env, obj)->apply_limit(deriv, min, max);
 }
 
-JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractProfile_destroy(JNIEnv *env, jobject obj) {
+JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractProfile_close(JNIEnv *env, jobject obj) {
   profile_base *profile = jni_get_handle<profile_base>(env, obj);
   delete profile;
   profile = static_cast<profile_base *>(nullptr);

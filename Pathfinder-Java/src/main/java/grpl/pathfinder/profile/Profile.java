@@ -8,9 +8,11 @@ public interface Profile {
 
     public static class Segment {
         public double time = 0;
-        public double[] kinematics = new double[3];
+        public double[] kinematics;
 
-        public Segment() {}
+        protected Segment(int limited_term) {
+            kinematics = new double[limited_term + 1];
+        }
     }
 
     void setGoal(double goal);
@@ -22,5 +24,10 @@ public interface Profile {
     void applyLimit(int derivative, double min, double max);
 
     Segment calculate(Segment last, double time);
+
+    Segment createSegment();
+
+    int getLimitedTerm();
+    int getOrder();
 
 }

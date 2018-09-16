@@ -16,9 +16,9 @@ public class TrapezoidalProfileTest {
 
     @Test
     void testDestroy() {
-        assertFalse(profile.destroyed());
-        profile.destroy();
-        assertTrue(profile.destroyed());
+        assertFalse(profile.closed());
+        profile.close();
+        assertTrue(profile.closed());
     }
 
     @Test
@@ -40,7 +40,7 @@ public class TrapezoidalProfileTest {
         profile.setGoal(5.0);
         profile.setTimeslice(0);
 
-        Profile.Segment segment = new Profile.Segment();
+        Profile.Segment segment = profile.createSegment();
         for (double t = 0; t < 7; t+=0.01) {
             segment = profile.calculate(segment, t);
             assertTrue(Math.abs(segment.kinematics[Profile.VELOCITY]) <= 3);

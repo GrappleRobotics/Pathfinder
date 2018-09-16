@@ -17,7 +17,7 @@ template <typename segment_t>
 jobject jni_segment_to_java(JNIEnv *env, segment_t seg) {
   jdoubleArray kin_arr = eigen_create_jdoubleArray(env, seg.kinematics);
 
-  jobject j_seg = jni_construct(env, "grpl/pathfinder/profile/Profile$Segment", "()V");
+  jobject j_seg = jni_construct(env, "grpl/pathfinder/profile/Profile$Segment", "(I)V", seg.kinematics.size());
   jni_set_double_field(env, j_seg, "time", seg.time);
   jni_set_field(env, j_seg, "kinematics", "[D", kin_arr);
   return j_seg;
