@@ -15,6 +15,8 @@ namespace profile {
   // type, as compile time information isn't available with another runtime.
   class profile_base {
    public:
+    virtual ~profile_base() {}
+    
     void   set_goal(double sp) { _goal = sp; }
     double get_goal() const { return _goal; }
 

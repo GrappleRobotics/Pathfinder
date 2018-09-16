@@ -1,11 +1,13 @@
 package grpl.pathfinder.profile;
 
+import grpl.pathfinder.util.NativeResource;
+import grpl.pathfinder.util.NativeResourceTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TrapezoidalProfileTest {
+public class TrapezoidalProfileTest extends NativeResourceTest {
 
     TrapezoidalProfile profile;
 
@@ -14,11 +16,9 @@ public class TrapezoidalProfileTest {
         profile = new TrapezoidalProfile();
     }
 
-    @Test
-    void testDestroy() {
-        assertFalse(profile.closed());
-        profile.close();
-        assertTrue(profile.closed());
+    @Override
+    protected NativeResource nativeResource() {
+        return profile;
     }
 
     @Test
@@ -28,7 +28,7 @@ public class TrapezoidalProfileTest {
     }
 
     @Test
-    void setTimeslice() {
+    void testTimeslice() {
         profile.setTimeslice(0.123);
         assertEquals(0.123, profile.getTimeslice(), 1e-12);
     }
@@ -48,5 +48,4 @@ public class TrapezoidalProfileTest {
         }
         assertEquals(5.0, segment.kinematics[Profile.POSITION], 0.001);
     }
-
 }

@@ -10,10 +10,10 @@ JNIEXPORT jlong JNICALL Java_grpl_pathfinder_profile_TrapezoidalProfile_allocate
   return jni_as_handle<trapezoidal>(new trapezoidal());
 }
 
-JNIEXPORT jobject JNICALL Java_grpl_pathfinder_profile_TrapezoidalProfile_calculate(JNIEnv *env, jobject obj,
-                                                                                    jobject last, jdouble t) {
-  trapezoidal::segment_t seg = jni_segment_to_native<trapezoidal::segment_t>(env, last);
+JNIEXPORT jdoubleArray JNICALL Java_grpl_pathfinder_profile_TrapezoidalProfile_calculateNative(
+    JNIEnv *env, jobject obj, jlong handle, jdoubleArray last, jdouble lastTime, jdouble time) {
+  trapezoidal::segment_t seg = jni_array_to_native_segment<trapezoidal::segment_t>(env, lastTime, last);
 
-  seg = jni_get_handle<trapezoidal>(env, obj)->calculate(seg, t);
-  return jni_segment_to_java(env, seg);
+  seg = jni_handle<trapezoidal>(env, handle)->calculate(seg, time);
+  return jni_segment_to_array(env, seg);
 }

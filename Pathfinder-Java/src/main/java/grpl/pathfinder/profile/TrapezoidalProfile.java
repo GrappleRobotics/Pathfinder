@@ -9,6 +9,5 @@ public class TrapezoidalProfile extends AbstractProfile {
     private static native long allocate();
 
     @Override
-    public native Segment calculate(Segment last, double time);
-
+    protected native double[] calculateNative(long h, double[] last, double lastTime, double time);
 }

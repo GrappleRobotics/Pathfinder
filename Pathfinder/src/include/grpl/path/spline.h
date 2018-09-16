@@ -8,6 +8,8 @@ namespace path {
   template <size_t DIM>
   class spline {
    public:
+    virtual ~spline() {}
+
     using vector_t = Eigen::Matrix<double, DIM, 1>;
 
     static const size_t DIMENSIONS = DIM;

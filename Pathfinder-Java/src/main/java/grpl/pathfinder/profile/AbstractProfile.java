@@ -3,32 +3,49 @@ package grpl.pathfinder.profile;
 import grpl.pathfinder.util.NativeResource;
 
 public abstract class AbstractProfile extends NativeResource implements Profile {
-    private long _handle = 0;
     private int _limitedTerm;
 
     AbstractProfile(long handle, int limitedTerm) {
-        this._handle = handle;
+        super(handle);
         this._limitedTerm = limitedTerm;
     }
 
     @Override
-    public native void setGoal(double goal);
+    public void setGoal(double goal) {
+        setGoal(nativeHandle(), goal);
+    }
 
     @Override
-    public native double getGoal();
+    public double getGoal() {
+        return getGoal(nativeHandle());
+    }
 
     @Override
-    public native void setTimeslice(double timeslice);
+    public void setTimeslice(double timeslice) {
+        setTimeslice(nativeHandle(), timeslice);
+    }
 
     @Override
-    public native double getTimeslice();
+    public double getTimeslice() {
+        return getTimeslice(nativeHandle());
+    }
 
     @Override
-    public native void applyLimit(int derivative, double min, double max);
+    public void applyLimit(int derivative, double min, double max) {
+        applyLimit(nativeHandle(), derivative, min, max);
+    }
 
     @Override
     public Segment createSegment() {
         return new Segment(this.getLimitedTerm());
+    }
+
+    @Override
+    public Segment calculate(Segment last, double time) {
+        Segment seg = createSegment();
+        seg.time = time;
+        seg.kinematics = calculateNative(nativeHandle(), last.kinematics, last.time, time);
+        return seg;
     }
 
     @Override
@@ -42,10 +59,20 @@ public abstract class AbstractProfile extends NativeResource implements Profile 
     }
 
     @Override
-    public native void close();
-
-    @Override
-    public boolean closed() {
-        return _handle == 0;
+    public void close() {
+        free(nativeHandle());
+        zeroHandle();
     }
+
+    /* JNI */
+    protected abstract double[] calculateNative(long h, double[] last, double lastTime, double time);
+
+    private static native void setGoal(long h, double g);
+    private static native double getGoal(long h);
+    private static native void setTimeslice(long h, double ts);
+    private static native double getTimeslice(long h);
+    private static native void applyLimit(long h, int d, double min, double max);
+
+    private static native void free(long h);
+
 }
