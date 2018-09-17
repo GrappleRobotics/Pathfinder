@@ -5,7 +5,7 @@ import java.util.Vector;
 
 public class HermiteFactory {
 
-    List<HermiteCubic> generateCubic(List<HermiteWaypoint> wps) {
+    public static List<HermiteCubic> generateCubic(List<? extends HermiteWaypoint> wps) {
         if (wps.size() == 0)
             return null;
 
@@ -19,7 +19,7 @@ public class HermiteFactory {
         return list;
     }
 
-    List<HermiteQuintic> generateQuintic(List<HermiteWaypoint> wps) {
+    public static List<HermiteQuintic> generateQuintic(List<? extends HermiteWaypoint> wps) {
         if (wps.size() == 0)
             return null;
 

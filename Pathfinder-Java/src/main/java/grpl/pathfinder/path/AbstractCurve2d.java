@@ -8,28 +8,28 @@ public class AbstractCurve2d extends NativeResource implements Curve2d {
     }
 
     @Override
-    public Vec2 position(double t)  {
-        return Vec2.cartesian(position(nativeHandle(), t));
+    public Vec2 position(double s)  {
+        return Vec2.cartesian(position(nativeHandle(), s));
     }
 
     @Override
-    public Vec2 velocity(double t)  {
-        return Vec2.cartesian(velocity(nativeHandle(), t));
+    public Vec2 velocity(double s)  {
+        return Vec2.cartesian(velocity(nativeHandle(), s));
     }
 
     @Override
-    public Vec2 rotation(double t)  {
-        return Vec2.cartesian(rotation(nativeHandle(), t));
+    public Vec2 rotation(double s)  {
+        return Vec2.cartesian(rotation(nativeHandle(), s));
     }
 
     @Override
-    public double curvature(double t)  {
-        return curvature(nativeHandle(), t);
+    public double curvature(double s)  {
+        return curvature(nativeHandle(), s);
     }
 
     @Override
-    public double curvature_prime(double t)   {
-        return curvature_prime(nativeHandle(), t);
+    public double curvature_prime(double s)   {
+        return curvature_prime(nativeHandle(), s);
     }
 
     @Override

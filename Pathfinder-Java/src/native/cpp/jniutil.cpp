@@ -4,6 +4,14 @@ jfieldID jni_get_field_id(JNIEnv *env, jobject obj, const char *name, const char
   return env->GetFieldID(env->GetObjectClass(obj), name, sig);
 }
 
+jmethodID jni_get_method_id(JNIEnv *env, jobject obj, const char *name, const char *sig) {
+  return env->GetMethodID(env->GetObjectClass(obj), name, sig);
+}
+
+jmethodID jni_get_method_id(JNIEnv *env, const char *className, const char *name, const char *sig) {
+  return env->GetMethodID(env->FindClass(className), name, sig);
+}
+
 jdouble jni_get_double_field(JNIEnv *env, jobject obj, const char *name) {
   return env->GetDoubleField(obj, jni_get_field_id(env, obj, name, "D"));
 }

@@ -9,32 +9,32 @@ using namespace grpl::path;
 using curve_t = curve<2>;
 
 JNIEXPORT jdoubleArray JNICALL Java_grpl_pathfinder_path_AbstractCurve2d_position(JNIEnv *env, jclass claz,
-                                                                                  jlong handle, jdouble t) {
-  curve_t::vector_t vec = jni_handle<curve_t>(env, handle)->position(t);
+                                                                                  jlong handle, jdouble s) {
+  curve_t::vector_t vec = jni_handle<curve_t>(env, handle)->position(s);
   return eigen_create_jdoubleArray<curve_t::vector_t>(env, vec);
 }
 
 JNIEXPORT jdoubleArray JNICALL Java_grpl_pathfinder_path_AbstractCurve2d_velocity(JNIEnv *env, jclass claz,
-                                                                                  jlong handle, jdouble t) {
-  curve_t::vector_t vec = jni_handle<curve_t>(env, handle)->velocity(t);
+                                                                                  jlong handle, jdouble s) {
+  curve_t::vector_t vec = jni_handle<curve_t>(env, handle)->velocity(s);
   return eigen_create_jdoubleArray<curve_t::vector_t>(env, vec);
 }
 
 JNIEXPORT jdoubleArray JNICALL Java_grpl_pathfinder_path_AbstractCurve2d_rotation(JNIEnv *env, jclass claz,
-                                                                                  jlong handle, jdouble t) {
-  curve_t::vector_t vec = jni_handle<curve_t>(env, handle)->rotation(t);
+                                                                                  jlong handle, jdouble s) {
+  curve_t::vector_t vec = jni_handle<curve_t>(env, handle)->rotation(s);
   return eigen_create_jdoubleArray<curve_t::vector_t>(env, vec);
 }
 
 JNIEXPORT jdouble JNICALL Java_grpl_pathfinder_path_AbstractCurve2d_curvature(JNIEnv *env, jclass claz,
-                                                                              jlong handle, jdouble t) {
-  return jni_handle<curve_t>(env, handle)->curvature(t);
+                                                                              jlong handle, jdouble s) {
+  return jni_handle<curve_t>(env, handle)->curvature(s);
 }
 
 JNIEXPORT jdouble JNICALL Java_grpl_pathfinder_path_AbstractCurve2d_curvature_1prime(JNIEnv *env, jclass claz,
                                                                                      jlong   handle,
-                                                                                     jdouble t) {
-  return jni_handle<curve_t>(env, handle)->curvature_prime(t);
+                                                                                     jdouble s) {
+  return jni_handle<curve_t>(env, handle)->curvature_prime(s);
 }
 
 JNIEXPORT jdouble JNICALL Java_grpl_pathfinder_path_AbstractCurve2d_length(JNIEnv *env, jclass claz,
