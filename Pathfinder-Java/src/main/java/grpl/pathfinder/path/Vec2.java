@@ -29,6 +29,11 @@ public class Vec2 {
         return new double[] { x, y };
     }
 
+    public Vec2 unit() {
+        double mag = magnitude();
+        return Vec2.cartesian(x / mag, y / mag);
+    }
+
     public static Vec2 cartesian(double x, double y) {
         return new Vec2(x, y);
     }

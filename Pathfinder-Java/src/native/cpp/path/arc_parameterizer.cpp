@@ -17,12 +17,17 @@ class java_spline_wrapper : public spline<2> {
  public:
   using vector_t = typename spline::vector_t;
 
-  java_spline_wrapper(JNIEnv *env, jobject &obj) : _env(env), _obj(obj) {
-    _posid  = jni_get_method_id(env, obj, "position", "(D)Lgrpl/pathfinder/path/Vec2");
-    _velid  = jni_get_method_id(env, obj, "velocity", "(D)Lgrpl/pathfinder/path/Vec2");
-    _rotid  = jni_get_method_id(env, obj, "rotation", "(D)Lgrpl/pathfinder/path/Vec2");
+  java_spline_wrapper(JNIEnv *env, jobject obj) : _env(env) {
+    _obj = env->NewGlobalRef(obj);
+    _posid  = jni_get_method_id(env, obj, "position", "(D)Lgrpl/pathfinder/path/Vec2;");
+    _velid  = jni_get_method_id(env, obj, "velocity", "(D)Lgrpl/pathfinder/path/Vec2;");
+    _rotid  = jni_get_method_id(env, obj, "rotation", "(D)Lgrpl/pathfinder/path/Vec2;");
     _curvid = jni_get_method_id(env, obj, "curvature", "(D)D");
     _vecxy  = jni_get_method_id(env, "grpl/pathfinder/path/Vec2", "xy", "()[D");
+  }
+
+  virtual ~java_spline_wrapper() {
+    _env->DeleteGlobalRef(_obj);
   }
 
   vector_t position(double s) override {
@@ -43,7 +48,9 @@ class java_spline_wrapper : public spline<2> {
     return eigen_adapt_jdoubleArray<vector_t>(_env, arr);
   }
 
-  double curvature(double s) override { return _env->CallDoubleMethod(_obj, _curvid, s); }
+  double curvature(double s) override { 
+    return _env->CallDoubleMethod(_obj, _curvid, s);
+  }
 
  private:
   JNIEnv *  _env;
