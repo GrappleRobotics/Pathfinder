@@ -1,6 +1,6 @@
 package grpl.pathfinder.path;
 
-public interface Spline {
+public interface Spline2d {
 
     Vec2 position(double t);
     Vec2 velocity(double t);

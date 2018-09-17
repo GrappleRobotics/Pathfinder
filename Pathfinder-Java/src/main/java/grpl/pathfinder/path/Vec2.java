@@ -1,7 +1,5 @@
 package grpl.pathfinder.path;
 
-import java.util.Objects;
-
 public class Vec2 {
 
     private double x, y;
@@ -25,6 +23,10 @@ public class Vec2 {
 
     public double y() {
         return y;
+    }
+
+    public double[] xy() {
+        return new double[] { x, y };
     }
 
     public static Vec2 cartesian(double x, double y) {

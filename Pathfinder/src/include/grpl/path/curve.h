@@ -10,6 +10,8 @@ namespace path {
    public:
     using vector_t = Eigen::Matrix<double, DIM, 1>;
 
+    virtual ~curve() {}
+
     static const size_t DIMENSIONS = DIM;
 
     virtual vector_t position(double s) const = 0;
