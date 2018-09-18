@@ -17,6 +17,7 @@ matrix:
             - g++-5
             - g++-5-multilib
             - gcc-5-multilib
+            - gcc-multilib
             - gnuplot
           sources:
             - ubuntu-toolchain-r-test
@@ -29,6 +30,7 @@ matrix:
             - g++-5
             - g++-5-multilib
             - gcc-5-multilib
+            - gcc-multilib
             - gnuplot
           sources:
             - ubuntu-toolchain-r-test
