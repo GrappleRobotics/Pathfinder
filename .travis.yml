@@ -16,6 +16,7 @@ matrix:
             - clang-3.8
             - g++-5
             - g++-5-multilib
+            - gcc-5-multilib
             - gnuplot
           sources:
             - ubuntu-toolchain-r-test
@@ -27,6 +28,7 @@ matrix:
           packages:
             - g++-5
             - g++-5-multilib
+            - gcc-5-multilib
             - gnuplot
           sources:
             - ubuntu-toolchain-r-test
