@@ -1,10 +1,10 @@
-#include "grpl/path/arc_parameterizer.h"
-#include "grpl/path/hermite.h"
+#include "grpl/pf/path/arc_parameterizer.h"
+#include "grpl/pf/path/hermite.h"
 
 #include <vector>
 
-using namespace grpl;
-using namespace grpl::path;
+using namespace grpl::pf;
+using namespace grpl::pf::path;
 
 #include <benchmark/benchmark.h>
 

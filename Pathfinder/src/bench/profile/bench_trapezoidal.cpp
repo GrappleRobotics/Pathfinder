@@ -1,8 +1,8 @@
-#include <grpl/profile/trapezoidal.h>
+#include <grpl/pf/profile/trapezoidal.h>
 
 #include <benchmark/benchmark.h>
 
-using namespace grpl::profile;
+using namespace grpl::pf::profile;
 
 static void BM_Profile_Trapezoidal(benchmark::State &state) {
   trapezoidal pr;
