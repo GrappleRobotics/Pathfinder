@@ -1,10 +1,10 @@
-#include <grpl/profile/trapezoidal.h>
 #include <gtest/gtest.h>
+#include "grpl/pf/profile/trapezoidal.h"
 
 #include <cmath>
 #include <fstream>
 
-using namespace grpl::profile;
+using namespace grpl::pf::profile;
 using namespace std;
 
 TEST(Profile, Trapezoidal) {

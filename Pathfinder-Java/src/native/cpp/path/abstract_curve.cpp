@@ -2,9 +2,9 @@
 #include "jnieigen.h"
 #include "jnihandle.h"
 
-#include <grpl/path/curve.h>
+#include <grpl/pf/path/curve.h>
 
-using namespace grpl::path;
+using namespace grpl::pf::path;
 
 using curve_t = curve<2>;
 

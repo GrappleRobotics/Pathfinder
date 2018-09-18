@@ -1,13 +1,13 @@
-#include <grpl/path/hermite.h>
 #include <gtest/gtest.h>
+#include "grpl/pf/path/hermite.h"
 
 #include <fstream>
 #include <iostream>
 #include <array>
 #include <vector>
 
-using namespace grpl;
-using namespace grpl::path;
+using namespace grpl::pf;
+using namespace grpl::pf::path;
 
 TEST(Hermite, Cubic) {
   using hermite_t = hermite_cubic;

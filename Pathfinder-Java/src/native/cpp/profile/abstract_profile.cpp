@@ -1,9 +1,9 @@
 #include "grpl_pathfinder_profile_AbstractProfile.h"
 #include "jnihandle.h"
 
-#include <grpl/profile/profile.h>
+#include <grpl/pf/profile/profile.h>
 
-using namespace grpl::profile;
+using namespace grpl::pf::profile;
 
 JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractProfile_setGoal(JNIEnv *env, jclass claz,
                                                                             jlong handle, jdouble goal) {

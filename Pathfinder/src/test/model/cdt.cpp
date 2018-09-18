@@ -1,7 +1,7 @@
-#include "grpl/model/coupled.h"
-#include "grpl/path/arc_parameterizer.h"
-#include "grpl/path/hermite.h"
-#include "grpl/profile/trapezoidal.h"
+#include "grpl/pf/model/coupled.h"
+#include "grpl/pf/path/arc_parameterizer.h"
+#include "grpl/pf/path/hermite.h"
+#include "grpl/pf/profile/trapezoidal.h"
 
 #include <gtest/gtest.h>
 
@@ -9,7 +9,7 @@
 #include <array>
 #include <vector>
 
-using namespace grpl;
+using namespace grpl::pf;
 
 template <typename ST>
 void echo(std::ofstream &out, ST state, int id) {
@@ -60,7 +60,7 @@ TEST(CDT, basic) {
   // profile.set_timeslice(0.00001);
   double G = 12.75;
 
-  transmission::dc_motor  dualCIM{12.0, 5330 * 2.0 * PI / 60.0 / G, 2 * 2.7, 2 * 131.0, 2 * 2.41 * G};
+  transmission::dc_motor  dualCIM{12.0, 5330 * 2.0 * constants::PI / 60.0 / G, 2 * 2.7, 2 * 131.0, 2 * 2.41 * G};
   coupled_t               model{dualCIM, dualCIM, 0.0762, 0.5, 25.0, 10.0};
 
   state_t state = model.initial_state();

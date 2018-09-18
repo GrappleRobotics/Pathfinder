@@ -1,11 +1,11 @@
-#include <grpl/path/arc.h>
 #include <gtest/gtest.h>
+#include "grpl/pf/path/arc.h"
 
 #include <fstream>
 #include <iostream>
 
-using namespace grpl;
-using namespace grpl::path;
+using namespace grpl::pf;
+using namespace grpl::pf::path;
 
 TEST(Arc, ArcTest) {
   arc2d::vector_t start = {0, 0}, mid = {4, 2}, end = {5, 5};

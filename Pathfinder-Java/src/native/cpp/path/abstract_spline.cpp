@@ -2,9 +2,9 @@
 #include "jnieigen.h"
 #include "jnihandle.h"
 
-#include <grpl/path/spline.h>
+#include <grpl/pf/path/spline.h>
 
-using namespace grpl::path;
+using namespace grpl::pf::path;
 
 using spline_t = spline<2>;
 

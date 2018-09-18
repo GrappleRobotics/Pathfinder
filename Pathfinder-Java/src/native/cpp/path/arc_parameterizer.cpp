@@ -6,9 +6,9 @@
 #include <functional>
 #include <vector>
 
-#include <grpl/path/arc_parameterizer.h>
+#include <grpl/pf/path/arc_parameterizer.h>
 
-using namespace grpl::path;
+using namespace grpl::pf::path;
 
 using spline_container_t = std::vector<std::reference_wrapper<spline<2>>>;
 using curve_container_t  = std::vector<arc_parameterizer::curve_t>;

@@ -3,9 +3,9 @@
 #include "jnieigen.h"
 #include "jnihandle.h"
 
-#include <grpl/path/hermite.h>
+#include <grpl/pf/path/hermite.h>
 
-using namespace grpl::path;
+using namespace grpl::pf::path;
 
 template <typename T>
 static typename T::waypoint hermite_create_waypoint(JNIEnv *env, jdoubleArray wp) {

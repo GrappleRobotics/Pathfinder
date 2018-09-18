@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "grpl/path/arc_parameterizer.h"
-#include "grpl/path/hermite.h"
+#include "grpl/pf/path/arc_parameterizer.h"
+#include "grpl/pf/path/hermite.h"
 
 #include <fstream>
 #include <iostream>
@@ -9,8 +9,8 @@
 #include <list>
 #include <vector>
 
-using namespace grpl;
-using namespace grpl::path;
+using namespace grpl::pf;
+using namespace grpl::pf::path;
 
 TEST(ArcParam, Hermite) {
   using hermite_t = hermite<5>;
@@ -88,7 +88,7 @@ TEST(ArcParam, Multispline) {
       auto pos = it->position(t);
       auto rot = it->rotation(t);
       ps += (pos - last_pos).norm();
-      outfile << -100.0 << "," << ps << "," << pos[0] << "," << pos[1] << "," << it->curvature(t) << "," << (atan2(rot.y(), rot.x()) * 180/PI) << std::endl;
+      outfile << -100.0 << "," << ps << "," << pos[0] << "," << pos[1] << "," << it->curvature(t) << "," << (atan2(rot.y(), rot.x()) * 180 / constants::PI) << std::endl;
       last_pos = pos;
     }
   }
@@ -104,7 +104,7 @@ TEST(ArcParam, Multispline) {
 
     ASSERT_FALSE(std::isnan(c.length()));
 
-    outfile << curve << "," << s << "," << pos[0] << "," << pos[1] << "," << curv << "," << (angle * 180 / PI)
+    outfile << curve << "," << s << "," << pos[0] << "," << pos[1] << "," << curv << "," << (angle * 180 / constants::PI)
             << std::endl;
 
     si += 0.001;
