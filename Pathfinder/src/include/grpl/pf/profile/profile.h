@@ -40,7 +40,7 @@ namespace pf {
       static const size_t LIMITED = LIM_TERM;
 
       struct segment_t {
-        using kinematics_t = kinematics_t;
+        using profile_t = profile;
         double       time;
         kinematics_t kinematics;
       };

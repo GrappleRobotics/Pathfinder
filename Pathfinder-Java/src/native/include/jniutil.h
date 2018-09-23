@@ -27,13 +27,13 @@ template <typename T>
 jlongArray jni_copy_to_handles(JNIEnv *env, std::vector<T> &vec) {
   jlong *addr = new jlong[vec.size()];
   size_t i = 0;
-  for (std::vector<T>::iterator it = vec.begin(); it != vec.end(); ++it) {
+  for (typename std::vector<T>::iterator it = vec.begin(); it != vec.end(); ++it) {
     // Create a copy of T somewhere on the heap, since it's now Javas to deal with.
     addr[i++] = reinterpret_cast<jlong>(new T(*it));
   }
 
   jlongArray arr = env->NewLongArray(vec.size());
   env->SetLongArrayRegion(arr, 0, vec.size(), addr);
-  delete addr;
+  delete[] addr;
   return arr;
 }

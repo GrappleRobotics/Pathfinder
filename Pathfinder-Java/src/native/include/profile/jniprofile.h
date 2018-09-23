@@ -5,12 +5,17 @@
 #include "jniutil.h"
 
 template <typename segment_t>
+segment_t jni_array_to_native_segment(JNIEnv *env, jdouble t, jdoubleArray kinematics) {
+  return segment_t{t, eigen_adapt_jdoubleArray<typename segment_t::profile_t::kinematics_t>(env, kinematics)};
+}
+
+template <typename segment_t>
 segment_t jni_java_to_native_segment(JNIEnv *env, jobject obj) {
   jdouble t = jni_get_double_field(env, obj, "time");
 
   jdoubleArray kin_array = jni_get_field<jdoubleArray>(env, obj, "kinematics", "[D");
 
-  return jni_to_native_segment(t, kin_array);
+  return jni_array_to_native_segment<segment_t>(env, t, kin_array);
 }
 
 template <typename segment_t>
@@ -22,11 +27,6 @@ jobject jni_segment_to_java(JNIEnv *env, segment_t seg) {
   jni_set_double_field(env, j_seg, "time", seg.time);
   jni_set_field(env, j_seg, "kinematics", "[D", kin_arr);
   return j_seg;
-}
-
-template <typename segment_t>
-segment_t jni_array_to_native_segment(JNIEnv *env, jdouble t, jdoubleArray kinematics) {
-  return segment_t{t, eigen_adapt_jdoubleArray<segment_t::kinematics_t>(env, kinematics)};
 }
 
 template <typename segment_t>
