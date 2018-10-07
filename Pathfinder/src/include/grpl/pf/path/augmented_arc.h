@@ -1,6 +1,6 @@
 #pragma once
 
-#include "grpl/pf/path/arc.h"
+#include "arc.h"
 
 namespace grpl {
 namespace pf {

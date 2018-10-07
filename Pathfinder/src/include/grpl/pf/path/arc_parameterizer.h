@@ -1,7 +1,7 @@
 #pragma once
 
-#include "grpl/pf/path/augmented_arc.h"
-#include "grpl/pf/path/spline.h"
+#include "augmented_arc.h"
+#include "spline.h"
 
 namespace grpl {
 namespace pf {

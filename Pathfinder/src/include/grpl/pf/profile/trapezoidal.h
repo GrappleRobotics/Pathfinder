@@ -1,6 +1,6 @@
 #pragma once
 
-#include "grpl/pf/profile/profile.h"
+#include "profile.h"
 #include "grpl/pf/util/constants.h"
 
 #include <iostream>
