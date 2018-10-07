@@ -41,8 +41,8 @@ namespace pf {
 
       struct segment_t {
         using profile_t = profile;
-        double       time;
-        kinematics_t kinematics;
+        double       time = 0;
+        kinematics_t kinematics = kinematics_t::Zero();
       };
 
       void apply_limit(int derivative, double min, double max) override {

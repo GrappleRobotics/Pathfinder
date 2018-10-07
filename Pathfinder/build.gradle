@@ -65,7 +65,7 @@ model {
                 if (toolChain instanceof Gcc || toolChain instanceof Clang) {
                     linker.args << '-pthread'
 
-                    if (toolChain instanceof Clang) {
+                    if (toolChain instanceof Clang && targetPlatform.architecture == 'any64') {
                         cppCompiler.args << '-fsanitize=address'
                         linker.args << '-fsanitize=address'
                     }

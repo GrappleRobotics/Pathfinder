@@ -14,10 +14,10 @@ TEST(Profile, Trapezoidal) {
   trapezoidal pr;
   pr.apply_limit(VELOCITY, -3, 3);      // Velocity Limit = -3 to 3m/s
   pr.apply_limit(ACCELERATION, -3, 4);  // Acceleration limit = -3 to 4m/s
-  pr.set_goal(5);        // Goal = 5m
-  pr.set_timeslice(0);   // No Timeslice
+  pr.set_goal(5);                       // Goal = 5m
+  pr.set_timeslice(0);                  // No Timeslice
 
-  trapezoidal::segment_t seg;
+  trapezoidal::segment_t    seg;
   trapezoidal::kinematics_t kin;
 
   ofstream outfile("profile_trap.csv");
