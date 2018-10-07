@@ -1,0 +1,27 @@
+parameters: 
+  env: {}
+
+steps:
+- task: Gradle@2
+  inputs:
+    workingDirectory: ''
+    gradleWrapperFile: 'gradlew'
+    gradleOptions: '-Xmx3072m'
+    publishJUnitResults: false
+    testResultsFiles: '**/TEST-*.xml'
+    tasks: 'build'
+    options: '-PwithBench --scan --stacktrace'
+  env: ${{ parameters.env }}
+  
+- task: CopyFiles@2
+  inputs:
+    contents: 'Pathfinder/build/!(tmp|objs|classes)/**/*.*'
+    targetFolder: $(Build.ArtifactStagingDirectory)/$(PlatformName)
+- task: CopyFiles@2
+  inputs:
+    contents: 'Pathfinder-Java/build/!(tmp|objs|classes)/**/*.*'
+    targetFolder: $(Build.ArtifactStagingDirectory)/$(PlatformName)
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    artifactName: 'BuildFiles'

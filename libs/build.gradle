@@ -34,7 +34,7 @@ model {
 
             binaries.all {
                 if (toolChain instanceof Gcc || toolChain instanceof Clang) {
-                    cppCompiler.args << '-std=c++14'
+                    cppCompiler.args << '-std=c++14' << '-Wno-deprecated-declarations'
                     linker.args << '-pthread'
                 } else {
                     // MSVC

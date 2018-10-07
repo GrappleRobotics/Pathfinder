@@ -1,0 +1,69 @@
+resources:
+  containers:
+  - container: wpilib2019
+    image: wpilib/roborio-cross-ubuntu:2019-18.04
+
+jobs:
+- job: Windows
+  pool:
+    vmImage: 'VS2017-Win2016'
+  variables:
+    PlatformName: "win"
+  steps:
+  - template: azure-steps.yml
+    parameters:
+      env: { }
+
+- job: macOS
+  pool:
+    vmImage: 'macOS-10.13'
+  variables:
+    PlatformName: "mac"
+  steps:
+  - template: azure-steps.yml
+    parameters:
+      env: { }
+  - script: 'ls -al Pathfinder/build Pathfinder-Java/build'
+    displayName: 'List build files'
+
+- job: LinuxGCC
+  pool: 
+    vmImage: 'Ubuntu-16.04'
+  container: wpilib2019
+  variables:
+    PlatformName: "linuxGCC"
+  steps:
+  - script: |
+      sudo apt update
+      sudo apt install -y gcc-5 g++-5 g++-5-multilib gcc-5-multilib g++-multilib gcc-multilib gnuplot
+      sudo update-alternatives --remove-all gcc || true
+      sudo update-alternatives --remove-all g++ || true
+      sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 10 || true
+      sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 10 || true
+    displayName: 'Install packages'
+  - template: azure-steps.yml
+    parameters:
+      env: { "CI_COMPILER": "GCC" }
+  - script: 'ls -al Pathfinder/build Pathfinder-Java/build'
+    displayName: 'List build files'
+
+- job: LinuxClang
+  pool: 
+    vmImage: 'Ubuntu-16.04'
+  container: wpilib2019
+  variables:
+    PlatformName: "linuxClang"
+  steps:
+  - script: |
+      sudo apt update
+      sudo apt install -y clang-6.0 gcc-5 g++-5 g++-5-multilib gcc-5-multilib g++-multilib gcc-multilib gnuplot
+      sudo update-alternatives --remove-all clang || true
+      sudo update-alternatives --remove-all clang++ || true
+      sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-6.0 10 || true
+      sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-6.0 10 || true
+    displayName: 'Install packages'
+  - template: azure-steps.yml
+    parameters:
+      env: { "CI_COMPILER": "CLANG" }
+  - script: 'ls -al Pathfinder/build Pathfinder-Java/build'
+    displayName: 'List build files'
