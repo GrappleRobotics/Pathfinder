@@ -1,6 +1,9 @@
 Pathfinder
 ====
 
+[![Azure Status](https://dev.azure.com/grapplerobotics/Pathfinder/_apis/build/status/GrappleRobotics.Pathfinder?branchName=master)](https://dev.azure.com/grapplerobotics/Pathfinder/_build/latest?definitionId=1)
+
+
 Pathfinder is a robotic motion library, with logic for motion profiling, path planning and more. 
 
 Pathfinder is still under heavy development, and the structure is still very volatile, please see the issues tab if you'd like to contribute to making Pathfinder great.
