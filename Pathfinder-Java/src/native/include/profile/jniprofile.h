@@ -6,7 +6,7 @@
 
 template <typename segment_t>
 segment_t jni_array_to_native_segment(JNIEnv *env, jdouble t, jdoubleArray kinematics) {
-  return segment_t{t, eigen_adapt_jdoubleArray<typename segment_t::profile_t::kinematics_t>(env, kinematics)};
+  return segment_t{t, eigen_adapt_jdoubleArray<typename segment_t::kinematics_t>(env, kinematics)};
 }
 
 template <typename segment_t>

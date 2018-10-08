@@ -14,6 +14,8 @@ namespace pf {
       virtual double get_free_voltage(double speed) const      = 0;
       virtual double get_current_voltage(double current) const = 0;
       virtual double get_torque_current(double torque) const   = 0;
+
+      virtual double nominal_voltage() const = 0;
     };
 
     // Basic DC Motor Model, dervied from the ideal resistive motor model with Back EMF
@@ -32,6 +34,10 @@ namespace pf {
       inline double internal_resistance() const { return _v_nom / _stall_current; }
       inline double kv() const { return (_v_nom - _free_current * _v_nom / _stall_current) / _free_speed; }
       inline double kt() const { return _stall_current / _stall_torque; }
+
+      double nominal_voltage() const override {
+        return _v_nom;
+      }
 
       double get_current(double voltage, double speed) const override {
         // V_w = kv * w

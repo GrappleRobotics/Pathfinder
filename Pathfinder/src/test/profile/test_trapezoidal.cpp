@@ -3,6 +3,8 @@
 
 #include <cmath>
 #include <fstream>
+#include <iostream>
+#include <iomanip>
 
 using namespace grpl::pf::profile;
 using namespace std;
@@ -46,4 +48,37 @@ TEST(Profile, Trapezoidal) {
 
   // Check setpoint has been reached at end of profile
   ASSERT_NEAR(kin[0], 5, 0.001);
+}
+
+TEST(Profile, SegmentConversion) {
+  trapezoidal pr;
+  pr.apply_limit(VELOCITY, -3, 3);      // Velocity Limit = -3 to 3m/s
+  pr.apply_limit(ACCELERATION, -3, 4);  // Acceleration limit = -3 to 4m/s
+  pr.set_goal(5);                       // Goal = 5m
+  pr.set_timeslice(0);                  // No Timeslice
+
+  trapezoidal::segment_t    seg, seg_last;
+
+  segment<5> seg_large, seg_last_large;
+
+  std::cout << std::setprecision(20);
+  for (double t = 0; t < 7; t += 0.01) {
+    seg = pr.calculate(seg_last, t);
+    pr.calculate_into(seg_large, seg_last_large, t);
+
+    // std::cout << seg.kinematics[1] << std::endl;
+    // std::cout << seg_large.kinematics[1] << std::endl;
+
+    size_t min_size = std::min(seg_large.ORDER, seg.ORDER);
+    // Make sure common terms match
+    for (size_t i = 0; i < min_size; i++) {
+      ASSERT_DOUBLE_EQ(seg.kinematics[i], seg_large.kinematics[i]) << "Time: " << t << " Order: " << i;
+    }
+    // Make sure other terms are defaulted to zero.
+    for (size_t i = min_size; i < seg_large.ORDER; i++) {
+      ASSERT_DOUBLE_EQ(0, seg_large.kinematics[i]) << "Time: " << t << " Order: " << i;
+    }
+    seg_last_large = seg_large;
+    seg_last = seg;
+  }
 }
