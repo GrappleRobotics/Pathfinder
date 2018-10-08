@@ -1,3 +1,8 @@
+// Coupled
+#include "coupled/chassis.h"
+#include "coupled/drivetrain.h"
+#include "coupled/state.h"
+
 // Model
 #include "model/coupled.h"
 #include "model/transmission.h"

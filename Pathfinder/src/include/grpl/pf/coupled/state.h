@@ -16,8 +16,8 @@ namespace pf {
     struct state {
       double          time      = 0;
       double          curvature = 0, dcurvature = 0;
-      configuration_t configuration{0, 0, 0};
-      kinematics_t    kinematics{0, 0, 0};
+      configuration_t configuration = configuration_t::Zero();
+      kinematics_t    kinematics = kinematics_t::Zero();
       bool            finished = false;
     };
 
@@ -25,8 +25,8 @@ namespace pf {
       using vector_t = Eigen::Vector2d;
 
       double       time = 0;
-      vector_t     position{0, 0};
-      kinematics_t kinematics{0, 0, 0};
+      vector_t     position = vector_t::Zero();
+      kinematics_t kinematics = kinematics_t::Zero();
       double       voltage = 0, current = 0;
       bool         finished = false;
     };
