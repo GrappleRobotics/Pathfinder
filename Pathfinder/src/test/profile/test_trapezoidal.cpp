@@ -3,8 +3,8 @@
 
 #include <cmath>
 #include <fstream>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
 using namespace grpl::pf::profile;
 using namespace std;
@@ -57,14 +57,14 @@ TEST(Profile, SegmentConversion) {
   pr.set_goal(5);                       // Goal = 5m
   pr.set_timeslice(0);                  // No Timeslice
 
-  trapezoidal::segment_t    seg, seg_last;
+  trapezoidal::segment_t seg;
 
-  segment<5> seg_large, seg_last_large;
+  segment<5> seg_large;
 
   std::cout << std::setprecision(20);
   for (double t = 0; t < 7; t += 0.01) {
-    seg = pr.calculate(seg_last, t);
-    pr.calculate_into(seg_large, seg_last_large, t);
+    seg = pr.calculate(seg, t);
+    pr.calculate_into(seg_large, seg_large, t);
 
     // std::cout << seg.kinematics[1] << std::endl;
     // std::cout << seg_large.kinematics[1] << std::endl;
@@ -78,7 +78,5 @@ TEST(Profile, SegmentConversion) {
     for (size_t i = min_size; i < seg_large.ORDER; i++) {
       ASSERT_DOUBLE_EQ(0, seg_large.kinematics[i]) << "Time: " << t << " Order: " << i;
     }
-    seg_last_large = seg_large;
-    seg_last = seg;
   }
 }
