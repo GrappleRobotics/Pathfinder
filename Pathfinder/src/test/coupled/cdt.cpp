@@ -1,12 +1,12 @@
-#include "grpl/pf/model/coupled.h"
+#include "grpl/pf/coupled/drivetrain.h"
 #include "grpl/pf/path/arc_parameterizer.h"
 #include "grpl/pf/path/hermite.h"
 #include "grpl/pf/profile/trapezoidal.h"
 
 #include <gtest/gtest.h>
 
-#include <fstream>
 #include <array>
+#include <fstream>
 #include <vector>
 
 using namespace grpl::pf;
@@ -15,7 +15,9 @@ template <typename ST>
 void echo(std::ofstream &out, ST state, int id) {
   out << state.time << "," << state.configuration.x() << "," << state.configuration.y() << ","
       << state.configuration[2] << "," << state.kinematics[0] << "," << state.kinematics[1] << ","
-      << state.kinematics[2] << "," << state.curvature << "," << id << "," << "" << "," << std::endl;
+      << state.kinematics[2] << "," << state.curvature << "," << id << ","
+      << ""
+      << "," << std::endl;
 }
 
 void echo_limits(std::ofstream &out, double time, profile::trapezoidal::limits_t lim) {
@@ -33,16 +35,19 @@ void echo_simulation(std::ofstream &out, double time, Eigen::Vector3d config) {
 template <typename ST>
 void echo_wheel(std::ofstream &out, ST state, int id) {
   out << state.time << "," << state.position.x() << "," << state.position.y() << ","
-      << "" << "," << "" << "," << state.velocity << "," << state.acceleration << "," 
-      << "" << "," << id << "," << state.voltage << "," << state.current << std::endl;
+      << ""
+      << ","
+      << ""
+      << "," << state.kinematics[profile::VELOCITY] << "," << state.kinematics[profile::ACCELERATION] << ","
+      << ""
+      << "," << id << "," << state.voltage << "," << state.current << std::endl;
 }
 
 TEST(CDT, basic) {
-  using hermite_t = path::hermite_quintic;
-  using profile_t = profile::trapezoidal;
-  using coupled_t = model::coupled<profile_t>;
-  using state_t   = typename coupled_t::state;
-  using wheel_state_t = typename coupled_t::wheel_state;
+  using hermite_t     = path::hermite_quintic;
+  using profile_t     = profile::trapezoidal;
+  using state_t       = coupled::state;
+  using wheel_state_t = coupled::wheel_state;
 
   std::vector<path::augmented_arc2d> curves;
   std::array<hermite_t::waypoint, 2> wps{hermite_t::waypoint{{0, 0}, {5, 0}, {0, 0}},
@@ -60,15 +65,18 @@ TEST(CDT, basic) {
   // profile.set_timeslice(0.00001);
   double G = 12.75;
 
-  transmission::dc_motor  dualCIM{12.0, 5330 * 2.0 * constants::PI / 60.0 / G, 2 * 2.7, 2 * 131.0, 2 * 2.41 * G};
-  coupled_t               model{dualCIM, dualCIM, 0.0762, 0.5, 25.0, 10.0};
+  transmission::dc_motor dualCIM{12.0, 5330 * 2.0 * constants::PI / 60.0 / G, 2 * 2.7, 2 * 131.0,
+                                 2 * 2.41 * G};
+  // coupled_t               model{dualCIM, dualCIM, 0.0762, 0.5, 25.0, 10.0};
+  coupled::chassis    chassis{dualCIM, dualCIM, 0.0762, 0.5, 25.0};
+  coupled::drivetrain model{chassis};
 
-  state_t state = model.initial_state();
+  state_t state;
 
   std::ofstream pathfile("cdt.csv");
   pathfile << "t,x,y,heading,distance,velocity,acceleration,curvature,path,voltage,current\n";
 
-  typename coupled_t::configuration_t centre{0, 0, 0};
+  coupled::configuration centre{0, 0, 0};
 
   for (double t = 0; !state.finished && t < 5; t += 0.01) {
     state = model.generate(curves.begin(), curves.end(), profile, state, t);
@@ -80,8 +88,9 @@ TEST(CDT, basic) {
     echo_wheel(pathfile, split.first, 1);
     echo_wheel(pathfile, split.second, 2);
 
-    double w = (split.second.velocity - split.first.velocity);    // track radius = 0.5, track diam = 1
-    double v = (split.second.velocity + split.first.velocity) / 2.0;
+    double w = (split.second.kinematics[profile::VELOCITY] -
+                split.first.kinematics[profile::VELOCITY]);  // track radius = 0.5, track diam = 1
+    double v = (split.second.kinematics[profile::VELOCITY] + split.first.kinematics[profile::VELOCITY]) / 2.0;
 
     // TODO: Checks
 

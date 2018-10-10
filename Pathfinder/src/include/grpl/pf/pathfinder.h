@@ -4,7 +4,6 @@
 #include "coupled/state.h"
 
 // Model
-#include "model/coupled.h"
 #include "model/transmission.h"
 
 // Path

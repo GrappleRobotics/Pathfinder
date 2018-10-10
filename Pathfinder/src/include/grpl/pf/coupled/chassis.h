@@ -1,8 +1,9 @@
 #pragma once
 
-#include "grpl/pf/mode/coupled/state.h"
+#include "chassis.h"
 #include "grpl/pf/model/transmission.h"
 #include "grpl/pf/util/constants.h"
+#include "state.h"
 
 namespace grpl {
 namespace pf {
@@ -23,8 +24,8 @@ namespace pf {
       double track_radius() const { return _track_radius; }
       double wheel_radius() const { return _wheel_radius; }
 
-      transmission_t transmission_left() const { return _trans_left; }
-      transmission_t transmission_right() const { return _trans_right; }
+      transmission_t &transmission_left() const { return _trans_left; }
+      transmission_t &transmission_right() const { return _trans_right; }
 
       double linear_vel_limit(configuration &config, double curvature) const {
         // Infinite curvature, point turn (purely angular), therefore no linear velocity.
@@ -32,8 +33,8 @@ namespace pf {
 
         // Wheel linear speed, maximum possible speeds
         // Ordered left, right.
-        Eigen::Vector2d maximum_vels{_trans_left.get_free_speed(_trans_left.nominal_voltage()) * _wheel_r,
-                                     _trans_right.get_free_speed(_trans_right.nominal_voltage()) * _wheel_r};
+        Eigen::Vector2d maximum_vels{_trans_left.get_free_speed(_trans_left.nominal_voltage()) * _wheel_radius,
+                                     _trans_right.get_free_speed(_trans_right.nominal_voltage()) * _wheel_radius};
 
         if (std::abs(curvature) < constants::epsilon) {
           // No curvature, straight forward (purely linear). Need to take minimum as for
@@ -56,7 +57,7 @@ namespace pf {
           // rk = (v_r - v_l) / (v_r + v_l)
           // v_r(1 - rk) = v_l(1 + rk)            [4]
           // let ratio = (1 - rk) / (1 + rk)
-          double ratio = (1 - _track_r * curvature) / (1 + _track_r * curvature);
+          double ratio = (1 - _track_radius * curvature) / (1 + _track_radius * curvature);
           // v_l = v_r * ratio                    [5]
           // v_r = v_l / ratio                    [6]
 
@@ -102,37 +103,58 @@ namespace pf {
         // k = w / v, w = v * k
         double angular = velocity * curvature;
         // v_diff = w * r
-        double differential = angular * _track_r;
+        double differential = angular * _track_radius;
 
         // v_r = v + v_diff, w_r = v_r / r_wheel
         // v_l = v - v_diff, w_l = v_l / r_wheel
         // Ordered right, left.
-        Eigen::Vector2d wheels{(linear + differential) / _wheel_r, (linear - differential) / _wheel_r};
+        Eigen::Vector2d wheels{(linear + differential) / _wheel_radius, (linear - differential) / _wheel_radius};
 
         // Calculate fwd torque limits for each side
         Eigen::Vector2d fwd_torque_limits{
-            _transmission_right.get_torque(_transmission_right.get_current(_max_voltage, wheels[0])),
-            _transmission_left.get_torque(_transmission_left.get_current(_max_voltage, wheels[1]))};
+            _trans_right.get_torque(_trans_right.get_current(_trans_right.nominal_voltage(), wheels[0])),
+            _trans_left.get_torque(_trans_left.get_current(_trans_left.nominal_voltage(), wheels[1]))};
 
-        Eigen::Vector2d fwd_accel_limits = fwd_torque_limits / (_mass * _wheel_r);
+        Eigen::Vector2d fwd_accel_limits = fwd_torque_limits / (_mass * _wheel_radius);
 
         double max = fwd_accel_limits.sum() / 2.0;
 
         // Calculate rvs torque limits for each side
         Eigen::Vector2d rvs_torque_limits{
-            _transmission_right.get_torque(-_transmission_right.get_current(_max_voltage, wheels[0])),
-            _transmission_left.get_torque(-_transmission_left.get_current(_max_voltage, wheels[1]))};
+            _trans_right.get_torque(-_trans_right.get_current(_trans_right.nominal_voltage(), wheels[0])),
+            _trans_left.get_torque(-_trans_left.get_current(_trans_left.nominal_voltage(), wheels[1]))};
 
-        Eigen::Vector2d rvs_accel_limits = rvs_torque_limits / (_mass * _wheel_r);
+        Eigen::Vector2d rvs_accel_limits = rvs_torque_limits / (_mass * _wheel_radius);
 
         double min = rvs_accel_limits.sum() / 2.0;
 
         return std::pair<double, double>{min, max};
       }
 
+      void solve_electrical(wheel_state &left, wheel_state &right) {
+        do_solve_electrical(left, _trans_left);
+        do_solve_electrical(right, _trans_right);
+      }
+
      private:
-      double         _mass, _track_radius, _wheel_radius;
-      transmission_t _trans_left, _trans_right;
+      // TODO: Make this part of transmission_t
+      void do_solve_electrical(wheel_state &wheel, transmission_t &transmission) {
+        double speed        = wheel.kinematics[1] / _wheel_radius;
+        double free_voltage = transmission.get_free_voltage(speed);
+
+        double torque          = _mass * wheel.kinematics[2] * _wheel_radius;
+        double current         = transmission.get_torque_current(torque);
+        double current_voltage = transmission.get_current_voltage(current);
+
+        double total_voltage = free_voltage + current_voltage;
+
+        wheel.voltage = total_voltage;
+        wheel.current = current;
+      }
+
+      double _mass, _track_radius, _wheel_radius;
+      // TODO: Not reference
+      transmission_t &_trans_left, &_trans_right;
     };
   }  // namespace coupled
 }  // namespace pf

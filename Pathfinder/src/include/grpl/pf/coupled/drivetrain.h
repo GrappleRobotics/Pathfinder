@@ -1,8 +1,8 @@
 #pragma once
 
 #include "chassis.h"
-#include "state.h"
 #include "grpl/pf/profile/profile.h"
+#include "state.h"
 
 namespace grpl {
 namespace pf {
@@ -11,7 +11,7 @@ namespace pf {
      public:
       using vector_t = Eigen::Vector2d;
 
-      coupled(chassis &chassis_in) : _chassis(chassis_in) {}
+      drivetrain(chassis &chassis_in) : _chassis(chassis_in) {}
 
       template <typename iterator_curve_t>
       inline bool find_curve(double targ_len, const iterator_curve_t curve_begin,
@@ -35,10 +35,10 @@ namespace pf {
         return found;
       }
 
-      // TODO: Profile type.
+      // TODO: Profile type. Needs overhaul.
       template <typename iterator_curve_t>
-      state generate(const iterator_curve_t curve_begin, const iterator_curve_t curve_end, profile &profile,
-                     state &last, double time) {
+      state generate(const iterator_curve_t curve_begin, const iterator_curve_t curve_end,
+                     profile::profile &profile, state &last, double time) {
         iterator_curve_t curve;
         state            output;
         double           total_length, curve_distance;
@@ -61,8 +61,8 @@ namespace pf {
         double   curvature  = curve->curvature(curve_distance);
         double   dcurvature = curve->curvature_prime(curve_distance);
 
-        double          heading = atan2(centre_rot.y(), centre_rot.x());
-        configuration_t config{centre.x(), centre.y(), heading};
+        double        heading = atan2(centre_rot.y(), centre_rot.x());
+        configuration config{centre.x(), centre.y(), heading};
 
         output.time          = time;
         output.configuration = config;
@@ -70,13 +70,14 @@ namespace pf {
         // TODO: Allow multiple constraints (like current limits)
         // TODO: Enforce minimum acceleration constraints in profiles.
         // TODO: Does limiting jerk prevent oscillation
-        double                    limit_vel = linear_vel_limit(config, curvature);
-        std::pair<double, double> limit_acc = acceleration_limits(config, curvature, last.kinematics[1]);
+        double                    limit_vel = _chassis.linear_vel_limit(config, curvature);
+        std::pair<double, double> limit_acc =
+            _chassis.acceleration_limits(config, curvature, last.kinematics[1]);
 
         profile.apply_limit(1, -limit_vel, limit_vel);
         profile.apply_limit(2, limit_acc.first, limit_acc.second);
 
-        typename profile_t::segment_t segment;
+        profile::segment segment;
         segment.time       = last.time;
         segment.kinematics = last.kinematics;
 
@@ -114,8 +115,8 @@ namespace pf {
         double v_linear       = centre.kinematics[1];
         double v_angular      = v_linear * centre.curvature;
         double v_differential = v_angular * _chassis.track_radius();
-        left.velocity         = v_linear - v_differential;
-        right.velocity        = v_linear + v_differential;
+        left.kinematics[1]    = v_linear - v_differential;
+        right.kinematics[1]   = v_linear + v_differential;
 
         // Split accelerations
         double a_linear = centre.kinematics[2];
@@ -133,12 +134,10 @@ namespace pf {
         // Isn't that just a gorgeous piece of math?
         double a_angular      = a_linear * centre.curvature + v_linear * v_linear * centre.dcurvature;
         double a_differential = a_angular * _chassis.track_radius();
-        left.acceleration     = a_linear - a_differential;
-        right.acceleration    = a_linear + a_differential;
+        left.kinematics[2]    = a_linear - a_differential;
+        right.kinematics[2]   = a_linear + a_differential;
 
-        // TODO:
-        // solve_electrical(left, _transmission_left);
-        // solve_electrical(right, _transmission_right);
+        _chassis.solve_electrical(left, right);
 
         return std::pair<wheel_state, wheel_state>{left, right};
       }
