@@ -1,7 +1,6 @@
 #pragma once
 
 #include "spline.h"
-#include "grpl/pf/util/constants.h"
 
 namespace grpl {
 namespace pf {

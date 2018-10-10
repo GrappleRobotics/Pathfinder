@@ -14,8 +14,8 @@ using namespace grpl::pf;
 template <typename ST>
 void echo(std::ofstream &out, ST state, int id) {
   out << state.time << "," << state.configuration.x() << "," << state.configuration.y() << ","
-      << state.configuration[2] << "," << state.kinematics[0] << "," << state.kinematics[1] << ","
-      << state.kinematics[2] << "," << state.curvature << "," << id << ","
+      << state.configuration[2] << "," << state.kinematics[POSITION] << "," << state.kinematics[VELOCITY] << ","
+      << state.kinematics[ACCELERATION] << "," << state.curvature << "," << id << ","
       << ""
       << "," << std::endl;
 }
@@ -38,7 +38,7 @@ void echo_wheel(std::ofstream &out, ST state, int id) {
       << ""
       << ","
       << ""
-      << "," << state.kinematics[profile::VELOCITY] << "," << state.kinematics[profile::ACCELERATION] << ","
+      << "," << state.kinematics[VELOCITY] << "," << state.kinematics[ACCELERATION] << ","
       << ""
       << "," << id << "," << state.voltage << "," << state.current << std::endl;
 }
@@ -88,9 +88,9 @@ TEST(CDT, basic) {
     echo_wheel(pathfile, split.first, 1);
     echo_wheel(pathfile, split.second, 2);
 
-    double w = (split.second.kinematics[profile::VELOCITY] -
-                split.first.kinematics[profile::VELOCITY]);  // track radius = 0.5, track diam = 1
-    double v = (split.second.kinematics[profile::VELOCITY] + split.first.kinematics[profile::VELOCITY]) / 2.0;
+    double w = (split.second.kinematics[VELOCITY] -
+                split.first.kinematics[VELOCITY]);  // track radius = 0.5, track diam = 1
+    double v = (split.second.kinematics[VELOCITY] + split.first.kinematics[VELOCITY]) / 2.0;
 
     // TODO: Checks
 

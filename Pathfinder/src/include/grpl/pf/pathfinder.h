@@ -19,5 +19,6 @@
 #include "profile/trapezoidal.h"
 
 // Util
-#include "util/constants.h"
 #include "util/vec.h"
+
+#include "constants.h"

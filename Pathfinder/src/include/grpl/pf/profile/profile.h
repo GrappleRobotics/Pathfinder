@@ -1,20 +1,13 @@
 #pragma once
 
 #include <Eigen/Dense>
+#include "grpl/pf/constants.h"
 
 namespace grpl {
 namespace pf {
   namespace profile {
-    const size_t POSITION     = 0;
-    const size_t VELOCITY     = 1;
-    const size_t ACCELERATION = 2;
-    const size_t JERK = 3;
-
-    const size_t profile_segment_order = 3; // Pos, Vel, Acc
-    const size_t profile_limits_order  = 4; // <>, Vel, Acc, Jerk
-
     struct segment {
-      using kinematics_t = Eigen::Matrix<double, 1, profile_segment_order>;
+      using kinematics_t = Eigen::Matrix<double, 1, constants::profile_segment_order>;
 
       double       time       = 0;
       kinematics_t kinematics = kinematics_t::Zero();
@@ -23,7 +16,7 @@ namespace pf {
     class profile {
      public:
       using segment_t = segment;
-      using limits_t  = Eigen::Matrix<double, 2, profile_limits_order>;
+      using limits_t  = Eigen::Matrix<double, 2, constants::profile_limits_order>;
 
       virtual ~profile() {}
 

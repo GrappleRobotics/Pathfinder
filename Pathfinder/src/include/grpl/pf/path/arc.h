@@ -1,7 +1,7 @@
 #pragma once
 
 #include "curve.h"
-#include "grpl/pf/util/constants.h"
+#include "grpl/pf/constants.h"
 
 namespace grpl {
 namespace pf {

@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <iostream>
 
+using namespace grpl::pf;
 using namespace grpl::pf::profile;
 using namespace std;
 
