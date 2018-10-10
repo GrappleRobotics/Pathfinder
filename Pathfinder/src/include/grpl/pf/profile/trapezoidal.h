@@ -8,27 +8,31 @@
 namespace grpl {
 namespace pf {
   namespace profile {
-    class trapezoidal : public profile<ACCELERATION> {
+    class trapezoidal : public profile {
      public:
-      segment_t calculate(segment_t &last, double time) const override {
+      const size_t limited_term() const override {
+        return ACCELERATION;
+      }
+
+      segment_t calculate(segment_t &last, double time) override {
         double dt          = time - last.time;
         double timestep    = dt;
         int    slice_count = 1;
 
-        if (_timeslice > 0) {
-          double slice_count_d = static_cast<double>(dt / _timeslice);
+        if (this->_timeslice > 0) {
+          double slice_count_d = static_cast<double>(dt / this->_timeslice);
 
           slice_count = static_cast<int>(slice_count_d);
           if (slice_count_d - slice_count > 0.9) slice_count++;
           if (slice_count < 1) slice_count++;
 
-          timestep = _timeslice;
+          timestep = this->_timeslice;
         }
 
-        double vel_min   = _limits(0, 1);
-        double vel_max   = _limits(1, 1);
-        double accel_min = _limits(0, 2);
-        double accel_max = _limits(1, 2);
+        double vel_min   = this->_limits(0, 1);
+        double vel_max   = this->_limits(1, 1);
+        double accel_min = this->_limits(0, 2);
+        double accel_max = this->_limits(1, 2);
 
         segment_t seg = last;
 
@@ -39,9 +43,9 @@ namespace pf {
           if (t > time) t = time;
           dt = t - seg.time;
 
-          kinematics_t &k = seg.kinematics;
+          auto &k = seg.kinematics;
 
-          double error = k[0] - _goal;
+          double error = k[0] - this->_goal;
           double accel = (error < 0 ? accel_max : accel_min);
 
           // TODO: Find point at which we reach v_max and if it's less than dt, split
@@ -51,7 +55,7 @@ namespace pf {
 
           double decel_time  = v_projected / -accel_min;
           double decel_dist  = v_projected * decel_time + 0.5 * accel_min * decel_time * decel_time;
-          double decel_error = k[0] + decel_dist - _goal;
+          double decel_error = k[0] + decel_dist - this->_goal;
 
           // TODO: make this better
           // If we decelerate now, do we cross the zero of the error function?
