@@ -39,7 +39,7 @@ TEST(Arc, ArcTest) {
     // Curvature of an arc (1/radius) is constant.
     ASSERT_DOUBLE_EQ(curvature, arc.curvature(s));
 
-    outfile << s << "," << pos[0] << "," << pos[1] << "," << deriv[0] << "," << deriv[1]
-            << "," << arc.curvature(s) << std::endl;
+    outfile << s << "," << pos[0] << "," << pos[1] << "," << deriv[0] << "," << deriv[1] << ","
+            << arc.curvature(s) << std::endl;
   }
 }

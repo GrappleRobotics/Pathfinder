@@ -19,10 +19,10 @@ static void BM_ArcParamHermite(benchmark::State &state) {
   for (auto _ : state) {
     state.PauseTiming();
     std::vector<arc_parameterizer::curve_t> curves;
-    arc_parameterizer param;
-    double sensitivity = 1.0 / static_cast<double>(state.range(0));
+    arc_parameterizer                       param;
+    double                                  sensitivity = 1.0 / static_cast<double>(state.range(0));
     param.configure(sensitivity, sensitivity);
-    curves.reserve(param.curve_count(hermite));   // Ensure the timing isn't affected by reallocs
+    curves.reserve(param.curve_count(hermite));  // Ensure the timing isn't affected by reallocs
     state.ResumeTiming();
 
     param.parameterize(hermite, std::back_inserter(curves), curves.max_size());

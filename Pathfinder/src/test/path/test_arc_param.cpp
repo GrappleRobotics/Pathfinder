@@ -81,14 +81,15 @@ TEST(ArcParam, Multispline) {
   std::ofstream outfile("arcparam.csv");
   outfile << "curveid,s,x,y,curvature,angle\n";
 
-  double ps = 0;
+  double              ps = 0;
   hermite_t::vector_t last_pos{2, 2};
   for (auto it = hermites.begin(); it != hermites.end(); it++) {
     for (double t = 0; t < 1; t += 0.001) {
       auto pos = it->position(t);
       auto rot = it->rotation(t);
       ps += (pos - last_pos).norm();
-      outfile << -100.0 << "," << ps << "," << pos[0] << "," << pos[1] << "," << it->curvature(t) << "," << (atan2(rot.y(), rot.x()) * 180 / constants::PI) << std::endl;
+      outfile << -100.0 << "," << ps << "," << pos[0] << "," << pos[1] << "," << it->curvature(t) << ","
+              << (atan2(rot.y(), rot.x()) * 180 / constants::PI) << std::endl;
       last_pos = pos;
     }
   }
@@ -99,13 +100,13 @@ TEST(ArcParam, Multispline) {
     auto c     = curves[curve];
     auto pos   = c.position(si);
     auto curv  = c.curvature(si);
-    auto rot = c.rotation(si);
+    auto rot   = c.rotation(si);
     auto angle = atan2(rot.y(), rot.x());
 
     ASSERT_FALSE(std::isnan(c.length()));
 
-    outfile << curve << "," << s << "," << pos[0] << "," << pos[1] << "," << curv << "," << (angle * 180 / constants::PI)
-            << std::endl;
+    outfile << curve << "," << s << "," << pos[0] << "," << pos[1] << "," << curv << ","
+            << (angle * 180 / constants::PI) << std::endl;
 
     si += 0.001;
     s += 0.001;

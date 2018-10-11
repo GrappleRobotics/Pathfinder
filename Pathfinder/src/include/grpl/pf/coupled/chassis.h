@@ -1,8 +1,8 @@
 #pragma once
 
 #include "chassis.h"
-#include "grpl/pf/model/transmission.h"
 #include "grpl/pf/constants.h"
+#include "grpl/pf/model/transmission.h"
 #include "state.h"
 
 namespace grpl {
@@ -33,8 +33,9 @@ namespace pf {
 
         // Wheel linear speed, maximum possible speeds
         // Ordered left, right.
-        Eigen::Vector2d maximum_vels{_trans_left.get_free_speed(_trans_left.nominal_voltage()) * _wheel_radius,
-                                     _trans_right.get_free_speed(_trans_right.nominal_voltage()) * _wheel_radius};
+        Eigen::Vector2d maximum_vels{
+            _trans_left.get_free_speed(_trans_left.nominal_voltage()) * _wheel_radius,
+            _trans_right.get_free_speed(_trans_right.nominal_voltage()) * _wheel_radius};
 
         if (std::abs(curvature) < constants::epsilon) {
           // No curvature, straight forward (purely linear). Need to take minimum as for
@@ -108,7 +109,8 @@ namespace pf {
         // v_r = v + v_diff, w_r = v_r / r_wheel
         // v_l = v - v_diff, w_l = v_l / r_wheel
         // Ordered right, left.
-        Eigen::Vector2d wheels{(linear + differential) / _wheel_radius, (linear - differential) / _wheel_radius};
+        Eigen::Vector2d wheels{(linear + differential) / _wheel_radius,
+                               (linear - differential) / _wheel_radius};
 
         // Calculate fwd torque limits for each side
         Eigen::Vector2d fwd_torque_limits{

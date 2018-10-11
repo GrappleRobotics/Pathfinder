@@ -7,8 +7,8 @@
 #include "model/transmission.h"
 
 // Path
-#include "path/arc_parameterizer.h"
 #include "path/arc.h"
+#include "path/arc_parameterizer.h"
 #include "path/augmented_arc.h"
 #include "path/curve.h"
 #include "path/hermite.h"

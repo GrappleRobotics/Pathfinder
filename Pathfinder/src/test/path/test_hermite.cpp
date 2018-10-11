@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include "grpl/pf/path/hermite.h"
 
+#include <array>
 #include <fstream>
 #include <iostream>
-#include <array>
 #include <vector>
 
 using namespace grpl::pf;
@@ -44,8 +44,7 @@ TEST(Hermite, Cubic) {
 
     ASSERT_GT(curv, 0);
 
-    outfile << t << "," << pt[0] << "," << pt[1] << "," << curv
-            << std::endl;
+    outfile << t << "," << pt[0] << "," << pt[1] << "," << curv << std::endl;
   }
 }
 
@@ -96,8 +95,7 @@ TEST(Hermite, Quintic) {
 
     ASSERT_GE(curv, 0);
 
-    outfile << t << "," << pt[0] << "," << pt[1] << "," << curv
-            << std::endl;
+    outfile << t << "," << pt[0] << "," << pt[1] << "," << curv << std::endl;
   }
 }
 
@@ -136,8 +134,7 @@ TEST(Hermite, NegativeCurvature) {
 
     ASSERT_LT(curv, 0);
 
-    outfile << t << "," << pt[0] << "," << pt[1] << "," << curv
-            << std::endl;
+    outfile << t << "," << pt[0] << "," << pt[1] << "," << curv << std::endl;
   }
 }
 
@@ -164,8 +161,7 @@ void multitest(std::string name) {
   for (size_t i = 0; i < num_hermites; i++) {
     for (double t = 0; t <= 1; t += 0.001) {
       auto pt = hermites[i].position(t);
-      outfile << (t + i) << "," << pt[0] << "," << pt[1] << ","
-              << hermites[i].curvature(t) << std::endl;
+      outfile << (t + i) << "," << pt[0] << "," << pt[1] << "," << hermites[i].curvature(t) << std::endl;
     }
   }
 }
@@ -185,8 +181,8 @@ TEST(Hermite, MultiZeroWP) {
 
   std::array<hermite_t, 10> hermites;
 
-  size_t num_hermites = hermite_factory::generate<hermite_t>(
-      wps.begin(), wps.end(), hermites.begin(), hermites.max_size());
+  size_t num_hermites =
+      hermite_factory::generate<hermite_t>(wps.begin(), wps.end(), hermites.begin(), hermites.max_size());
 
   ASSERT_EQ(num_hermites, 0);
 }

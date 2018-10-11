@@ -18,7 +18,7 @@ class java_spline_wrapper : public spline<2> {
   using vector_t = typename spline::vector_t;
 
   java_spline_wrapper(JNIEnv *env, jobject obj) : _env(env) {
-    _obj = env->NewGlobalRef(obj);
+    _obj    = env->NewGlobalRef(obj);
     _posid  = jni_get_method_id(env, obj, "position", "(D)Lgrpl/pathfinder/path/Vec2;");
     _velid  = jni_get_method_id(env, obj, "velocity", "(D)Lgrpl/pathfinder/path/Vec2;");
     _rotid  = jni_get_method_id(env, obj, "rotation", "(D)Lgrpl/pathfinder/path/Vec2;");
@@ -26,9 +26,7 @@ class java_spline_wrapper : public spline<2> {
     _vecxy  = jni_get_method_id(env, "grpl/pathfinder/path/Vec2", "xy", "()[D");
   }
 
-  virtual ~java_spline_wrapper() {
-    _env->DeleteGlobalRef(_obj);
-  }
+  virtual ~java_spline_wrapper() { _env->DeleteGlobalRef(_obj); }
 
   vector_t position(double s) override {
     jobject      vec2 = _env->CallObjectMethod(_obj, _posid, s);
@@ -48,9 +46,7 @@ class java_spline_wrapper : public spline<2> {
     return eigen_adapt_jdoubleArray<vector_t>(_env, arr);
   }
 
-  double curvature(double s) override { 
-    return _env->CallDoubleMethod(_obj, _curvid, s);
-  }
+  double curvature(double s) override { return _env->CallDoubleMethod(_obj, _curvid, s); }
 
  private:
   JNIEnv *  _env;
@@ -102,7 +98,7 @@ JNIEXPORT void JNICALL Java_grpl_pathfinder_path_ArcParameterizer_enqueueAdapter
                                                                                  jlong   bufferHandle,
                                                                                  jobject javaSpline) {
   spline_container_t *splines = jni_handle<spline_container_t>(env, bufferHandle);
-  spline<2> *spl = new java_spline_wrapper(env, javaSpline);
+  spline<2> *         spl     = new java_spline_wrapper(env, javaSpline);
   splines->push_back(*spl);
 }
 

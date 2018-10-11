@@ -35,9 +35,7 @@ namespace pf {
       inline double kv() const { return (_v_nom - _free_current * _v_nom / _stall_current) / _free_speed; }
       inline double kt() const { return _stall_current / _stall_torque; }
 
-      double nominal_voltage() const override {
-        return _v_nom;
-      }
+      double nominal_voltage() const override { return _v_nom; }
 
       double get_current(double voltage, double speed) const override {
         // V_w = kv * w

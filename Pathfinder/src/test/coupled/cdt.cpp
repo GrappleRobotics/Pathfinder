@@ -14,8 +14,8 @@ using namespace grpl::pf;
 template <typename ST>
 void echo(std::ofstream &out, ST state, int id) {
   out << state.time << "," << state.configuration.x() << "," << state.configuration.y() << ","
-      << state.configuration[2] << "," << state.kinematics[POSITION] << "," << state.kinematics[VELOCITY] << ","
-      << state.kinematics[ACCELERATION] << "," << state.curvature << "," << id << ","
+      << state.configuration[2] << "," << state.kinematics[POSITION] << "," << state.kinematics[VELOCITY]
+      << "," << state.kinematics[ACCELERATION] << "," << state.curvature << "," << id << ","
       << ""
       << "," << std::endl;
 }

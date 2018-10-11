@@ -29,7 +29,7 @@ namespace pf {
         if (curv != 0) {
           double sign  = curv > 0 ? 1 : -1;
           double angle = _angle_offset + (s * curv);
-          double off = sign * constants::PI / 2;
+          double off   = sign * constants::PI / 2;
           return vector_t{cos(angle + off), sin(angle + off)};
         } else {
           return _delta;

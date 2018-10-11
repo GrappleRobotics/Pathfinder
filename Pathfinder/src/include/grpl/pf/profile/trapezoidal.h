@@ -9,9 +9,7 @@ namespace pf {
   namespace profile {
     class trapezoidal : public profile {
      public:
-      const size_t limited_term() const override {
-        return ACCELERATION;
-      }
+      const size_t limited_term() const override { return ACCELERATION; }
 
       segment_t calculate(segment_t &last, double time) override {
         double dt          = time - last.time;
