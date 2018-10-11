@@ -3,6 +3,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <cstddef>
+
 namespace grpl {
 namespace pf {
   const size_t POSITION     = 0;
