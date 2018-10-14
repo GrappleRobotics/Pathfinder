@@ -29,19 +29,19 @@ public class ArcParameterizerTest {
     @Test
     void testParameterization() throws IOException {
         List<Arc2d> arcs = arcParam.parameterize(nativeSplines);
-        BufferedWriter writer = new BufferedWriter(new FileWriter("javaparam.csv"));
-        writer.write("x,y\n");
-        arcs.forEach((arc) -> {
-            for (double s = 0; s < arc.length(); s+=0.01) {
-                Vec2 pos = arc.position(s);
-                try {
-                    writer.write(pos.x() + "," + pos.y() + "\n");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        writer.close();
+//        BufferedWriter writer = new BufferedWriter(new FileWriter("javaparam.csv"));
+//        writer.write("x,y\n");
+//        arcs.forEach((arc) -> {
+//            for (double s = 0; s < arc.length(); s+=0.01) {
+//                Vec2 pos = arc.position(s);
+//                try {
+//                    writer.write(pos.x() + "," + pos.y() + "\n");
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
+//        writer.close();
     }
 
 }

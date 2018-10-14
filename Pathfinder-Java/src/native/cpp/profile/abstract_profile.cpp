@@ -1,9 +1,18 @@
 #include "grpl_pathfinder_profile_AbstractProfile.h"
 #include "jnihandle.h"
+#include "profile/jniprofile.h"
 
 #include <grpl/pf/profile/profile.h>
 
 using namespace grpl::pf::profile;
+
+JNIEXPORT jdoubleArray JNICALL Java_grpl_pathfinder_profile_AbstractProfile_calculateNative(
+    JNIEnv *env, jclass claz, jlong handle, jdoubleArray last, jdouble lastTime, jdouble time) {
+  segment seg = jni_array_to_native_segment<segment>(env, lastTime, last);
+
+  seg = jni_handle<profile>(env, handle)->calculate(seg, time);
+  return jni_segment_to_array(env, seg);
+}
 
 JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractProfile_setGoal(JNIEnv *env, jclass claz,
                                                                             jlong handle, jdouble goal) {

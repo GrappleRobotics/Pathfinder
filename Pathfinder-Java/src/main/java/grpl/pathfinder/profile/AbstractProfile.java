@@ -65,7 +65,7 @@ public abstract class AbstractProfile extends NativeResource implements Profile 
     }
 
     /* JNI */
-    protected abstract double[] calculateNative(long h, double[] last, double lastTime, double time);
+    private static native double[] calculateNative(long h, double[] last, double lastTime, double time);
 
     private static native void setGoal(long h, double g);
     private static native double getGoal(long h);
