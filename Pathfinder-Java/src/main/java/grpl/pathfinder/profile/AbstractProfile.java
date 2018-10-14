@@ -2,7 +2,7 @@ package grpl.pathfinder.profile;
 
 import grpl.pathfinder.util.NativeResource;
 
-public abstract class AbstractProfile extends NativeResource implements Profile {
+public class AbstractProfile extends NativeResource implements Profile {
     private int _limitedTerm;
 
     AbstractProfile(long handle, int limitedTerm) {

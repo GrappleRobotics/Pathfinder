@@ -2,7 +2,7 @@
 
 #include "chassis.h"
 #include "grpl/pf/constants.h"
-#include "grpl/pf/model/transmission.h"
+#include "grpl/pf/transmission/dc.h"
 #include "state.h"
 
 namespace grpl {
