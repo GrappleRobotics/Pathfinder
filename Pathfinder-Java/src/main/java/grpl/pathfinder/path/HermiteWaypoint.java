@@ -1,5 +1,7 @@
 package grpl.pathfinder.path;
 
+import grpl.pathfinder.Vec2;
+
 public class HermiteWaypoint {
     public Vec2 position;
     public Vec2 tangent;

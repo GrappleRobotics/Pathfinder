@@ -1,5 +1,6 @@
 package grpl.pathfinder.path;
 
+import grpl.pathfinder.Vec2;
 import grpl.pathfinder.util.NativeResource;
 
 public class AbstractSpline2d extends NativeResource implements Spline2d {

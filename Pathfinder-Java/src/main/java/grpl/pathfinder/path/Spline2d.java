@@ -1,5 +1,7 @@
 package grpl.pathfinder.path;
 
+import grpl.pathfinder.Vec2;
+
 public interface Spline2d {
 
     Vec2 position(double t);

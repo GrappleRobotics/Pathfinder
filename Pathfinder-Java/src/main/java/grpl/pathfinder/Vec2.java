@@ -1,8 +1,8 @@
-package grpl.pathfinder.path;
+package grpl.pathfinder;
 
 public class Vec2 {
 
-    private double x, y;
+    private final double x, y;
 
     private Vec2(double x, double y) {
         this.x = x;
@@ -32,6 +32,18 @@ public class Vec2 {
     public Vec2 unit() {
         double mag = magnitude();
         return Vec2.cartesian(x / mag, y / mag);
+    }
+
+    public Vec2 plus(Vec2 other) {
+        return new Vec2(x() + other.x(), y() + other.y());
+    }
+
+    public Vec2 minus(Vec2 other) {
+        return new Vec2(x() - other.x(), y() - other.y());
+    }
+
+    public Vec2 times(double scalar) {
+        return new Vec2(x() * scalar, y() * scalar);
     }
 
     public static Vec2 cartesian(double x, double y) {
