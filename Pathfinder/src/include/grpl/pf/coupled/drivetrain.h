@@ -14,29 +14,6 @@ namespace pf {
       drivetrain(chassis &chassis_in) : _chassis(chassis_in) {}
 
       template <typename iterator_curve_t>
-      inline bool find_curve(double targ_len, const iterator_curve_t curve_begin,
-                             const iterator_curve_t curve_end, iterator_curve_t &curve_out,
-                             double &curve_len_out, double &total_len_out) {
-        curve_len_out = targ_len;
-        total_len_out = 0;
-        bool found    = false;
-
-        for (iterator_curve_t it = curve_begin; it != curve_end; it++) {
-          double len = it->length();
-          // If we haven't found a curve, and the current length of the curve will put us ahead
-          // of our distance target.
-          if (!found && (len + total_len_out) >= targ_len) {
-            found         = true;
-            curve_len_out = targ_len - total_len_out;
-            curve_out     = it;
-          }
-          total_len_out += len;
-        }
-        return found;
-      }
-
-      // TODO: Profile type. Needs overhaul.
-      template <typename iterator_curve_t>
       state generate(const iterator_curve_t curve_begin, const iterator_curve_t curve_end,
                      profile::profile &profile, state &last, double time) {
         iterator_curve_t curve;
@@ -143,6 +120,28 @@ namespace pf {
       }
 
      private:
+      template <typename iterator_curve_t>
+      inline bool find_curve(double targ_len, const iterator_curve_t curve_begin,
+                             const iterator_curve_t curve_end, iterator_curve_t &curve_out,
+                             double &curve_len_out, double &total_len_out) {
+        curve_len_out = targ_len;
+        total_len_out = 0;
+        bool found    = false;
+
+        for (iterator_curve_t it = curve_begin; it != curve_end; it++) {
+          double len = it->length();
+          // If we haven't found a curve, and the current length of the curve will put us ahead
+          // of our distance target.
+          if (!found && (len + total_len_out) >= targ_len) {
+            found         = true;
+            curve_len_out = targ_len - total_len_out;
+            curve_out     = it;
+          }
+          total_len_out += len;
+        }
+        return found;
+      }
+      
       chassis _chassis;
     };
   }  // namespace coupled
