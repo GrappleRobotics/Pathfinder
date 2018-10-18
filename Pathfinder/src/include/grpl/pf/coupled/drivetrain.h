@@ -1,6 +1,7 @@
 #pragma once
 
 #include "chassis.h"
+#include "grpl/pf/path/curve.h"
 #include "grpl/pf/profile/profile.h"
 #include "state.h"
 
@@ -16,16 +17,16 @@ namespace pf {
       template <typename iterator_curve_t>
       state generate(const iterator_curve_t curve_begin, const iterator_curve_t curve_end,
                      profile::profile &profile, state &last, double time) {
-        iterator_curve_t curve;
-        state            output;
-        double           total_length, curve_distance;
-        double           distance = last.kinematics[0];
+        path::curve<2> *curve;
+        state           output;
+        double          total_length, curve_distance;
+        double          distance = last.kinematics[0];
 
-        bool curve_found = find_curve(distance, curve_begin, curve_end, curve, curve_distance, total_length);
+        curve = find_curve(distance, curve_begin, curve_end, curve_distance, total_length);
 
         // TODO: The epsilon of the profile causes this to never advance, meaning the path
         // is never marked as 'finished' on some timesteps.
-        if (!curve_found) {
+        if (curve == nullptr) {
           output          = last;
           output.finished = true;
           return output;
@@ -121,27 +122,28 @@ namespace pf {
 
      private:
       template <typename iterator_curve_t>
-      inline bool find_curve(double targ_len, const iterator_curve_t curve_begin,
-                             const iterator_curve_t curve_end, iterator_curve_t &curve_out,
+      inline path::curve<2> * find_curve(double targ_len, const iterator_curve_t curve_begin,
+                             const iterator_curve_t curve_end, 
                              double &curve_len_out, double &total_len_out) {
+        path::curve<2> *curve_out = nullptr;
         curve_len_out = targ_len;
         total_len_out = 0;
-        bool found    = false;
 
         for (iterator_curve_t it = curve_begin; it != curve_end; it++) {
-          double len = it->length();
+          path::curve<2> &curr = *it;
+
+          double len = curr.length();
           // If we haven't found a curve, and the current length of the curve will put us ahead
           // of our distance target.
-          if (!found && (len + total_len_out) >= targ_len) {
-            found         = true;
+          if (curve_out == nullptr && (len + total_len_out) >= targ_len) {
             curve_len_out = targ_len - total_len_out;
-            curve_out     = it;
+            curve_out     = &curr;
           }
           total_len_out += len;
         }
-        return found;
+        return curve_out;
       }
-      
+
       chassis _chassis;
     };
   }  // namespace coupled

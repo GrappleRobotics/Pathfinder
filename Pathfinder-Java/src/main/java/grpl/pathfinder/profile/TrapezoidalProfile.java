@@ -1,8 +1,8 @@
 package grpl.pathfinder.profile;
 
-public class TrapezoidalProfile extends AbstractProfile {
+public class TrapezoidalProfile extends AbstractNativeProfile {
 
-    TrapezoidalProfile() {
+    public TrapezoidalProfile() {
         super(allocate(), ACCELERATION);
     }
 

@@ -7,6 +7,11 @@ public class CoupledConfiguration {
     private final Vec2 xy;
     private final double heading;
 
+    public CoupledConfiguration() {
+        this.xy = Vec2.zero();
+        this.heading = 0;
+    }
+
     public CoupledConfiguration(Vec2 xy, double heading) {
         this.xy = xy;
         this.heading = heading;

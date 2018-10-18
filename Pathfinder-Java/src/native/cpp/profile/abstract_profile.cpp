@@ -1,4 +1,4 @@
-#include "grpl_pathfinder_profile_AbstractProfile.h"
+#include "grpl_pathfinder_profile_AbstractNativeProfile.h"
 #include "jnihandle.h"
 #include "profile/jniprofile.h"
 
@@ -6,7 +6,7 @@
 
 using namespace grpl::pf::profile;
 
-JNIEXPORT jdoubleArray JNICALL Java_grpl_pathfinder_profile_AbstractProfile_calculateNative(
+JNIEXPORT jdoubleArray JNICALL Java_grpl_pathfinder_profile_AbstractNativeProfile_calculateNative(
     JNIEnv *env, jclass claz, jlong handle, jdoubleArray last, jdouble lastTime, jdouble time) {
   segment seg = jni_array_to_native_segment<segment>(env, lastTime, last);
 
@@ -14,33 +14,33 @@ JNIEXPORT jdoubleArray JNICALL Java_grpl_pathfinder_profile_AbstractProfile_calc
   return jni_segment_to_array(env, seg);
 }
 
-JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractProfile_setGoal(JNIEnv *env, jclass claz,
+JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractNativeProfile_setGoal(JNIEnv *env, jclass claz,
                                                                             jlong handle, jdouble goal) {
   jni_handle<profile>(env, handle)->set_goal(goal);
 }
 
-JNIEXPORT jdouble JNICALL Java_grpl_pathfinder_profile_AbstractProfile_getGoal(JNIEnv *env, jclass claz,
+JNIEXPORT jdouble JNICALL Java_grpl_pathfinder_profile_AbstractNativeProfile_getGoal(JNIEnv *env, jclass claz,
                                                                                jlong handle) {
   return static_cast<jdouble>(jni_handle<profile>(env, handle)->get_goal());
 }
 
-JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractProfile_setTimeslice(JNIEnv *env, jclass claz,
+JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractNativeProfile_setTimeslice(JNIEnv *env, jclass claz,
                                                                                  jlong handle, jdouble ts) {
   jni_handle<profile>(env, handle)->set_timeslice(ts);
 }
 
-JNIEXPORT jdouble JNICALL Java_grpl_pathfinder_profile_AbstractProfile_getTimeslice(JNIEnv *env, jclass claz,
+JNIEXPORT jdouble JNICALL Java_grpl_pathfinder_profile_AbstractNativeProfile_getTimeslice(JNIEnv *env, jclass claz,
                                                                                     jlong handle) {
   return static_cast<jdouble>(jni_handle<profile>(env, handle)->get_timeslice());
 }
 
-JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractProfile_applyLimit(JNIEnv *env, jclass claz,
+JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractNativeProfile_applyLimit(JNIEnv *env, jclass claz,
                                                                                jlong handle, jint deriv,
                                                                                jdouble min, jdouble max) {
   jni_handle<profile>(env, handle)->apply_limit(deriv, min, max);
 }
 
-JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractProfile_free(JNIEnv *env, jclass claz,
+JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractNativeProfile_free(JNIEnv *env, jclass claz,
                                                                          jlong handle) {
   delete jni_handle<profile>(env, handle);
 }

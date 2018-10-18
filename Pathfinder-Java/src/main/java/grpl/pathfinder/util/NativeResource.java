@@ -17,6 +17,9 @@ public abstract class NativeResource extends PathfinderJNI implements INativeRes
     }
 
     @Override
+    public void close() { }
+
+    @Override
     public boolean closed() {
         return _handle == 0;
     }

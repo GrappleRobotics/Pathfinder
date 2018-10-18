@@ -35,7 +35,7 @@ public class CoupledChassis extends NativeResource {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         free(nativeHandle());
         zeroHandle();
 

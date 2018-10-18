@@ -4,7 +4,7 @@ import grpl.pathfinder.util.NativeResource;
 
 public class JavaDcTransmissionAdapter extends AbstractDcTransmission {
 
-    public JavaDcTransmissionAdapter(DcTransmission transmission) {
+    public  JavaDcTransmissionAdapter(DcTransmission transmission) {
         super(allocate(transmission));
     }
 

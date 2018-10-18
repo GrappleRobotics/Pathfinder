@@ -4,6 +4,12 @@ public class CoupledKinematics {
 
     private final double distance, velocity, acceleration;
 
+    public CoupledKinematics() {
+        this.distance = 0;
+        this.velocity = 0;
+        this.acceleration = 0;
+    }
+
     public CoupledKinematics(double dist, double vel, double acc) {
         this.distance = dist;
         this.velocity = vel;

@@ -44,7 +44,7 @@ public class AbstractDcTransmission extends NativeResource implements DcTransmis
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         free(nativeHandle());
         zeroHandle();
     }
