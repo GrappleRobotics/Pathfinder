@@ -8,10 +8,36 @@
 namespace grpl {
 namespace pf {
   namespace coupled {
+
+    /**
+     * @brief
+     * Mathematical model representation of a coupled (tank / differential) drivetrain.
+     *
+     * Chassis contains members for the transmissions (motors), as well as other configurations
+     * regarding the chassis (track radius, wheel radius, mass, etc).
+     *
+     * The chassis mirrors the physical "layout" of the drivetrain.
+     *
+     * @ref grpl::pf::coupled::drivetrain
+     */
     class chassis {
      public:
       using transmission_t = transmission::dc_transmission;
 
+      /**
+       * @brief
+       * Construct a coupled chassis
+       *
+       * @param transmission_left   The left side transmission, held internally as a reference.
+       * @param transmission_right  The right side transmission, held internally as a reference.
+       * @param wheel_radius        The wheel radius, in metres. Should be emperically measured
+       *                            for best performance. Note that both the left and right
+       *                            transmission wheels must be the same radius.
+       * @param track_radius        The track radius, a.k.a half the chassis width, in metres.
+       *                            Measured as half the distance between the centres of the left
+       *                            and right transmissions at their points of contact with the ground.
+       * @param mass                The mass of the chassis, in kilograms.
+       */
       chassis(transmission_t &transmission_left, transmission_t &transmission_right, double wheel_radius,
               double track_radius, double mass)
           : _trans_left(transmission_left),
@@ -20,14 +46,48 @@ namespace pf {
             _track_radius(track_radius),
             _mass(mass) {}
 
+      /**
+       * @return The mass of the chassis, in kilograms
+       */
       double mass() const { return _mass; }
+
+      /**
+       * @return  The track radius (half the chassis width) in metres. Measured
+       *          between the left and right transmissions.
+       */
       double track_radius() const { return _track_radius; }
+
+      /**
+       * @return  The wheel radius, in metres.
+       */
       double wheel_radius() const { return _wheel_radius; }
 
+      /**
+       * @return  Reference to the left-side transmission of the chassis.
+       */
       transmission_t &transmission_left() const { return _trans_left; }
+
+      /**
+       * @return  Reference to the right-side transmission of the chassis.
+       */
       transmission_t &transmission_right() const { return _trans_right; }
 
-      double linear_vel_limit(configuration &config, double curvature) const {
+      /**
+       * @brief
+       * Calculate the absolute linear (translational) velocity limit of the chassis in metres
+       * per second (ms^-1).
+       *
+       * This calculation relates purely to the free-speed of the motors, meaning for a fully
+       * constrained calculation, @ref acceleration_limits(configuration, double, double) should
+       * be called and used to constrain the velocity if necessary.
+       *
+       * @param config    The configuration of the chassis
+       * @param curvature The instantaneous curvature, in metres^-1, expected of the chassis,
+       *                  such as the curvature of a path being followed.
+       *
+       * @return  The absolute linear (translational) velocity limit in metres per second (ms^-2).
+       */
+      double linear_vel_limit(const configuration &config, double curvature) const {
         // Infinite curvature, point turn (purely angular), therefore no linear velocity.
         if (std::abs(curvature) > constants::almost_inf) return 0;
 
@@ -98,7 +158,25 @@ namespace pf {
         }
       }
 
-      std::pair<double, double> acceleration_limits(configuration &config, double curvature,
+      /**
+       * @brief
+       * Calculate the minimum and maximum linear (translational) acceleration limits of the chassis,
+       * in metres per second per second (ms^-2).
+       *
+       * This calculation uses torque limits of the transmissions, meaning speed limits
+       * are not directly taken into account. For a fully constrained representation,
+       * @ref linear_vel_limit(configuration, double) must also be called and used to constrain
+       * if necessary.
+       *
+       * @param config    The configuration of the chassis
+       * @param curvature The instantaneous curvature, in metres^-1, expected of the chassis,
+       *                  such as the curvature of a path being followed.
+       * @param velocity  The current linear velocity of the chassis, in metres per second (ms^-1).
+       *
+       * @return  A pair, ordered [min, max], of the linear acceleration limits, in metres per second
+       *          per second (ms^-2).
+       */
+      std::pair<double, double> acceleration_limits(const configuration &config, double curvature,
                                                     double velocity) const {
         double linear = velocity;
         // k = w / v, w = v * k
@@ -133,14 +211,71 @@ namespace pf {
         return std::pair<double, double>{min, max};
       }
 
-      void solve_electrical(wheel_state &left, wheel_state &right) {
+      /**
+       * @brief
+       * Split a centre state of this chassis into the left and right transmission state components.
+       *
+       * @return  A pair, ordered [left, right], of @ref wheel_state.
+       */
+      std::pair<wheel_state, wheel_state> split(const state centre) const {
+        wheel_state left, right;
+
+        left.time = right.time = centre.time;
+        left.finished = right.finished = centre.finished;
+
+        // Split positions
+        wheel_state::vector_t position{centre.configuration.x(), centre.configuration.y()};
+        double                heading = centre.configuration[2];
+        wheel_state::vector_t p_offset{0, _track_radius};
+
+        Eigen::Matrix<double, 2, 2> rotation;
+        rotation << cos(heading), -sin(heading), sin(heading), cos(heading);
+
+        // Rotate the wheel offsets by the heading of the robot, adding it to the
+        // centre position, this 'splits' the centre path into two paths constrained
+        // by the configuration (heading + position) and track radius.
+        left.position  = position + rotation * p_offset;
+        right.position = position - rotation * p_offset;
+
+        // Split velocities
+        double v_linear       = centre.kinematics[1];
+        double v_angular      = v_linear * centre.curvature;
+        double v_differential = v_angular * _track_radius;
+        left.kinematics[1]    = v_linear - v_differential;
+        right.kinematics[1]   = v_linear + v_differential;
+
+        // Split accelerations
+        double a_linear = centre.kinematics[2];
+        // This is a bit of a tricky one, so don't blink
+        // a_angular = dw / dt (where w = v_angular)
+        // a_angular = d/dt (v * k) (from v_angular above, w = vk)
+        // Then, by product rule:
+        //    a_angular = dv/dt * k + v * dk/dt     (note dv/dt is acceleration)
+        //    a_angular = a * k + v * dk/dt         [1]
+        // We don't have dk/dt, but we do have dk/ds. By chain rule:
+        //    dk/dt = dk/ds * ds/dt                 (note ds/dt is velocity)
+        //    dk/dt = dk/ds * v                     [2]
+        // Therefore, by composing [1] and [2],
+        //    a_angular = a * k + v^2 * dk/ds
+        // Isn't that just a gorgeous piece of math?
+        double a_angular      = a_linear * centre.curvature + v_linear * v_linear * centre.dcurvature;
+        double a_differential = a_angular * _track_radius;
+        left.kinematics[2]    = a_linear - a_differential;
+        right.kinematics[2]   = a_linear + a_differential;
+
+        solve_electrical(left, right);
+
+        return std::pair<wheel_state, wheel_state>{left, right};
+      }
+
+     private:
+      void solve_electrical(wheel_state &left, wheel_state &right) const {
         do_solve_electrical(left, _trans_left);
         do_solve_electrical(right, _trans_right);
       }
 
-     private:
       // TODO: Make this part of transmission_t
-      void do_solve_electrical(wheel_state &wheel, transmission_t &transmission) {
+      void do_solve_electrical(wheel_state &wheel, transmission_t &transmission) const {
         double speed        = wheel.kinematics[1] / _wheel_radius;
         double free_voltage = transmission.get_free_voltage(speed);
 

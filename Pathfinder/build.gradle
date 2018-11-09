@@ -91,6 +91,11 @@ model {
     }
 }
 
+doxygen {
+    generate_html true
+    source project.file('src/include')
+}
+
 task cleanTestTask() {
     doLast {
         delete {

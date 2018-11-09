@@ -1,5 +1,6 @@
 plugins {
     id 'com.gradle.build-scan' version '1.16'
+    id "org.ysb33r.doxygen" version "0.4" apply false
 }
 
 task subclean();
@@ -8,6 +9,7 @@ allprojects {
     apply plugin: 'idea'
     plugins.withType(CppPlugin).whenPluginAdded {
         project.apply plugin: "visual-studio"
+        project.apply plugin: "org.ysb33r.doxygen"
         rootProject.tasks.subclean.dependsOn tasks.clean
 
         project.group = "grpl.pathfinder"

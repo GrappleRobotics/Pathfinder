@@ -1,10 +1,7 @@
 // Coupled
+#include "coupled/causal_trajectory_generator.h"
 #include "coupled/chassis.h"
-#include "coupled/drivetrain.h"
 #include "coupled/state.h"
-
-// Model
-#include "model/transmission.h"
 
 // Path
 #include "path/arc.h"

@@ -1,7 +1,4 @@
-#include "grpl/pf/coupled/drivetrain.h"
-#include "grpl/pf/path/arc_parameterizer.h"
-#include "grpl/pf/path/hermite.h"
-#include "grpl/pf/profile/trapezoidal.h"
+#include "grpl/pf.h"
 
 #include <gtest/gtest.h>
 
@@ -69,7 +66,7 @@ TEST(CDT, basic) {
                                  2 * 2.41 * G};
   // coupled_t               model{dualCIM, dualCIM, 0.0762, 0.5, 25.0, 10.0};
   coupled::chassis    chassis{dualCIM, dualCIM, 0.0762, 0.5, 25.0};
-  coupled::drivetrain model{chassis};
+  coupled::causal_trajectory_generator gen;
 
   state_t state;
 
@@ -79,12 +76,12 @@ TEST(CDT, basic) {
   coupled::configuration centre{0, 0, 0};
 
   for (double t = 0; !state.finished && t < 5; t += 0.01) {
-    state = model.generate(curves.begin(), curves.end(), profile, state, t);
+    state = gen.generate(chassis, curves.begin(), curves.end(), profile, state, t);
     echo(pathfile, state, 0);
 
     echo_limits(pathfile, t, profile.get_limits());
 
-    std::pair<wheel_state_t, wheel_state_t> split = model.split(state);
+    std::pair<wheel_state_t, wheel_state_t> split = chassis.split(state);
     echo_wheel(pathfile, split.first, 1);
     echo_wheel(pathfile, split.second, 2);
 
