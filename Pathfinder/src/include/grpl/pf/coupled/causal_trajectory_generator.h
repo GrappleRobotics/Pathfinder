@@ -17,11 +17,10 @@ namespace pf {
      * applying motion and timing information based on the limits and constraints of a drivetrain. The
      * generator applies a motion profile to a path, while fitting within given constraints.
      * 
-     * This generator is causal and memoryless, meaning it will generate a single state (output) with 
-     * knowledge only of the current state of the system. This generator can be used on-the-fly, and is
-     * primarily advantageous in speed and flexibility. The cost is accuracy towards the end of the path,
-     * as a sudden deceleration may be required with insufficient time steps, as the end velocity may not
-     * be zero.
+     * This generator is causal and will generate a single state (output) with knowledge only of the current 
+     * state of the system. This generator can be used on-the-fly, and is primarily advantageous in speed and 
+     * flexibility. The cost is accuracy towards the end of the path, as a sudden deceleration may be required
+     * with insufficient time steps, as the end velocity may not be zero.
      * 
      * It is recommended to use this generator if on-the-fly generation is required, or memory and computational
      * resources are sparse. This generator also enables the ability to provide feedback information on 
