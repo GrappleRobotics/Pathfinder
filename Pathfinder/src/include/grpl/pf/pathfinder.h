@@ -19,3 +19,11 @@
 #include "util/vec.h"
 
 #include "constants.h"
+
+namespace grpl {
+/**
+ * @brief
+ * The Grapple Robotics Pathfinder library.
+ */
+namespace pf {}
+}  // namespace grpl
