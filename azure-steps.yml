@@ -16,11 +16,8 @@ steps:
 - task: CopyFiles@2
   inputs:
     sourceFolder: 'Pathfinder/build'
-    contents: '**/*.*'
+    contents: '**/*'
     targetFolder: $(Build.ArtifactStagingDirectory)
-
-- script: 'ls -al Pathfinder/build/exe'
-  displayName: 'List exe'
 
 - task: PublishBuildArtifacts@1
   inputs:
@@ -31,3 +28,8 @@ steps:
   inputs:
     artifactName: 'test-results/$(PlatformName)'
     pathtoPublish: $(Build.ArtifactStagingDirectory)/test-results
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    artifactName: 'exe/$(PlatformName)'
+    pathtoPublish: $(Build.ArtifactStagingDirectory)/exe
