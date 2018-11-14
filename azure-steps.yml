@@ -15,18 +15,12 @@ steps:
   
 - task: CopyFiles@2
   inputs:
-    contents: '**/build/docs/**/*.*'
-    targetFolder: $(Build.ArtifactStagingDirectory)/docs
-    
-- task: CopyFiles@2
-  inputs: 
-    contents: '**/test-results/**/*.*'
-    targetFolder: $(Build.ArtifactStagingDirectory)/test-results
+    sourceFolder: '$(Build.SourceDirectory)/Pathfinder/build'
+    contents: '**/*.*'
+    targetFolder: $(Build.ArtifactStagingDirectory)
 
-- task: CopyFiles@2
-  inputs: 
-    contents: '**/exe/**/*.*'
-    targetFolder: $(Build.ArtifactStagingDirectory)/exe
+- script: 'ls -al $(Build.SourceDirectory)/Pathfinder/build/exe'
+  displayName: 'List exe'
 
 - task: PublishBuildArtifacts@1
   inputs:
@@ -36,9 +30,4 @@ steps:
 - task: PublishBuildArtifacts@1
   inputs:
     artifactName: 'test-results/$(PlatformName)'
-    pathtoPublish: $(Build.ArtifactStagingDirectory)/test-results  
-
-- task: PublishBuildArtifacts@1
-  inputs:
-    artifactName: 'exe/$(PlatformName)'
-    pathToPublish: $(Build.ArtifactStagingDirectory)/exe
+    pathtoPublish: $(Build.ArtifactStagingDirectory)/test-results
