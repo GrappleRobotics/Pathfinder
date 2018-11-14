@@ -20,8 +20,8 @@ TEST(Profile, Trapezoidal) {
   pr.set_goal(5);                       // Goal = 5m
   pr.set_timeslice(0);                  // No Timeslice
 
-  segment               seg;
-  segment::kinematics_t kin;
+  state           st;
+  kinematic_state kin;
 
   ofstream outfile("profile_trap.csv");
   ofstream outfile_sim("profile_trap_simulated.csv");
@@ -29,8 +29,8 @@ TEST(Profile, Trapezoidal) {
   outfile_sim << "time,dist,vel\n";
 
   for (double t = 0; t < 7; t += dt) {
-    seg = pr.calculate(seg, t);
-    kin = seg.kinematics;
+    st = pr.calculate(st, t);
+    kin = st.kinematics;
     sim_velocity += kin[ACCELERATION] * dt;
     sim_position += sim_velocity * dt;
 
@@ -43,8 +43,8 @@ TEST(Profile, Trapezoidal) {
     // ASSERT_LE(abs(kin[1] - sim_velocity), 0.01) << "Time: " << t;
     // ASSERT_LE(abs(kin[0] - sim_position), 0.01) << "Time: " << t;
 
-    outfile_sim << seg.time << "," << sim_position << "," << sim_velocity << "\n";
-    outfile << seg.time << "," << kin[POSITION] << "," << kin[VELOCITY] << "," << kin[ACCELERATION] << "\n";
+    outfile_sim << st.time << "," << sim_position << "," << sim_velocity << "\n";
+    outfile << st.time << "," << kin[POSITION] << "," << kin[VELOCITY] << "," << kin[ACCELERATION] << "\n";
   }
 
   // Check setpoint has been reached at end of profile

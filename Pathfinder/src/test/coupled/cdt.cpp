@@ -10,8 +10,8 @@ using namespace grpl::pf;
 
 template <typename ST>
 void echo(std::ofstream &out, ST state, int id) {
-  out << state.time << "," << state.configuration.x() << "," << state.configuration.y() << ","
-      << state.configuration[2] << "," << state.kinematics[POSITION] << "," << state.kinematics[VELOCITY]
+  out << state.time << "," << state.config.x() << "," << state.config.y() << ","
+      << state.config[2] << "," << state.kinematics[POSITION] << "," << state.kinematics[VELOCITY]
       << "," << state.kinematics[ACCELERATION] << "," << state.curvature << "," << id << ","
       << ""
       << "," << std::endl;
@@ -73,7 +73,7 @@ TEST(CDT, basic) {
   std::ofstream pathfile("cdt.csv");
   pathfile << "t,x,y,heading,distance,velocity,acceleration,curvature,path,voltage,current\n";
 
-  coupled::configuration centre{0, 0, 0};
+  coupled::configuration_state centre{0, 0, 0};
 
   for (double t = 0; !state.finished && t < 5; t += 0.01) {
     state = gen.generate(chassis, curves.begin(), curves.end(), profile, state, t);

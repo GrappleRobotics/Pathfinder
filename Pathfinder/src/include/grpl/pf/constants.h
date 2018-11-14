@@ -26,7 +26,7 @@ namespace pf {
     //! Default acceptable error when comparing setpoints and process variables.
     constexpr double default_acceptable_error = 1e-5;
 
-    const size_t profile_segment_order = 3;  // Pos, Vel, Acc
+    const size_t profile_kinematics_order = 3;  // Pos, Vel, Acc
     const size_t profile_limits_order  = 4;  // <>, Vel, Acc, Jerk
   }                                          // namespace constants
 }  // namespace pf

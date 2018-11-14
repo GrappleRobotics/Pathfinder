@@ -78,8 +78,8 @@ namespace pf {
        * per second (ms^-1).
        *
        * This calculation relates purely to the free-speed of the motors, meaning for a fully
-       * constrained calculation, @ref acceleration_limits(configuration, double, double) should
-       * be called and used to constrain the velocity if necessary.
+       * constrained calculation, @ref acceleration_limits(configuration_state&, double, double)
+       * should be called and used to constrain the velocity if necessary.
        *
        * @param config    The configuration of the chassis
        * @param curvature The instantaneous curvature, in metres^-1, expected of the chassis,
@@ -87,7 +87,7 @@ namespace pf {
        *
        * @return  The absolute linear (translational) velocity limit in metres per second (ms^-2).
        */
-      double linear_vel_limit(const configuration &config, double curvature) const {
+      double linear_vel_limit(const configuration_state &config, double curvature) const {
         // Infinite curvature, point turn (purely angular), therefore no linear velocity.
         if (std::abs(curvature) > constants::almost_inf) return 0;
 
@@ -165,7 +165,7 @@ namespace pf {
        *
        * This calculation uses torque limits of the transmissions, meaning speed limits
        * are not directly taken into account. For a fully constrained representation,
-       * @ref linear_vel_limit(configuration, double) must also be called and used to constrain
+       * @ref linear_vel_limit(configuration_state&, double) must also be called and used to constrain
        * if necessary.
        *
        * @param config    The configuration of the chassis
@@ -176,7 +176,7 @@ namespace pf {
        * @return  A pair, ordered [min, max], of the linear acceleration limits, in metres per second
        *          per second (ms^-2).
        */
-      std::pair<double, double> acceleration_limits(const configuration &config, double curvature,
+      std::pair<double, double> acceleration_limits(const configuration_state &config, double curvature,
                                                     double velocity) const {
         double linear = velocity;
         // k = w / v, w = v * k
@@ -224,8 +224,8 @@ namespace pf {
         left.finished = right.finished = centre.finished;
 
         // Split positions
-        wheel_state::vector_t position{centre.configuration.x(), centre.configuration.y()};
-        double                heading = centre.configuration[2];
+        wheel_state::vector_t position{centre.config.x(), centre.config.y()};
+        double                heading = centre.config[2];
         wheel_state::vector_t p_offset{0, _track_radius};
 
         Eigen::Matrix<double, 2, 2> rotation;
@@ -238,14 +238,14 @@ namespace pf {
         right.position = position - rotation * p_offset;
 
         // Split velocities
-        double v_linear       = centre.kinematics[1];
-        double v_angular      = v_linear * centre.curvature;
-        double v_differential = v_angular * _track_radius;
-        left.kinematics[1]    = v_linear - v_differential;
-        right.kinematics[1]   = v_linear + v_differential;
+        double v_linear            = centre.kinematics[VELOCITY];
+        double v_angular           = v_linear * centre.curvature;
+        double v_differential      = v_angular * _track_radius;
+        left.kinematics[VELOCITY]  = v_linear - v_differential;
+        right.kinematics[VELOCITY] = v_linear + v_differential;
 
         // Split accelerations
-        double a_linear = centre.kinematics[2];
+        double a_linear = centre.kinematics[ACCELERATION];
         // This is a bit of a tricky one, so don't blink
         // a_angular = dw / dt (where w = v_angular)
         // a_angular = d/dt (v * k) (from v_angular above, w = vk)
@@ -258,10 +258,10 @@ namespace pf {
         // Therefore, by composing [1] and [2],
         //    a_angular = a * k + v^2 * dk/ds
         // Isn't that just a gorgeous piece of math?
-        double a_angular      = a_linear * centre.curvature + v_linear * v_linear * centre.dcurvature;
-        double a_differential = a_angular * _track_radius;
-        left.kinematics[2]    = a_linear - a_differential;
-        right.kinematics[2]   = a_linear + a_differential;
+        double a_angular              = a_linear * centre.curvature + v_linear * v_linear * centre.dcurvature;
+        double a_differential         = a_angular * _track_radius;
+        left.kinematics[ACCELERATION] = a_linear - a_differential;
+        right.kinematics[ACCELERATION] = a_linear + a_differential;
 
         solve_electrical(left, right);
 
@@ -276,10 +276,10 @@ namespace pf {
 
       // TODO: Make this part of transmission_t
       void do_solve_electrical(wheel_state &wheel, transmission_t &transmission) const {
-        double speed        = wheel.kinematics[1] / _wheel_radius;
+        double speed        = wheel.kinematics[VELOCITY] / _wheel_radius;
         double free_voltage = transmission.get_free_voltage(speed);
 
-        double torque          = _mass * wheel.kinematics[2] * _wheel_radius;
+        double torque          = _mass * wheel.kinematics[ACCELERATION] * _wheel_radius;
         double current         = transmission.get_torque_current(torque);
         double current_voltage = transmission.get_current_voltage(current);
 
