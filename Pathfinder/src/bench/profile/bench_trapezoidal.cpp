@@ -12,10 +12,10 @@ static void BM_Profile_Trapezoidal(benchmark::State &state) {
   pr.set_timeslice(0);       // No Timeslice
 
   for (auto _ : state) {
-    trapezoidal::segment_t seg;
+    ::grpl::pf::profile::state st;
     double                 dt = 1.0 / static_cast<double>(state.range(0));
     for (double t = 0; t < 10; t += dt) {
-      benchmark::DoNotOptimize(seg = pr.calculate(seg, t));
+      benchmark::DoNotOptimize(st = pr.calculate(st, t));
     }
   }
 

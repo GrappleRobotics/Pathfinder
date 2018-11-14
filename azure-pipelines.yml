@@ -35,7 +35,7 @@ jobs:
   steps:
   - script: |
       sudo apt update
-      sudo apt install -y gcc-5 g++-5 g++-5-multilib gcc-5-multilib g++-multilib gcc-multilib gnuplot
+      sudo apt install -y gcc-5 g++-5 g++-5-multilib gcc-5-multilib g++-multilib gcc-multilib gnuplot doxygen
       sudo update-alternatives --remove-all gcc || true
       sudo update-alternatives --remove-all g++ || true
       sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 10 || true
@@ -56,7 +56,7 @@ jobs:
   steps:
   - script: |
       sudo apt update
-      sudo apt install -y clang-6.0 gcc-5 g++-5 g++-5-multilib gcc-5-multilib g++-multilib gcc-multilib gnuplot
+      sudo apt install -y clang-6.0 gcc-5 g++-5 g++-5-multilib gcc-5-multilib g++-multilib gcc-multilib gnuplot doxygen
       sudo update-alternatives --remove-all clang || true
       sudo update-alternatives --remove-all clang++ || true
       sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-6.0 10 || true
