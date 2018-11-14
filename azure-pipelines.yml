@@ -23,8 +23,6 @@ jobs:
   - template: azure-steps.yml
     parameters:
       env: { }
-  - script: 'ls -al Pathfinder/build Pathfinder-Java/build'
-    displayName: 'List build files'
 
 - job: LinuxGCC
   pool: 
@@ -44,8 +42,6 @@ jobs:
   - template: azure-steps.yml
     parameters:
       env: { "CI_COMPILER": "GCC" }
-  - script: 'ls -al Pathfinder/build Pathfinder-Java/build'
-    displayName: 'List build files'
 
 - job: LinuxClang
   pool: 
@@ -65,5 +61,3 @@ jobs:
   - template: azure-steps.yml
     parameters:
       env: { "CI_COMPILER": "CLANG" }
-  - script: 'ls -al Pathfinder/build Pathfinder-Java/build'
-    displayName: 'List build files'

@@ -17,11 +17,11 @@ steps:
   inputs:
     contents: 'Pathfinder/build/!(tmp|objs|classes)/**/*.*'
     targetFolder: $(Build.ArtifactStagingDirectory)
-# - task: CopyFiles@2
-#   inputs:
-#     contents: 'Pathfinder-Java/build/!(tmp|objs|classes)/**/*.*'
-#     targetFolder: $(Build.ArtifactStagingDirectory)/$(PlatformName)
+- task: CopyFiles@2
+  inputs:
+    contents: 'Pathfinder-Java/build/!(tmp|objs|classes)/**/*.*'
+    targetFolder: $(Build.ArtifactStagingDirectory)
 
 - task: PublishBuildArtifacts@1
   inputs:
-    artifactName: 'BuildFiles/$(PlatformName)'
+    artifactName: 'Build/$(PlatformName)'
