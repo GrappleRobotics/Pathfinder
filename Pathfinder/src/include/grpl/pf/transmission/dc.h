@@ -44,7 +44,7 @@ namespace pf {
        * Calculate the torque applied by the transmission at a given current draw.
        *
        * @param current The current drawn by the transmission, calculated in
-       *                @ref get_current(double, double), in Amps
+       *                @ref get_current(double, double) const, in Amps
        * @return The torque applied by the transmission, in Nm
        */
       virtual double get_torque(double current) const = 0;
@@ -54,8 +54,8 @@ namespace pf {
        * Calculate the component voltage applied to the transmission in order to obtain
        * a free speed.
        *
-       * To obtain the full applied voltage, sum @ref get_free_voltage(double) and
-       * @ref get_current_voltage(double).
+       * To obtain the full applied voltage, sum @ref get_free_voltage(double) const and
+       * @ref get_current_voltage(double) const.
        *
        * @param speed The speed of the transmission, in rad/s
        * @return The free voltage component of the transmission, in Volts
@@ -67,10 +67,10 @@ namespace pf {
        * Calculate the component voltage applied to the transmission in order to draw
        * a current.
        *
-       * Current is usually provided by @ref get_torque_current(double)
+       * Current is usually provided by @ref get_torque_current(double) const
        *
-       * To obtain the full applied voltage, sum @ref get_free_voltage(double) and
-       * @ref get_current_voltage(double).
+       * To obtain the full applied voltage, sum @ref get_free_voltage(double) const and
+       * @ref get_current_voltage(double) const.
        *
        * @param current The current drawn by the transmission, in Amps
        * @return The current voltage component of the transmission, in Volts
