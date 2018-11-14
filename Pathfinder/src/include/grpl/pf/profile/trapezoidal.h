@@ -7,11 +7,28 @@
 namespace grpl {
 namespace pf {
   namespace profile {
+    /**
+     * @brief
+     * Implementation of a trapezoidal (limited acceleration) motion profile.
+     * 
+     * A trapezoidal motion profile is a motion profile limited by acceleration (therefore, infinite jerk).
+     * The profile can be described by three distinct sections: ramp-up, hold and ramp-down.
+     * 
+     * During ramp-up, the system is accelerating towards its max velocity.
+     * 
+     * During hold, the system is not accelerating, and holds its max velocity. Depending on the setpoint,
+     * the system may not have time to reach hold before it must ramp-down, resulting in a trianglular velocity
+     * profile.
+     * 
+     * During ramp-down, the system is decelerating towards 0.
+     * 
+     * See @ref grpl::pf::profile::profile
+     */
     class trapezoidal : public profile {
      public:
       const size_t limited_term() const override { return ACCELERATION; }
 
-      segment_t calculate(segment_t &last, double time) override {
+      segment calculate(segment &last, double time) override {
         double dt          = time - last.time;
         double timestep    = dt;
         int    slice_count = 1;
@@ -31,7 +48,7 @@ namespace pf {
         double accel_min = this->_limits(0, 2);
         double accel_max = this->_limits(1, 2);
 
-        segment_t seg = last;
+        segment seg = last;
 
         double start_time = seg.time;
 

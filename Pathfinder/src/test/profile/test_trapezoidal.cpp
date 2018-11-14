@@ -20,8 +20,8 @@ TEST(Profile, Trapezoidal) {
   pr.set_goal(5);                       // Goal = 5m
   pr.set_timeslice(0);                  // No Timeslice
 
-  trapezoidal::segment_t               seg;
-  trapezoidal::segment_t::kinematics_t kin;
+  segment               seg;
+  segment::kinematics_t kin;
 
   ofstream outfile("profile_trap.csv");
   ofstream outfile_sim("profile_trap_simulated.csv");

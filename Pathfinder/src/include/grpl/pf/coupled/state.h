@@ -48,7 +48,7 @@ namespace pf {
       double        time      = 0;
       //! The instantaneous curvature of the state, in m^-1
       double        curvature = 0;
-      //! The instantaneous change in curvature of the state, in (ms)^-1
+      //! The instantaneous change in curvature of the state, in m^-2 (dk/ds)
       double        dcurvature = 0;
       //! The configuration of the chassis at the time of the state.
       configuration configuration = configuration::Zero();

@@ -15,9 +15,6 @@
 #include "profile/profile.h"
 #include "profile/trapezoidal.h"
 
-// Util
-#include "util/vec.h"
-
 #include "constants.h"
 
 namespace grpl {
