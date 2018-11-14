@@ -92,6 +92,10 @@ model {
 }
 
 doxygen {
+    executables {
+        doxygen version : '1.8.13'
+    }
+
     generate_html true
     source project.file('src/include')
 }
