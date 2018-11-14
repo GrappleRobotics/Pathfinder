@@ -15,11 +15,11 @@ steps:
   
 - task: CopyFiles@2
   inputs:
-    sourceFolder: '$(Build.SourceDirectory)/Pathfinder/build'
+    sourceFolder: 'Pathfinder/build'
     contents: '**/*.*'
     targetFolder: $(Build.ArtifactStagingDirectory)
 
-- script: 'ls -al $(Build.SourceDirectory)/Pathfinder/build/exe'
+- script: 'ls -al Pathfinder/build/exe'
   displayName: 'List exe'
 
 - task: PublishBuildArtifacts@1
