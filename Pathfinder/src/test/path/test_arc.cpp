@@ -27,7 +27,7 @@ TEST(Arc, ArcTest) {
 
   for (double s = 0; s < arc.length(); s += 0.01) {
     auto pos   = arc.position(s);
-    auto deriv = arc.velocity(s);
+    auto deriv = arc.derivative(s);
 
     position += deriv * 0.01;
 

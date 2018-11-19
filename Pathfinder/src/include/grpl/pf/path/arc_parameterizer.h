@@ -12,6 +12,16 @@ namespace pf {
     //        Another thought, we can actually genericize it into a bounds
     //        divider, with visit and subdivide being combined into one function.
     //        Default subclasses can handle the predicate and visit splitting.
+
+    /**
+     * @brief
+     * Arc Parameterizer, for reparameterizing splines to curves.
+     *
+     * The Arc Parameterizer takes in splines, parameterized to spline parameter 't', and produces
+     * arcs parameterized by arc length 's'. The parameterizer uses augmented arcs, which are of a
+     * non-constant curvature in order to approximate the spline while still remaining continuous in
+     * curvature at the knot points.
+     */
     class arc_parameterizer {
      public:
       using curve_t  = augmented_arc2d;
@@ -19,13 +29,33 @@ namespace pf {
 
       arc_parameterizer() {}
 
+      /**
+       * @brief
+       * Configure the parameters for the parameterizer, which are used as the criteria for deciding
+       * when to produce a new arc.
+       *
+       * @param max_arc_length      The maximum arc length. Any arcs larger than this will be recursively
+       *                            split. Unit is metres.
+       * @param max_delta_curvature The maximum change in curvature between the start and end of the
+       *                            arc. Any arcs with a large change in curvature will be recursively
+       *                            split. Unit is m^-1.
+       */
       void configure(double max_arc_length, double max_delta_curvature) {
         _max_arc_length      = max_arc_length;
         _max_delta_curvature = max_delta_curvature;
       }
 
-      bool has_overrun() { return _has_overrun; }
-
+      /**
+       * @brief
+       * Calculate the number of curves needed to approximate a given spline with values set in @ref
+       * configure(double, double)
+       *
+       * @param spline  The spline to parameterize
+       * @param t_lo    The start value of the spline parameter, set on recursive calls.
+       * @param t_hi    The end value of the spline parameter, set on recursive calls.
+       * @param count   The number of curves that have currently been parameterized, set on recursive calls.
+       * @return        The number of curves needed to approximate the given spline.
+       */
       size_t curve_count(spline<2> &spline, double t_lo = 0, double t_hi = 1, size_t count = 0) const {
         double t_mid = (t_hi + t_lo) / 2.0;
         double k_lo  = spline.curvature(t_lo);
@@ -44,9 +74,17 @@ namespace pf {
         }
       }
 
+      /**
+       * @brief
+       * Calculate the number of curves needed to approximate a given container of splines with values set in
+       * @ref configure(double, double)
+       *
+       * @param spline_begin  Iterator for the beginning of the spline container.
+       * @param spline_end    Iterator for the end of the spline container.
+       * @return              The number of curves needed to approximate the given spline container.
+       */
       template <typename iterator_spline_t>
-      size_t curve_count(iterator_spline_t spline_begin, iterator_spline_t spline_end,
-                         size_t count = 0) const {
+      size_t curve_count(iterator_spline_t spline_begin, iterator_spline_t spline_end) const {
         size_t total_count = 0;
         for (iterator_spline_t it = spline_begin; it != spline_end; it++) {
           total_count += curve_count(*it);
@@ -54,6 +92,20 @@ namespace pf {
         return total_count;
       }
 
+      /**
+       * @brief
+       * Parameterize a single spline into augmented 2D arcs.
+       *
+       * Reparameterizes a spline from being with respect to spline parameter 't', to a set of curves that are
+       * with respect to arc length 's'.
+       *
+       * @param spline          The spline to parameterize
+       * @param curve_begin     Iterator to the beginning of the curve output container. Must be an output
+       *                        iterator.
+       * @param max_curve_count The maximum size of the curve output container.
+       * @param t_lo            The start value of the spline parameter, set on recursive calls.
+       * @param t_hi            The end value of the spline parameter, set on recursive calls.
+       */
       template <typename output_iterator_t>
       size_t parameterize(spline<2> &spline, output_iterator_t &&curve_begin, const size_t max_curve_count,
                           double t_lo = 0, double t_hi = 1) {
@@ -84,6 +136,19 @@ namespace pf {
         }
       }
 
+      /**
+       * @brief
+       * Parameterize a container of splines into augmented 2D arcs.
+       *
+       * Reparameterizes a set of splines from being with respect to spline parameter 't', to a set of curves
+       * that are with respect to arc length 's'.
+       *
+       * @param spline_begin    Iterator to the start of the splines container.
+       * @param spline_end      Iterator to the end of the splines container.
+       * @param curve_begin     Iterator to the beginning of the curve output container. Must be an output
+       *                        iterator.
+       * @param max_curve_count The maximum size of the curve output container.
+       */
       template <typename output_iterator_t, typename iterator_spline_t>
       size_t parameterize(const iterator_spline_t spline_begin, const iterator_spline_t spline_end,
                           output_iterator_t &&curve_begin, const size_t max_curve_count) {
@@ -93,6 +158,15 @@ namespace pf {
         }
         return len;
       }
+
+      /**
+       * @brief
+       * Has the last call to @ref parameterize(spline<2> &, output_iterator_t &&, const size_t, double,
+       * double) has overrun the maximum length of the buffer provided?
+       *
+       * @return true if the last call to parameterize has overrun the maximum length of the buffer provided.
+       */
+      bool has_overrun() { return _has_overrun; }
 
      private:
       double _max_arc_length;

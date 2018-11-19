@@ -13,7 +13,7 @@ using namespace grpl::pf;
 using namespace grpl::pf::path;
 
 TEST(ArcParam, Hermite) {
-  using hermite_t = hermite<5>;
+  using hermite_t = hermite_quintic;
 
   hermite_t::waypoint start{{2, 2}, {5, 0}, {0, 0}}, end{{5, 5}, {5, 5}, {0, 0}};
   hermite_t           hermite(start, end);
@@ -38,7 +38,7 @@ TEST(ArcParam, Hermite) {
 }
 
 TEST(ArcParam, Overrun) {
-  using hermite_t = hermite<5>;
+  using hermite_t = hermite_quintic;
 
   hermite_t::waypoint start{{2, 2}, {5, 0}, {0, 0}}, end{{5, 5}, {5, 5}, {0, 0}};
   hermite_t           hermite(start, end);
@@ -56,7 +56,7 @@ TEST(ArcParam, Overrun) {
 }
 
 TEST(ArcParam, Multispline) {
-  using hermite_t = hermite<5>;
+  using hermite_t = hermite_quintic;
 
   std::array<hermite_t::waypoint, 4> wps{
       hermite_t::waypoint{{2, 2}, {5, 0}, {0, 0}}, hermite_t::waypoint{{3, 5}, {0, 5}, {0, 0}},

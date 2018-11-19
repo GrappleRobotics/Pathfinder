@@ -6,12 +6,27 @@
 namespace grpl {
 namespace pf {
   namespace path {
-
+    /**
+     * @brief
+     * A 2-Dimensional Circular Arc
+     * 
+     * Implementation of a 2-Dimensional circular arc, parameterized to arc length 's'.
+     */
     class arc2d : public curve<2> {
      public:
       using vector_t = typename curve::vector_t;
 
       arc2d() {}
+
+      /**
+       * @brief
+       * Create a circular arc from a set of 3 points (start, any, and end).
+       * 
+       * @param start The start point of the curve, in x,y metres.
+       * @param mid   Any point along the curve sitting between start and end, 
+       *              in x,y metres.
+       * @param end   The end point of the curve, in x,y metres.
+       */
       arc2d(vector_t start, vector_t mid, vector_t end) { from_three(start, mid, end); }
 
       vector_t position(const double s) const override {
@@ -24,7 +39,7 @@ namespace pf {
         }
       }
 
-      vector_t velocity(const double s) const override {
+      vector_t derivative(const double s) const override {
         double curv = _curvature;
         if (curv != 0) {
           double sign  = curv > 0 ? 1 : -1;
@@ -38,7 +53,7 @@ namespace pf {
 
       double curvature(const double s) const override { return _curvature; }
 
-      double curvature_prime(const double s) const override { return 0; }
+      double dcurvature(const double s) const override { return 0; }
 
       double length() const override { return _length; }
 

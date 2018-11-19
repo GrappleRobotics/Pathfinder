@@ -71,7 +71,7 @@ namespace pf {
         vector_t centre     = curve->position(curve_distance);
         vector_t centre_rot = curve->rotation(curve_distance);
         double   curvature  = curve->curvature(curve_distance);
-        double   dcurvature = curve->curvature_prime(curve_distance);
+        double   dcurvature = curve->dcurvature(curve_distance);
 
         double              heading = atan2(centre_rot.y(), centre_rot.x());
         configuration_state config{centre.x(), centre.y(), heading};
