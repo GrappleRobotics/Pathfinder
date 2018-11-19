@@ -68,11 +68,11 @@ namespace pf {
 
      protected:
       //! basis matrix
-      virtual inline basis_t basis(double t) const = 0;
+      virtual basis_t basis(double t) const = 0;
       //! derivatives of basis
-      virtual inline basis_t basis_1st(double t) const = 0;
+      virtual basis_t basis_1st(double t) const = 0;
       //! 2nd derivatives of basis
-      virtual inline basis_t basis_2nd(double t) const = 0;
+      virtual basis_t basis_2nd(double t) const = 0;
 
       control_matrix_t _M;
     };
