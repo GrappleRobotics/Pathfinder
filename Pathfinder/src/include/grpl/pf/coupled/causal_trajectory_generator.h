@@ -68,6 +68,8 @@ namespace pf {
           return output;
         }
 
+        profile.set_goal(total_length);
+
         vector_t centre     = curve->position(curve_distance);
         vector_t centre_rot = curve->rotation(curve_distance);
         double   curvature  = curve->curvature(curve_distance);
