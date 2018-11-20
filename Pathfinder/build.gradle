@@ -96,7 +96,7 @@ doxygen {
     source project.file('src/include')
 }
 
-task cleanTestTask() {
+task cleanTest() {
     doLast {
         delete {
             delete fileTree(dir: new File(project.buildDir, "test-results"), include: ["**/*.png", "**/*.csv"])
@@ -104,6 +104,4 @@ task cleanTestTask() {
     }
 }
 
-assemble.finalizedBy cleanTestTask
-check.mustRunAfter cleanTestTask
 check.finalizedBy plot
