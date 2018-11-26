@@ -8,13 +8,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class HermiteCubicTest {
 
-    HermiteWaypoint start, end;
+    HermiteCubic.Waypoint start, end;
     HermiteCubic spline;
 
     @BeforeEach
     void createSpline() {
-        start = new HermiteWaypoint(Vec2.cartesian(0, 0), Vec2.polar(5, 0));
-        end = new HermiteWaypoint(Vec2.cartesian(5, 4), Vec2.polar(5, -Math.PI / 2.0));
+        start = new HermiteCubic.Waypoint(Vec2.cartesian(0, 0), Vec2.polar(5, 0));
+        end = new HermiteCubic.Waypoint(Vec2.cartesian(5, 4), Vec2.polar(5, -Math.PI / 2.0));
         spline = new HermiteCubic(start, end);
     }
 

@@ -18,10 +18,10 @@ public class ArcParameterizerTest {
         arcParam = new ArcParameterizer();
         arcParam.configure(0.1, 0.1);
 
-        List<HermiteWaypoint> wps = new ArrayList<>();
-        wps.add(new HermiteWaypoint(Vec2.cartesian(2, 2), Vec2.cartesian(5, 0)));
-        wps.add(new HermiteWaypoint(Vec2.cartesian(5, 5), Vec2.cartesian(3, 2)));
-        wps.add(new HermiteWaypoint(Vec2.cartesian(10, 5), Vec2.cartesian(0, 5)));
+        List<HermiteCubic.Waypoint> wps = new ArrayList<>();
+        wps.add(new HermiteCubic.Waypoint(Vec2.cartesian(2, 2), Vec2.cartesian(5, 0)));
+        wps.add(new HermiteCubic.Waypoint(Vec2.cartesian(5, 5), Vec2.cartesian(3, 2)));
+        wps.add(new HermiteCubic.Waypoint(Vec2.cartesian(10, 5), Vec2.cartesian(0, 5)));
         nativeSplines = HermiteFactory.generateCubic(wps);
     }
 

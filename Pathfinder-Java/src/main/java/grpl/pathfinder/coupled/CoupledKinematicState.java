@@ -1,22 +1,23 @@
 package grpl.pathfinder.coupled;
 
-public class CoupledKinematics {
+public class CoupledKinematicState
+{
 
     private final double distance, velocity, acceleration;
 
-    public CoupledKinematics() {
+    public CoupledKinematicState() {
         this.distance = 0;
         this.velocity = 0;
         this.acceleration = 0;
     }
 
-    public CoupledKinematics(double dist, double vel, double acc) {
+    public CoupledKinematicState(double dist, double vel, double acc) {
         this.distance = dist;
         this.velocity = vel;
         this.acceleration = acc;
     }
 
-    public CoupledKinematics(double[] arr) {
+    public CoupledKinematicState(double[] arr) {
         this(arr[0], arr[1], arr[2]);
     }
 
@@ -38,9 +39,9 @@ public class CoupledKinematics {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof CoupledKinematics))
+        if (!(o instanceof CoupledKinematicState))
             return false;
-        CoupledKinematics k2 = (CoupledKinematics) o;
+        CoupledKinematicState k2 = (CoupledKinematicState) o;
         return Math.abs(k2.s() - s()) < 1e-6 &&
                 Math.abs(k2.v() - v()) < 1e-6 &&
                 Math.abs(k2.a() - a()) < 1e-6;

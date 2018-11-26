@@ -6,11 +6,11 @@ public class CoupledWheelState {
 
     private double time;
     private Vec2 position;
-    private CoupledKinematics kinematics;
+    private CoupledKinematicState kinematics;
     private double voltage, current;
     private boolean finished;
 
-    public CoupledWheelState(double time, Vec2 pos, CoupledKinematics kinem,
+    public CoupledWheelState(double time, Vec2 pos, CoupledKinematicState kinem,
                              double voltage, double current, boolean finished) {
         this.time = time;
         this.position = pos;
@@ -27,7 +27,7 @@ public class CoupledWheelState {
         double[] kinArr = new double[] { arr[3], arr[4], arr[5] };
 
         this.position = Vec2.cartesian(posArr);
-        this.kinematics = new CoupledKinematics(kinArr);
+        this.kinematics = new CoupledKinematicState(kinArr);
 
         this.voltage = arr[6];
         this.current = arr[7];
@@ -38,7 +38,7 @@ public class CoupledWheelState {
         return finished;
     }
 
-    public CoupledKinematics kinematics() {
+    public CoupledKinematicState kinematics() {
         return kinematics;
     }
 

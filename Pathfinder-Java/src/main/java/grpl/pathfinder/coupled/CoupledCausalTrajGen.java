@@ -8,10 +8,8 @@ import grpl.pathfinder.util.NativeResource;
 
 import java.util.List;
 
-public class CoupledDrivetrain extends NativeResource {
+public class CoupledCausalTrajGen extends NativeResource {
 
-    // Keep CoupledChassis in here so we still have ownership (it won't get GC'd
-    // out of nowhere)
     private CoupledChassis chassis;
     private long nativeCurveBuffer = 0L;
 
@@ -21,8 +19,8 @@ public class CoupledDrivetrain extends NativeResource {
     public static final int LEFT = 0;
     public static final int RIGHT = 1;
 
-    public CoupledDrivetrain(CoupledChassis chassis) {
-        super(allocate(chassis.nativeHandle()));
+    public CoupledCausalTrajGen(CoupledChassis chassis) {
+        super(allocate());
         this.chassis = chassis;
     }
 
@@ -43,17 +41,7 @@ public class CoupledDrivetrain extends NativeResource {
     }
 
     public CoupledState generate(CoupledState lastState, double time) {
-        return new CoupledState(generateNative(nativeHandle(), nativeCurveBuffer, nativeProfile.nativeHandle(), lastState.toArray(), time));
-    }
-
-    public CoupledWheelState[] split(CoupledState centre) {
-        double[] left = new double[9];
-        double[] right = new double[9];
-
-        splitNative(nativeHandle(), centre.toArray(), left, right);
-        return new CoupledWheelState[] {
-            new CoupledWheelState(left), new CoupledWheelState(right)
-        };
+        return new CoupledState(generateNative(nativeHandle(), chassis.nativeHandle(), nativeCurveBuffer, nativeProfile.nativeHandle(), lastState.toArray(), time));
     }
 
     @Override
@@ -76,11 +64,10 @@ public class CoupledDrivetrain extends NativeResource {
     }
 
     /* JNI */
-    private static native long allocate(long chassisHandle);
+    private static native long allocate();
     private static native void free(long handle);
 
-    private static native double[] generateNative(long h, long buf, long prof, double[] arr, double time);
-    private static native void splitNative(long h, double[] centre, double[] outLeft, double[] outRight);
+    private static native double[] generateNative(long h, long chassisHandle, long buf, long prof, double[] arr, double time);
 
     // Curve buffer
     private static native long acquireBuffer();

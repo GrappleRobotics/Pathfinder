@@ -8,6 +8,7 @@ public class CoupledChassis extends NativeResource {
 
     private DcTransmission transLeft, transRight;
     private NativeResource nativeLeft, nativeRight;
+    private double mass, trackRadius, wheelRadius;
 
     public CoupledChassis(DcTransmission left, DcTransmission right, double wheelRadius, double trackRadius, double mass) {
         super(allocateStub());
@@ -15,7 +16,22 @@ public class CoupledChassis extends NativeResource {
         this.transRight = right;
         this.nativeLeft = left instanceof NativeResource ? (NativeResource) left : new JavaDcTransmissionAdapter(left);
         this.nativeRight = right instanceof NativeResource ? (NativeResource) right : new JavaDcTransmissionAdapter(right);
+        this.mass = mass;
+        this.trackRadius = trackRadius;
+        this.wheelRadius = wheelRadius;
         construct(nativeHandle(), nativeLeft.nativeHandle(), nativeRight.nativeHandle(), wheelRadius, trackRadius, mass);
+    }
+
+    public double getMass() {
+        return mass;
+    }
+
+    public double getTrackRadius() {
+        return trackRadius;
+    }
+
+    public double getWheelRadius() {
+        return wheelRadius;
     }
 
     public DcTransmission getLeft() {
@@ -26,12 +42,23 @@ public class CoupledChassis extends NativeResource {
         return transRight;
     }
 
-    double linearVelocityLimit(CoupledConfiguration configuration, double curvature) {
+    double linearVelocityLimit(CoupledConfigurationState configuration, double curvature) {
         return linvelLimit(nativeHandle(), configuration.toArray(), curvature);
     }
 
-    double[] accelerationLimit(CoupledConfiguration configuration, double curvature, double velocity) {
+    double[] accelerationLimit(CoupledConfigurationState configuration, double curvature, double velocity) {
         return accLimit(nativeHandle(), configuration.toArray(), curvature, velocity);
+    }
+
+    public CoupledWheelState[] split(CoupledState centre) {
+        double[] left = new double[9];
+        double[] right = new double[9];
+
+        splitNative(nativeHandle(), centre.toArray(), left, right);
+
+        return new CoupledWheelState[] {
+                new CoupledWheelState(left), new CoupledWheelState(right)
+        };
     }
 
     @Override
@@ -52,4 +79,6 @@ public class CoupledChassis extends NativeResource {
 
     private static native double linvelLimit(long h, double[] config, double curvature);
     private static native double[] accLimit(long h, double[] config, double curvature, double vel);
+
+    private static native void splitNative(long h, double[] centre, double[] outLeft, double[] outRight);
 }

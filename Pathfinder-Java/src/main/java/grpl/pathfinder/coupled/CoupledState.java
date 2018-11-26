@@ -4,21 +4,21 @@ public class CoupledState {
 
     private double time;
     private double curvature, dcurvature;
-    private CoupledConfiguration config;
-    private CoupledKinematics kinematics;
+    private CoupledConfigurationState config;
+    private CoupledKinematicState kinematics;
     private boolean finished;
 
     public CoupledState() {
         this.time = 0;
         this.curvature = 0;
         this.dcurvature = 0;
-        this.config = new CoupledConfiguration();
-        this.kinematics = new CoupledKinematics();
+        this.config = new CoupledConfigurationState();
+        this.kinematics = new CoupledKinematicState();
         this.finished = false;
     }
 
     public CoupledState(double time, double curvature, double dcurvature,
-                        CoupledConfiguration config, CoupledKinematics kin, boolean finished) {
+                        CoupledConfigurationState config, CoupledKinematicState kin, boolean finished) {
         this.time = time;
         this.curvature = curvature;
         this.dcurvature = dcurvature;
@@ -37,19 +37,19 @@ public class CoupledState {
 
         this.finished = arr[9] > 0.5;
 
-        this.kinematics = new CoupledKinematics(kin);
-        this.config = new CoupledConfiguration(con);
+        this.kinematics = new CoupledKinematicState(kin);
+        this.config = new CoupledConfigurationState(con);
     }
 
     public boolean isFinished() {
         return finished;
     }
 
-    public CoupledKinematics kinematics() {
+    public CoupledKinematicState kinematics() {
         return kinematics;
     }
 
-    public CoupledConfiguration configuration() {
+    public CoupledConfigurationState configuration() {
         return config;
     }
 
