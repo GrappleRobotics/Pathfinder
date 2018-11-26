@@ -8,10 +8,10 @@ using namespace grpl::pf::profile;
 
 JNIEXPORT jdoubleArray JNICALL Java_grpl_pathfinder_profile_AbstractNativeProfile_calculateNative(
     JNIEnv *env, jclass claz, jlong handle, jdoubleArray last, jdouble lastTime, jdouble time) {
-  segment seg = jni_array_to_native_segment<segment>(env, lastTime, last);
+  state st = jni_array_to_native_state(env, lastTime, last);
 
-  seg = jni_handle<profile>(env, handle)->calculate(seg, time);
-  return jni_segment_to_array(env, seg);
+  st = jni_handle<profile>(env, handle)->calculate(st, time);
+  return jni_state_to_array(env, st);
 }
 
 JNIEXPORT void JNICALL Java_grpl_pathfinder_profile_AbstractNativeProfile_setGoal(JNIEnv *env, jclass claz,

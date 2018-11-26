@@ -15,8 +15,8 @@ public class AbstractSpline2d extends NativeResource implements Spline2d {
     }
 
     @Override
-    public Vec2 velocity(double t) {
-        return Vec2.cartesian(velocity(nativeHandle(), t));
+    public Vec2 derivative(double t) {
+        return Vec2.cartesian(derivative(nativeHandle(), t));
     }
 
     @Override
@@ -37,7 +37,7 @@ public class AbstractSpline2d extends NativeResource implements Spline2d {
 
     /* JNI */
     private static native double[] position(long h, double t);
-    private static native double[] velocity(long h, double t);
+    private static native double[] derivative(long h, double t);
     private static native double[] rotation(long h, double t);
     private static native double curvature(long h, double t);
 

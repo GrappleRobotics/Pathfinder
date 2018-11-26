@@ -11,6 +11,11 @@ public class AbstractNativeProfile extends NativeResource implements Profile {
     }
 
     @Override
+    public State createState() {
+        return new State(this.getLimitedTerm());
+    }
+
+    @Override
     public void setGoal(double goal) {
         setGoal(nativeHandle(), goal);
     }
@@ -36,13 +41,8 @@ public class AbstractNativeProfile extends NativeResource implements Profile {
     }
 
     @Override
-    public Segment createSegment() {
-        return new Segment(this.getLimitedTerm());
-    }
-
-    @Override
-    public Segment calculate(Segment last, double time) {
-        Segment seg = createSegment();
+    public State calculate(State last, double time) {
+        State seg = createState();
         seg.time = time;
         seg.kinematics = calculateNative(nativeHandle(), last.kinematics, last.time, time);
         return seg;
@@ -51,11 +51,6 @@ public class AbstractNativeProfile extends NativeResource implements Profile {
     @Override
     public int getLimitedTerm() {
         return _limitedTerm;
-    }
-
-    @Override
-    public int getOrder() {
-        return _limitedTerm + 1;
     }
 
     @Override

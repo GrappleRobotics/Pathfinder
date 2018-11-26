@@ -14,8 +14,8 @@ public class AbstractCurve2d extends NativeResource implements Curve2d {
     }
 
     @Override
-    public Vec2 velocity(double s)  {
-        return Vec2.cartesian(velocity(nativeHandle(), s));
+    public Vec2 derivative(double s)  {
+        return Vec2.cartesian(derivative(nativeHandle(), s));
     }
 
     @Override
@@ -29,8 +29,8 @@ public class AbstractCurve2d extends NativeResource implements Curve2d {
     }
 
     @Override
-    public double curvature_prime(double s)   {
-        return curvature_prime(nativeHandle(), s);
+    public double dcurvature(double s)   {
+        return dcurvature(nativeHandle(), s);
     }
 
     @Override
@@ -46,10 +46,10 @@ public class AbstractCurve2d extends NativeResource implements Curve2d {
 
     /* JNI */
     private static native double[] position(long h, double t);
-    private static native double[] velocity(long h, double t);
+    private static native double[] derivative(long h, double t);
     private static native double[] rotation(long h, double t);
     private static native double curvature(long h, double t);
-    private static native double curvature_prime(long h, double t);
+    private static native double dcurvature(long h, double t);
     private static native double length(long h);
 
     private static native void free(long h);

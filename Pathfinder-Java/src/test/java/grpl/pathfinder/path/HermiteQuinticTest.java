@@ -21,13 +21,13 @@ public class HermiteQuinticTest {
     @Test
     void testStartPoint() {
         assertEquals(start.position, spline.position(0));
-        assertEquals(start.tangent, spline.velocity(0));
+        assertEquals(start.tangent, spline.derivative(0));
     }
 
     @Test
     void testEndPoint() {
         assertEquals(end.position, spline.position(1));
-        assertEquals(end.tangent, spline.velocity(1));
+        assertEquals(end.tangent, spline.derivative(1));
     }
 
 }

@@ -6,14 +6,17 @@ public interface Profile {
     static final int VELOCITY = 1;
     static final int ACCELERATION = 2;
 
-    public static class Segment {
+    public static class State
+    {
         public double time = 0;
         public double[] kinematics;
 
-        protected Segment(int limited_term) {
+        protected State(int limited_term) {
             kinematics = new double[limited_term + 1];
         }
     }
+
+    State createState();
 
     void setGoal(double goal);
     double getGoal();
@@ -23,11 +26,8 @@ public interface Profile {
 
     void applyLimit(int derivative, double min, double max);
 
-    Segment calculate(Segment last, double time);
-
-    Segment createSegment();
+    State calculate(State last, double time);
 
     int getLimitedTerm();
-    int getOrder();
 
 }

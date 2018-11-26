@@ -40,12 +40,12 @@ public class TrapezoidalProfileTest extends NativeResourceTest {
         profile.setGoal(5.0);
         profile.setTimeslice(0);
 
-        Profile.Segment segment = profile.createSegment();
+        Profile.State state = profile.createState();
         for (double t = 0; t < 7; t+=0.01) {
-            segment = profile.calculate(segment, t);
-            assertTrue(Math.abs(segment.kinematics[Profile.VELOCITY]) <= 3);
-            assertTrue(Math.abs(segment.kinematics[Profile.VELOCITY]) <= 4);
+            state = profile.calculate(state, t);
+            assertTrue(Math.abs(state.kinematics[Profile.VELOCITY]) <= 3);
+            assertTrue(Math.abs(state.kinematics[Profile.VELOCITY]) <= 4);
         }
-        assertEquals(5.0, segment.kinematics[Profile.POSITION], 0.001);
+        assertEquals(5.0, state.kinematics[Profile.POSITION], 0.001);
     }
 }

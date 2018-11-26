@@ -7,12 +7,21 @@
 
 using namespace grpl::pf::path;
 
-template <typename T>
-static typename T::waypoint hermite_create_waypoint(JNIEnv *env, jdoubleArray wp) {
-  double *             wparr = env->GetDoubleArrayElements(wp, nullptr);
-  typename T::vector_t pos{wparr[0], wparr[1]}, tang{wparr[2], wparr[3]}, tang_slope{wparr[4], wparr[5]};
+static typename hermite_cubic::waypoint cubic_waypoint(JNIEnv *env, jdoubleArray wp) {
+  double *wparr = env->GetDoubleArrayElements(wp, nullptr);
+
+  typename hermite_quintic::vector_t pos{wparr[0], wparr[1]}, tang{wparr[2], wparr[3]};
   env->ReleaseDoubleArrayElements(wp, wparr, 0);
-  return typename T::waypoint{pos, tang, tang_slope};
+  return typename hermite_cubic::waypoint{pos, tang};
+}
+
+static typename hermite_quintic::waypoint quintic_waypoint(JNIEnv *env, jdoubleArray wp) {
+  double *wparr = env->GetDoubleArrayElements(wp, nullptr);
+
+  typename hermite_quintic::vector_t pos{wparr[0], wparr[1]}, tang{wparr[2], wparr[3]},
+      dtang{wparr[4], wparr[5]};
+  env->ReleaseDoubleArrayElements(wp, wparr, 0);
+  return typename hermite_quintic::waypoint{pos, tang, dtang};
 }
 
 JNIEXPORT jlong JNICALL Java_grpl_pathfinder_path_HermiteCubic_allocate(JNIEnv *env, jclass clz,
@@ -20,8 +29,8 @@ JNIEXPORT jlong JNICALL Java_grpl_pathfinder_path_HermiteCubic_allocate(JNIEnv *
                                                                         jdoubleArray end) {
   using hermite_t = hermite_cubic;
 
-  hermite_t::waypoint wpstart = hermite_create_waypoint<hermite_t>(env, start);
-  hermite_t::waypoint wpend   = hermite_create_waypoint<hermite_t>(env, end);
+  hermite_t::waypoint wpstart = cubic_waypoint(env, start);
+  hermite_t::waypoint wpend   = cubic_waypoint(env, end);
 
   return jni_as_handle<hermite_t>(new hermite_t(wpstart, wpend));
 }
@@ -31,8 +40,8 @@ JNIEXPORT jlong JNICALL Java_grpl_pathfinder_path_HermiteQuintic_allocate(JNIEnv
                                                                           jdoubleArray end) {
   using hermite_t = hermite_quintic;
 
-  hermite_t::waypoint wpstart = hermite_create_waypoint<hermite_t>(env, start);
-  hermite_t::waypoint wpend   = hermite_create_waypoint<hermite_t>(env, end);
+  hermite_t::waypoint wpstart = quintic_waypoint(env, start);
+  hermite_t::waypoint wpend   = quintic_waypoint(env, end);
 
   return jni_as_handle<hermite_t>(new hermite_t(wpstart, wpend));
 }

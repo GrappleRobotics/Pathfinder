@@ -83,7 +83,7 @@ public class CoupledTest {
 
         FileWriter out = new FileWriter("cdt.csv");
         csv(out, new String[] {
-                "t", "x", "y", "heading", "distance", "velocity",
+                "t", "x", "y", "heading", "distance", "derivative",
                 "acceleration", "curvature", "path", "voltage", "current"
         });
 

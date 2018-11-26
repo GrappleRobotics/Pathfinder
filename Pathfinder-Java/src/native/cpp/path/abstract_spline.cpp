@@ -14,9 +14,9 @@ JNIEXPORT jdoubleArray JNICALL Java_grpl_pathfinder_path_AbstractSpline2d_positi
   return eigen_create_jdoubleArray<spline_t::vector_t>(env, vec);
 }
 
-JNIEXPORT jdoubleArray JNICALL Java_grpl_pathfinder_path_AbstractSpline2d_velocity(JNIEnv *env, jclass claz,
+JNIEXPORT jdoubleArray JNICALL Java_grpl_pathfinder_path_AbstractSpline2d_derivative(JNIEnv *env, jclass claz,
                                                                                    jlong handle, jdouble t) {
-  spline_t::vector_t vec = jni_handle<spline_t>(env, handle)->velocity(t);
+  spline_t::vector_t vec = jni_handle<spline_t>(env, handle)->derivative(t);
   return eigen_create_jdoubleArray<spline_t::vector_t>(env, vec);
 }
 

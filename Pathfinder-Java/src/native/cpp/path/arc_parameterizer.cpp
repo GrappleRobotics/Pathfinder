@@ -20,7 +20,7 @@ class java_spline_wrapper : public spline<2> {
   java_spline_wrapper(JNIEnv *env, jobject obj) : _env(env) {
     _obj    = env->NewGlobalRef(obj);
     _posid  = jni_get_method_id(env, obj, "position", "(D)Lgrpl/pathfinder/path/Vec2;");
-    _velid  = jni_get_method_id(env, obj, "velocity", "(D)Lgrpl/pathfinder/path/Vec2;");
+    _velid  = jni_get_method_id(env, obj, "derivative", "(D)Lgrpl/pathfinder/path/Vec2;");
     _rotid  = jni_get_method_id(env, obj, "rotation", "(D)Lgrpl/pathfinder/path/Vec2;");
     _curvid = jni_get_method_id(env, obj, "curvature", "(D)D");
     _vecxy  = jni_get_method_id(env, "grpl/pathfinder/path/Vec2", "xy", "()[D");
@@ -34,7 +34,7 @@ class java_spline_wrapper : public spline<2> {
     return eigen_adapt_jdoubleArray<vector_t>(_env, arr);
   }
 
-  vector_t velocity(double s) override {
+  vector_t derivative(double s) override {
     jobject      vec2 = _env->CallObjectMethod(_obj, _velid, s);
     jdoubleArray arr  = reinterpret_cast<jdoubleArray>(_env->CallObjectMethod(vec2, _vecxy));
     return eigen_adapt_jdoubleArray<vector_t>(_env, arr);
