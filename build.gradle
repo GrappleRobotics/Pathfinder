@@ -11,13 +11,13 @@ allprojects {
     apply plugin: 'idea'
     apply plugin: 'maven-publish'
 
+    project.group = "grpl.pathfinder"
+    project.version = "2.0.0-prealpha"
+
     plugins.withType(CppPlugin).whenPluginAdded {
         project.apply plugin: "visual-studio"
         project.apply plugin: "org.ysb33r.doxygen"
         rootProject.tasks.subclean.dependsOn tasks.clean
-
-        project.group = "grpl.pathfinder"
-        project.version = "2.0.0-prealpha"
 
         ext.desktopOS = OperatingSystem.current().isWindows() ? "windows" : OperatingSystem.current().isMacOsX() ? "osx" : "linux"
         ext.desktop32Classifier = "${ext.desktopOS}x86"
@@ -145,6 +145,8 @@ allprojects {
         }
     }
 }
+
+apply from: 'vendordeps.gradle'
 
 task cleanMaven(type: Delete) {
     delete "$buildDir/mvnDistRepo"

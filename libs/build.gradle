@@ -5,6 +5,8 @@ ext.gtest_root = new File(libroot, "googletest/googletest")
 ext.gbench_root = new File(libroot, "googlebench")
 ext.eigen_root = new File(libroot, "eigen")
 
+ext.eigen_version = "3.3.5"
+
 model {
     buildTypes {
         release
@@ -77,7 +79,7 @@ task zipEigenHeaders(type: Zip) {
 
     baseName = "Eigen"
     classifier = "headers"
-    version = "3.3.5"
+    version = eigen_version
 }
 
 publishing {
@@ -85,7 +87,7 @@ publishing {
         eigen(MavenPublication) {
             groupId 'grpl.thirdparty.tuxfamily.eigen'
             artifactId 'Eigen'
-            version "3.3.5"
+            version eigen_version
 
             artifact zipEigenHeaders {
                 classifier 'headers'

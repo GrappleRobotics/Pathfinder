@@ -1,0 +1,86 @@
+import groovy.json.JsonOutput
+
+Map<String, Object> vendorJson() {
+  return [
+    fileName: "Pathfinder.json",
+    name: "Pathfinder",
+    version: project.version,
+    uuid: "44237bb3-7675-43ba-894a-302083a37bd8",
+    mavenUrls: [
+      // TODO
+    ],
+    jsonUrl: "",  // TODO
+    cppDependencies: [
+      [
+        groupId: "grpl.pathfinder",
+        artifactId: "Pathfinder",
+        version: project.version,
+        isHeaderOnly: true,
+        hasSources: false,  // Header only - headers == sources
+        headerClassifier: "headers", 
+        libName: "Pathfinder",
+        configuration: "native_pathfinder",
+        validClassifiers: []
+      ],
+      [
+        groupId: "grpl.thirdparty.tuxfamily.eigen",
+        artifactId: "Eigen",
+        version: project(':libs').eigen_version,
+        isHeaderOnly: true,
+        hasSources: false,  // See above
+        headerClassifier: "headers",
+        libName: "Eigen",
+        configuration: "native_pathfinder",
+        validClassifiers: []
+      ]
+    ],
+    javaDependencies: [
+      [
+        groupId: "grpl.pathfinder",
+        artifactId: "Pathfinder-Java",
+        version: project.version
+      ]
+    ],
+    jniDependencies: [
+      [
+        groupId: "grpl.pathfinder",
+        artifactId: "Pathfinder-JNI",
+        version: project.version,
+        isJar: true,
+        skipOnUnknownClassifier: true,
+        validClassifiers: [
+          "linuxx86-64",
+          "windowsx86-64",
+          "osxx86-64",
+          "linuxx86",
+          "windowsx86",
+          "osxx86"
+        ]
+      ]
+    ]
+  ]
+}
+
+String vendorJsonString() {
+  return JsonOutput.prettyPrint(JsonOutput.toJson(vendorJson()))
+}
+
+task generateVendorDepsJson() {
+  def outfile = new File(buildDir, "Pathfinder.json")
+  outputs.file(outfile)
+
+  doLast {
+    outfile.text = vendorJsonString()
+  }
+}
+
+publishing {
+  publications {
+    vendordeps(MavenPublication) {
+      artifactId 'Pathfinder-FRCDeps'
+      artifact(generateVendorDepsJson.outputs.files.files[0]) {
+        builtBy generateVendorDepsJson
+      }
+    }
+  }
+}
