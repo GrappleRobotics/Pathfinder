@@ -16,9 +16,6 @@ model {
     }
     components {
         pathfinder(NativeLibrarySpec) {
-            targetPlatform 'any32'
-            targetPlatform 'any64'
-
             sources.cpp {
                 source {
                     srcDir 'src/cpp'
@@ -33,27 +30,29 @@ model {
         }
     }
     testSuites {
-        if (project.hasProperty('withBench')) {
-            pathfinderBench(GoogleTestTestSuiteSpec) {
-                testing $.components.pathfinder 
+        pathfinderBench(GoogleTestTestSuiteSpec) {
+            testing $.components.pathfinder 
 
-                binaries.all {
-                    if (toolChain instanceof Gcc || toolChain instanceof Clang) {
-                        linker.args << '-pthread'
-                    } else {
-                        // MSVC
-                        linker.args << 'shlwapi.lib'
-                    }
+            binaries.all {
+                if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                    linker.args << '-pthread'
+                } else {
+                    // MSVC
+                    linker.args << 'shlwapi.lib'
                 }
+                if (!project.hasProperty("withBench"))
+                    tasks.withType(RunTestExecutable) { RunTestExecutable task -> 
+                        task.enabled = false
+                    }
+            }
 
-                sources.cpp {
-                    source {
-                        srcDir 'src/bench'
-                        include '**/*.cpp'
-                    }
-                    lib project: ':libs', library: 'googleBench', linkage: 'static'
-                    lib project: ':libs', library: 'eigen', linkage: 'api'
+            sources.cpp {
+                source {
+                    srcDir 'src/bench'
+                    include '**/*.cpp'
                 }
+                lib project: ':libs', library: 'googleBench', linkage: 'static'
+                lib project: ':libs', library: 'eigen', linkage: 'api'
             }
         }
 
@@ -99,6 +98,47 @@ doxygen {
     generate_html true
     javadoc_autobrief true
     source project.file('src/include')
+}
+
+task zipHeaders(type: Zip) {
+    from fileTree('src/include')
+
+    baseName = "Pathfinder"
+    classifier = "headers"
+}
+
+task zipDoxygen(type: Zip) {
+    from doxygen
+    baseName = "Pathfinder"
+    classifier = "doxygen"
+}
+
+publishing {
+    publications {
+        pathfinder(MavenPublication) {
+            artifactId 'Pathfinder'
+
+            artifact zipHeaders {
+                classifier 'headers'
+            }
+
+            artifact zipDoxygen {
+                classifier 'doxygen'
+            }
+        }
+        pathfinderTest(MavenPublication) {
+            groupId += ".testing"
+            artifactId 'Pathfinder-Test'
+
+            binaryArtifacts(it, "pathfinderTest", false)
+        }
+        pathfinderBench(MavenPublication) {
+            groupId += ".testing"
+            artifactId 'Pathfinder-Bench'
+
+            binaryArtifacts(it, "pathfinderBench", false)
+        }
+    }
 }
 
 task cleanTest() {

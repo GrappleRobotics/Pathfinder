@@ -10,17 +10,17 @@ try {
     plot_supported = false;
 }
 
-if (plot_supported) {
-    def loadpath = file('src/testplot/')
-    fileTree(dir: loadpath, include: '**/*.plt').files.each { file ->
-        def t = tasks.create("plot${file.name.capitalize()}") {
-            doLast {
-                exec {
-                    workingDir new File(project.buildDir, "test-results/pathfinderTest/any64/release")
-                    commandLine 'gnuplot', '-e', "set loadpath \"${loadpath.absolutePath}\";load \"settings.gp\"", file.absolutePath
-                }
-            }
-        }
-        plot.dependsOn t
-    }
-}
+// if (plot_supported) {
+//     def loadpath = file('src/testplot/')
+//     fileTree(dir: loadpath, include: '**/*.plt').files.each { file ->
+//         def t = tasks.create("plot${file.name.capitalize()}") {
+//             doLast {
+//                 exec {
+//                     workingDir new File(project.buildDir, "test-results/pathfinderTest/any64/release")
+//                     commandLine 'gnuplot', '-e', "set loadpath \"${loadpath.absolutePath}\";load \"settings.gp\"", file.absolutePath
+//                 }
+//             }
+//         }
+//         plot.dependsOn t
+//     }
+// }

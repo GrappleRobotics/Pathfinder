@@ -13,9 +13,6 @@ model {
 
     components {
         googleTest(NativeLibrarySpec) {
-            targetPlatform 'any32'
-            targetPlatform 'any64'
-
             sources.cpp {
                 source {
                     srcDir new File(gtest_root, "src")
@@ -29,9 +26,6 @@ model {
         }
 
         googleBench(NativeLibrarySpec) {
-            targetPlatform 'any32'
-            targetPlatform 'any64'
-
             binaries.all {
                 if (toolChain instanceof Gcc || toolChain instanceof Clang) {
                     cppCompiler.args << '-std=c++14' << '-Wno-deprecated-declarations'
@@ -56,12 +50,45 @@ model {
                 lib project: ':libs', library: "googleTest", linkage: "static"
             }
         }
+
+        eigen(NativeLibrarySpec) {
+            sources.cpp {
+                exportedHeaders {
+                    srcDirs eigen_root
+                    include "Eigen/**/*"
+                }
+            }
+        }
     }
-    repositories {
-        libs(PrebuiltLibraries) {
-            eigen {
-                headers.srcDir eigen_root
-                headers.include "**/*"
+    // repositories {
+    //     libs(PrebuiltLibraries) {
+    //         eigen {
+    //             headers.srcDir eigen_root
+    //             headers.include "**/*"
+    //         }
+    //     }
+    // }
+}
+
+task zipEigenHeaders(type: Zip) {
+    from fileTree(eigen_root) {
+        include "Eigen/**/*"
+    }
+
+    baseName = "Eigen"
+    classifier = "headers"
+    version = "3.3.5"
+}
+
+publishing {
+    publications {
+        eigen(MavenPublication) {
+            groupId 'grpl.thirdparty.tuxfamily.eigen'
+            artifactId 'Eigen'
+            version "3.3.5"
+
+            artifact zipEigenHeaders {
+                classifier 'headers'
             }
         }
     }

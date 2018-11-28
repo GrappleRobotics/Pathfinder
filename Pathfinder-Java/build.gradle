@@ -17,9 +17,6 @@ repositories {
 model {
     components {
         pathfinderjni(JniNativeLibrarySpec) {
-            targetPlatform 'any32'
-            targetPlatform 'any64'
-
             enableCheckTask true
             javaCompileTasks << compileJava
 
@@ -59,10 +56,52 @@ doxygen {
     source project.file('src/main/java')
 }
 
+task sourcesJar(type: Jar) {
+    dependsOn classes
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    dependsOn javadoc
+    from javadoc.destinationDir
+}
+
+task zipDoxygen(type: Zip) {
+    from doxygen
+    baseName = "Pathfinder"
+    classifier = "doxygen"
+}
+
+project.afterEvaluate {
+    publishing {
+        publications {
+            pathfinderJava(MavenPublication) {
+                artifactId 'Pathfinder-Java'
+
+                artifact jar
+                artifact sourcesJar {
+                    classifier 'sources'
+                }
+                artifact javadocJar {
+                    classifier 'javadoc'
+                }
+                artifact zipDoxygen {
+                    classifier 'doxygen'
+                }
+            }
+            pathfinderJni(MavenPublication) {
+                artifactId 'Pathfinder-JNI'
+
+                binaryArtifacts(it, "pathfinderjni", true)
+            }
+        }
+    }
+}
+
 test {
     useJUnitPlatform()
     // TODO: make this not-shit
-    def libPath = new File(project.buildDir, "libs/pathfinderjni/shared/any64/debug").absolutePath
+    def libPath = new File(project.buildDir, "libs/pathfinderjni/shared/${desktop64Classifier}/debug").absolutePath
     systemProperties.put("java.library.path", libPath)
     testLogging {
         events "passed", "skipped", "failed"

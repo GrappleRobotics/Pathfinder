@@ -3,10 +3,14 @@ plugins {
     id "org.ysb33r.doxygen" version "0.4" apply false
 }
 
+import org.gradle.internal.os.OperatingSystem
+
 task subclean();
 
 allprojects {
     apply plugin: 'idea'
+    apply plugin: 'maven-publish'
+
     plugins.withType(CppPlugin).whenPluginAdded {
         project.apply plugin: "visual-studio"
         project.apply plugin: "org.ysb33r.doxygen"
@@ -15,16 +19,20 @@ allprojects {
         project.group = "grpl.pathfinder"
         project.version = "2.0.0-prealpha"
 
+        ext.desktopOS = OperatingSystem.current().isWindows() ? "windows" : OperatingSystem.current().isMacOsX() ? "osx" : "linux"
+        ext.desktop32Classifier = "${ext.desktopOS}x86"
+        ext.desktop64Classifier = "${ext.desktopOS}x86-64"
+
         project.model {
             buildTypes {
                 release
                 debug
             }
             platforms {
-                any32 {
+                "${desktop32Classifier}" {
                     architecture 'x86'
                 }
-                any64 {
+                "${desktop64Classifier}" {
                     architecture 'x86_64'
                 }
             }
@@ -41,6 +49,12 @@ allprojects {
                     // Define Clang first - for ASAN (Default)
                     clang(Clang)
                     gcc(Gcc)
+                }
+            }
+            components {
+                withType(TargetedNativeComponent) {
+                    targetPlatform ext.desktop32Classifier
+                    targetPlatform ext.desktop64Classifier
                 }
             }
             binaries {
@@ -64,6 +78,50 @@ allprojects {
                 }
             }
         }
+        
+        ext.binaryDists = []
+        ext.binaryArtifacts = { scope, name, jar ->
+            binaryDists.each { z -> 
+                if (z.binary.component.name == name) {
+                    scope.artifact(jar ? z.jartask : z.ziptask) {
+                        classifier z.binary.targetPlatform.name
+                    }
+                }
+            }
+        }
+
+        project.model {
+            binaries {
+                withType(NativeBinarySpec) {
+                    def bin = it
+                    if (buildType.name == "release" && !(it instanceof StaticLibraryBinary)) {
+                        def taskSuffix = "${component.name}${targetPlatform.name}"
+                        def source = (bin instanceof SharedLibraryBinary ? bin.sharedLibraryFile : bin.executable.file)
+                        
+                        def ziptask = task "zip${taskSuffix}"(type: Zip) {
+                            from(source)
+                            into(targetPlatform.name)
+
+                            baseName = component.name
+                            classifier = targetPlatform.name
+
+                            dependsOn bin.tasks.withType(AbstractLinkTask)
+                        }
+
+                        def jartask = task "jar${taskSuffix}"(type: Jar) {
+                            from(source)
+                            into(targetPlatform.name)
+
+                            baseName = component.name
+                            classifier = targetPlatform.name
+
+                            dependsOn bin.tasks.withType(AbstractLinkTask)
+                        }
+                        binaryDists << [ binary: bin, jartask: jartask, ziptask: ziptask ]
+                    }
+                }
+            }
+        }
     }
     plugins.withType(GoogleTestPlugin).whenPluginAdded {
         model {
@@ -74,7 +132,25 @@ allprojects {
             }
         }
     }
+
+    publishing {
+        repositories {
+            maven {
+                name = "distLocal"
+                url = "${rootProject.buildDir}/mvnDistRepo"
+            }
+        }
+        publications.all {
+            groupId 'grpl.pathfinder'
+        }
+    }
 }
+
+task cleanMaven(type: Delete) {
+    delete "$buildDir/mvnDistRepo"
+}
+
+task clean(dependsOn: cleanMaven)
 
 buildScan { 
     termsOfServiceUrl = 'https://gradle.com/terms-of-service';
