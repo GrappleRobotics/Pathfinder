@@ -7,9 +7,9 @@ Map<String, Object> vendorJson() {
     version: project.version,
     uuid: "44237bb3-7675-43ba-894a-302083a37bd8",
     mavenUrls: [
-      // TODO
+      "https://dev.imjac.in/maven"
     ],
-    jsonUrl: "",  // TODO
+    jsonUrl: "https://dev.imjac.in/maven/grpl/pathfinder/Pathfinder-latest.json",
     cppDependencies: [
       [
         groupId: "grpl.pathfinder",
@@ -81,6 +81,23 @@ publishing {
       artifact(generateVendorDepsJson.outputs.files.files[0]) {
         builtBy generateVendorDepsJson
       }
+    }
+  }
+}
+
+afterEvaluate {
+  publishing.repositories.all {
+    def vendorTask = task "writeLatestVendorDepsTo${name}"() {
+      def outfile = new File(new File(url), "grpl/pathfinder/Pathfinder-latest.json")
+      outputs.file(outfile)
+
+      doLast {
+        outfile.text = vendorJsonString()
+      }
+    }
+
+    tasks.withType(PublishToMavenRepository).all {
+      dependsOn vendorTask
     }
   }
 }
