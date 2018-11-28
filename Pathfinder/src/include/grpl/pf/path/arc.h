@@ -7,7 +7,6 @@ namespace grpl {
 namespace pf {
   namespace path {
     /**
-     * @brief
      * A 2-Dimensional Circular Arc
      * 
      * Implementation of a 2-Dimensional circular arc, parameterized to arc length 's'.
@@ -19,7 +18,6 @@ namespace pf {
       arc2d() {}
 
       /**
-       * @brief
        * Create a circular arc from a set of 3 points (start, any, and end).
        * 
        * @param start The start point of the curve, in x,y metres.

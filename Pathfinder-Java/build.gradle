@@ -49,6 +49,16 @@ dependencies {
     )
 }
 
+doxygen {
+    executables {
+        doxygen version : '1.8.13'
+    }
+
+    generate_html true
+    javadoc_autobrief true
+    source project.file('src/main/java')
+}
+
 test {
     useJUnitPlatform()
     // TODO: make this not-shit

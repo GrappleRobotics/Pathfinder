@@ -1,9 +1,25 @@
 package grpl.pathfinder.coupled;
 
-public class CoupledKinematicState
-{
+/**
+ * Drivetrain kinematic state, describing the movement and motion of the chassis.
+ */
+public class CoupledKinematicState {
 
-    private final double distance, velocity, acceleration;
+    /**
+     * The distance covered by the drivetrain, in metres.
+     */
+    public double distance;
+
+    /**
+     * The linear velocity of the drivetrain, in metres per second (ms^-1).
+     */
+    public double velocity;
+
+    /**
+     * The linear acceleration of the drivetrain, in metres per second
+     * per second (ms^-2).
+     */
+    public double acceleration;
 
     public CoupledKinematicState() {
         this.distance = 0;
@@ -21,20 +37,8 @@ public class CoupledKinematicState
         this(arr[0], arr[1], arr[2]);
     }
 
-    public double s() {
-        return distance;
-    }
-
-    public double v() {
-        return velocity;
-    }
-
-    public double a() {
-        return acceleration;
-    }
-
     public double[] toArray() {
-        return new double[] { distance, velocity, acceleration };
+        return new double[]{distance, velocity, acceleration};
     }
 
     @Override
@@ -42,8 +46,8 @@ public class CoupledKinematicState
         if (!(o instanceof CoupledKinematicState))
             return false;
         CoupledKinematicState k2 = (CoupledKinematicState) o;
-        return Math.abs(k2.s() - s()) < 1e-6 &&
-                Math.abs(k2.v() - v()) < 1e-6 &&
-                Math.abs(k2.a() - a()) < 1e-6;
+        return Math.abs(k2.distance - distance) < 1e-6 &&
+                Math.abs(k2.velocity - velocity) < 1e-6 &&
+                Math.abs(k2.acceleration - acceleration) < 1e-6;
     }
 }

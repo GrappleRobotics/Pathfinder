@@ -1,14 +1,16 @@
 package grpl.pathfinder.coupled;
 
 import grpl.pathfinder.Vec2;
-import grpl.pathfinder.path.*;
+import grpl.pathfinder.path.ArcParameterizer;
+import grpl.pathfinder.path.Curve2d;
+import grpl.pathfinder.path.HermiteFactory;
+import grpl.pathfinder.path.HermiteQuintic;
 import grpl.pathfinder.profile.TrapezoidalProfile;
 import grpl.pathfinder.transmission.DcMotor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -23,7 +25,7 @@ public class CoupledTest {
     @BeforeEach
     public void setup() {
         // Dual CIM
-        motor = new DcMotor(12.0, 5330*2.0*Math.PI / 60.0 / 12.75, 2 * 2.7, 2*131.0, 2*2.41*12.75);
+        motor = new DcMotor(12.0, 5330 * 2.0 * Math.PI / 60.0 / 12.75, 2 * 2.7, 2 * 131.0, 2 * 2.41 * 12.75);
         chassis = new CoupledChassis(motor, motor, 0.0762, 0.5, 25.0);
         gen = new CoupledCausalTrajGen(chassis);
     }
@@ -46,18 +48,18 @@ public class CoupledTest {
 
     private void echo(Writer writer, CoupledState state) throws IOException {
         Object obj[] = new Object[]{
-                state.time(), state.configuration().position().x(), state.configuration().position().y(),
-                state.configuration().heading(), state.kinematics().s(), state.kinematics().v(), state.kinematics().a(),
-                state.curvature(), 0, 0, 0,
+                state.time, state.config.position.x(), state.config.position.y(),
+                state.config.heading, state.kinematics.distance, state.kinematics.velocity, state.kinematics.acceleration,
+                state.curvature, 0, 0, 0,
         };
         csv(writer, obj);
     }
 
     private void echo(Writer writer, CoupledWheelState state, int idx) throws IOException {
         Object obj[] = new Object[]{
-                state.time(), state.position().x(), state.position().y(),
-                0, state.kinematics().s(), state.kinematics().v(), state.kinematics().a(),
-                0, idx, state.voltage(), state.current()
+                state.time, state.position.x(), state.position.y(),
+                0, state.kinematics.distance, state.kinematics.velocity, state.kinematics.acceleration,
+                0, idx, state.voltage, state.current
         };
         csv(writer, obj);
     }
@@ -85,7 +87,7 @@ public class CoupledTest {
 //                "acceleration", "curvature", "path", "voltage", "current"
 //        });
 
-        for (double t = 0; !state.isFinished() && t < 5; t += 0.01) {
+        for (double t = 0; !state.finished && t < 5; t += 0.01) {
             state = gen.generate(state, t);
 //            echo(out, state);
 

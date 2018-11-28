@@ -10,7 +10,6 @@ namespace pf {
   namespace coupled {
 
     /**
-     * @brief
      * Causal trajectory generator, given the chassis, path and motion profile.
      *
      * This class provides the necessary plumbing in order to generate trajectories from a given path,
@@ -24,7 +23,7 @@ namespace pf {
      *
      * It is recommended to use this generator if on-the-fly generation is required, or memory and
      * computational resources are sparse. This generator also enables the ability to provide feedback
-     * information on chassis odometry to the next generation step, making it possible to embed a feedback
+     * information on chassis kinematics to the next generation step, making it possible to embed a feedback
      * loop into the generation phase.
      */
     class causal_trajectory_generator {
@@ -36,8 +35,9 @@ namespace pf {
       // parts required to follow a causal path within this class.
 
       /**
-       * @brief
        * Generate the next state of the trajectory given the current state.
+       * 
+       * The curves in this system define the path that will be followed.
        *
        * @param chassis       The coupled chassis, used to provide limits for the trajectory the trajectory
        *                      kinematics.

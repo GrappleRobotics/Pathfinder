@@ -5,7 +5,6 @@
 namespace grpl {
 namespace pf {
   /**
-   * @brief
    * Coupled / tank / differential drivetrain models.
    *
    * The grpl::pf::coupled namespace contains all models and other structures for use
@@ -18,7 +17,6 @@ namespace pf {
   namespace coupled {
 
     /**
-     * @brief
      * Drivetrain configuration state, describing the configuration of the chassis.
      * 
      * Formally, the 'configuration' of a body is all variables required to fully define the position
@@ -33,7 +31,6 @@ namespace pf {
     using configuration_state = Eigen::Vector3d;
 
     /**
-     * @brief
      * Drivetrain kinematic state, describing the movement and motion of the chassis.
      *
      * @param distance      The distance covered by the drivetrain, in metres.
@@ -44,7 +41,6 @@ namespace pf {
     using kinematic_state = Eigen::Vector3d;
 
     /**
-     * @brief
      * The state of a coupled drivetrain at any point in time, as a single state within a
      * trajectory.
      */
@@ -63,13 +59,11 @@ namespace pf {
     };
 
     /**
-     * @brief
      * The state of a wheel (side) of the coupled drivetrain at any point in time, primarily
      * for use with encoders / other following regimes.
      */
     struct wheel_state {
       /**
-       * @brief
        * Position vector of the wheel
        *
        * @param x The x position of the wheel, in metres.

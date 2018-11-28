@@ -14,7 +14,6 @@ namespace pf {
     //        Default subclasses can handle the predicate and visit splitting.
 
     /**
-     * @brief
      * Arc Parameterizer, for reparameterizing splines to curves.
      *
      * The Arc Parameterizer takes in splines, parameterized to spline parameter 't', and produces
@@ -30,7 +29,6 @@ namespace pf {
       arc_parameterizer() {}
 
       /**
-       * @brief
        * Configure the parameters for the parameterizer, which are used as the criteria for deciding
        * when to produce a new arc.
        *
@@ -46,7 +44,6 @@ namespace pf {
       }
 
       /**
-       * @brief
        * Calculate the number of curves needed to approximate a given spline with values set in @ref
        * configure(double, double)
        *
@@ -75,7 +72,6 @@ namespace pf {
       }
 
       /**
-       * @brief
        * Calculate the number of curves needed to approximate a given container of splines with values set in
        * @ref configure(double, double)
        *
@@ -93,7 +89,6 @@ namespace pf {
       }
 
       /**
-       * @brief
        * Parameterize a single spline into augmented 2D arcs.
        *
        * Reparameterizes a spline from being with respect to spline parameter 't', to a set of curves that are
@@ -137,7 +132,6 @@ namespace pf {
       }
 
       /**
-       * @brief
        * Parameterize a container of splines into augmented 2D arcs.
        *
        * Reparameterizes a set of splines from being with respect to spline parameter 't', to a set of curves
@@ -160,7 +154,6 @@ namespace pf {
       }
 
       /**
-       * @brief
        * Has the last call to @ref parameterize(spline<2> &, output_iterator_t &&, const size_t, double,
        * double) has overrun the maximum length of the buffer provided?
        *

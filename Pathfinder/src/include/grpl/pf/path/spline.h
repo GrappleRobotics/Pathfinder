@@ -5,7 +5,6 @@
 namespace grpl {
 namespace pf {
   /**
-   * @brief
    * Path, spline and curve members.
    * 
    * The grpl::pf::path namespace contains all classes to deal with pathing, be 
@@ -15,7 +14,6 @@ namespace pf {
    */
   namespace path {
     /**
-     * @brief
      * A position curve parameterized to spline parameter 't'. 
      * 
      * A spline is simply a position curve parameterized to spline parameter 't' 
@@ -35,7 +33,6 @@ namespace pf {
       static const size_t DIMENSIONS = DIM;
 
       /**
-       * @brief
        * Calculate the position of a point on the spline, at any spline parameter
        * value 't'
        * 
@@ -46,7 +43,6 @@ namespace pf {
       virtual vector_t position(double t) = 0;
 
       /**
-       * @brief
        * Calculate the derivative of a point on the spline, at any spline parameter
        * value 't' (the derivative of @ref position(double))
        * 
@@ -57,7 +53,6 @@ namespace pf {
       virtual vector_t derivative(double t) = 0;
 
       /**
-       * @brief
        * Calculate the rotation of a point on the spline, at any spline parameter 
        * value 't'. This is the unit vector of @ref derivative(double)
        * 
@@ -71,7 +66,6 @@ namespace pf {
       };
 
       /**
-       * @brief
        * Calculate the curvature of the spline at any spline parameter value 't'.
        * 
        * @param t The spline parameter, where 0 is the start and 1 is the end of the

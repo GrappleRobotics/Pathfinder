@@ -3,7 +3,6 @@
 namespace grpl {
 namespace pf {
   /**
-   * @brief
    * Motor transmissions.
    *
    * The grpl::pf::transmission namespace contains implementations of transmissions, which convert
@@ -12,7 +11,6 @@ namespace pf {
   namespace transmission {
 
     /**
-     * @brief
      * Base class of a DC electric transmission, usually @ref grpl::pf::transmission::dc_motor.
      */
     class dc_transmission {
@@ -21,7 +19,6 @@ namespace pf {
       virtual ~dc_transmission(){};
 
       /**
-       * @brief
        * Calculate the free (no load) speed of the transmission at an applied voltage.
        *
        * @param voltage The voltage applied to the transmission, in Volts
@@ -30,7 +27,6 @@ namespace pf {
       virtual double get_free_speed(double voltage) const = 0;
 
       /**
-       * @brief
        * Calculate the current draw of the transmission at an applied voltage and speed.
        *
        * @param voltage The voltage applied to the transmission, in Volts
@@ -40,7 +36,6 @@ namespace pf {
       virtual double get_current(double voltage, double speed) const = 0;
 
       /**
-       * @brief
        * Calculate the torque applied by the transmission at a given current draw.
        *
        * @param current The current drawn by the transmission, calculated in
@@ -50,7 +45,6 @@ namespace pf {
       virtual double get_torque(double current) const = 0;
 
       /**
-       * @brief
        * Calculate the component voltage applied to the transmission in order to obtain
        * a free speed.
        *
@@ -63,7 +57,6 @@ namespace pf {
       virtual double get_free_voltage(double speed) const = 0;
 
       /**
-       * @brief
        * Calculate the component voltage applied to the transmission in order to draw
        * a current.
        *
@@ -78,7 +71,6 @@ namespace pf {
       virtual double get_current_voltage(double current) const = 0;
 
       /**
-       * @brief
        * Calculate the current draw of the transmission given a torque.
        *
        * @param torque The torque applied by the transmission, in Nm.
@@ -87,7 +79,6 @@ namespace pf {
       virtual double get_torque_current(double torque) const = 0;
 
       /**
-       * @brief
        * Get the nominal, operating voltage of the transmission.
        *
        * @return The nominal, operating voltage of the transmission, in Volts
@@ -96,7 +87,6 @@ namespace pf {
     };
 
     /**
-     * @brief
      * Mathematical Model of a DC Brushed Motor
      *
      * Basic DC Motor Model, dervied from the ideal resistive motor model with Back EMF
@@ -106,7 +96,6 @@ namespace pf {
     class dc_motor : public dc_transmission {
      public:
       /**
-       * @brief
        * Construct a DC Brushed Motor Model.
        *
        * @param v_nom         The nominal operating voltage of the motor, in Volts
@@ -125,7 +114,6 @@ namespace pf {
             _stall_torque(stall_torque) {}
 
       /**
-       * @brief
        * Calculate the internal resistance of the motor windings
        *
        * @return the internal resistance of the motor, in Ohms
@@ -133,7 +121,6 @@ namespace pf {
       inline double internal_resistance() const { return _v_nom / _stall_current; }
 
       /**
-       * @brief
        * Calculate the speed-voltage coefficient of the motor (kv in V = kv*w)
        *
        * @return The speed-voltage coefficient of the motor, in Vs/rad
@@ -141,7 +128,6 @@ namespace pf {
       inline double kv() const { return (_v_nom - _free_current * _v_nom / _stall_current) / _free_speed; }
 
       /**
-       * @brief
        * Calculate the torque-current coefficient of the motor (kt in I = kt*t)
        *
        * @return The torque-current coefficient of the motor, in A/(Nm)

@@ -6,7 +6,6 @@ namespace grpl {
 namespace pf {
   namespace path {
     /**
-     * @brief
      * Implementation of @ref arc2d with non-constant curvature.
      * 
      * The Augmented Arc is an arc with a non-continuous curvature, slightly disobeying 
@@ -21,7 +20,6 @@ namespace pf {
       augmented_arc2d() : arc2d(){};
 
       /**
-       * @brief
        * Create a circular arc from a set of 3 points (start, any, and end).
        * 
        * @param start The start point of the curve, in x,y metres.
@@ -32,7 +30,6 @@ namespace pf {
       augmented_arc2d(vector_t start, vector_t mid, vector_t end) : arc2d(start, mid, end) {}
 
       /**
-       * @brief
        * Create a circular arc from a set of 3 points (start, any, and end), and the
        * start and end curvature.
        * 
@@ -49,7 +46,6 @@ namespace pf {
       }
 
       /**
-       * @brief
        * Set the start and end curvature values for interpolation.
        * 
        * @param start_k The starting curvature value k in m^-1.

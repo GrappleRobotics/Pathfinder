@@ -97,6 +97,7 @@ doxygen {
     }
 
     generate_html true
+    javadoc_autobrief true
     source project.file('src/include')
 }
 

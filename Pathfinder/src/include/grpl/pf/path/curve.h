@@ -6,7 +6,6 @@ namespace grpl {
 namespace pf {
   namespace path {
     /**
-     * @brief
      * A position curve parameterized to arc length 's'.
      * 
      * A curve parameterized to its arc length, allowing extremely quick 
@@ -27,7 +26,6 @@ namespace pf {
       static const size_t DIMENSIONS = DIM;
 
       /**
-       * @brief
        * Calculate the position of a point on the curve, at any arc length 's'.
        * 
        * @param s The distance along the arc.
@@ -36,8 +34,6 @@ namespace pf {
       virtual vector_t position(double s) const = 0;
 
       /**
-       * @brief
-       * 
        * Calculate the derivative of a point on the curve, at any arc length 's'.
        * 
        * @param s The distance along the arc.
@@ -46,7 +42,6 @@ namespace pf {
       virtual vector_t derivative(double s) const = 0;
 
       /**
-       * @brief
        * Calculate the rotation of a point on the curve, at any arc length 's'.
        * This is the unit vector of @ref derivative(double) const.
        * 
@@ -59,7 +54,6 @@ namespace pf {
       };
 
       /**
-       * @brief
        * Calculate the curvature of the curve at any arc length 's'.
        * 
        * @param s The distance along the arc
@@ -68,7 +62,6 @@ namespace pf {
       virtual double curvature(double s) const       = 0;
 
       /**
-       * @brief
        * Calculate the derivative of curvature of the curve at any arc length 's'.
        * 
        * @param s The distance along the arc
@@ -78,7 +71,6 @@ namespace pf {
       virtual double dcurvature(double s) const = 0;
 
       /**
-       * @brief
        * Calculate the total length of the arc.
        * 
        * The arc length is what defines the range of parameter 's' used throughout this class.

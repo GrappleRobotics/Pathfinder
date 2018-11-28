@@ -7,7 +7,6 @@ namespace pf {
   namespace path {
 
     /**
-     * @brief
      * Hermite Spline Base Class
      *
      * Base implementation of a hermite spline, either quintic or cubic, as detemined
@@ -24,13 +23,11 @@ namespace pf {
       using control_matrix_t = typename Eigen::Matrix<double, 2, ORDER + 1>;
 
       /**
-       * @brief
        * Create a default hermite, with identical zero'd start and end waypoints
        */
       hermite() {}
 
       /**
-       * @brief
        * Create a hermite spline with the given control matrix.
        *
        * The control matrix is structured with vector columns. The first half of
@@ -43,13 +40,11 @@ namespace pf {
       hermite(control_matrix_t &M) { set_control_matrix(M); }
 
       /**
-       * @brief
        * Set the control matrix. See @ref hermite(control_matrix_t &)
        */
       void set_control_matrix(control_matrix_t &M) { _M = M; }
 
       /**
-       * @brief
        * Get the control matrix. See @ref hermite(control_matrix_t &)
        */
       control_matrix_t &get_control_matrix() { return _M; }
@@ -78,7 +73,6 @@ namespace pf {
     };
 
     /**
-     * @brief
      * Implementation of a cubic (order 3) hermite spline.
      *
      * A Cubic Hermite Spline is a spline of order 3, as defined here
@@ -90,7 +84,6 @@ namespace pf {
     class hermite_cubic : public hermite<3> {
      public:
       /**
-       * @brief
        * Waypoint for a cubic hermite spline.
        */
       struct waypoint {
@@ -103,7 +96,6 @@ namespace pf {
       hermite_cubic() = default;
 
       /**
-       * @brief
        * Construct a cubic hermite spline, given a start and end point.
        *
        * @param start The waypoint of the start of the spline
@@ -112,7 +104,6 @@ namespace pf {
       hermite_cubic(waypoint &start, waypoint &end) { set_waypoints(start, end); }
 
       /**
-       * @brief
        * Set the start and end waypoints of the spline.
        *
        * @param start The waypoint of the start of the spline
@@ -148,16 +139,14 @@ namespace pf {
     };
 
     /**
-     * @brief
      * Implementation of a quintic (order 5) hermite spline.
-     *     *
+     * 
      * The quintic spline is defined in regards to its waypoints, which are defined in terms of position,
      * tangent and the derivative of the tangent.
      */
     class hermite_quintic : public hermite<5> {
      public:
       /**
-       * @brief
        * Waypoint for a quintic hermite spline.
        */
       struct waypoint {
@@ -172,7 +161,6 @@ namespace pf {
       hermite_quintic() = default;
 
       /**
-       * @brief
        * Construct a quintic hermite spline, given a start and end point.
        *
        * @param start The waypoint of the start of the spline
@@ -181,7 +169,6 @@ namespace pf {
       hermite_quintic(waypoint &start, waypoint &end) { set_waypoints(start, end); }
 
       /**
-       * @brief
        * Set the start and end waypoints of the spline.
        *
        * @param start The waypoint of the start of the spline

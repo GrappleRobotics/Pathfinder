@@ -19,7 +19,6 @@
 
 namespace grpl {
 /**
- * @brief
  * The Grapple Robotics Pathfinder library.
  */
 namespace pf {}

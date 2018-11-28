@@ -10,7 +10,6 @@ namespace pf {
   namespace coupled {
 
     /**
-     * @brief
      * Mathematical model representation of a coupled (tank / differential) drivetrain.
      *
      * Chassis contains members for the transmissions (motors), as well as other configurations
@@ -18,14 +17,13 @@ namespace pf {
      *
      * The chassis mirrors the physical "layout" of the drivetrain.
      *
-     * @ref grpl::pf::coupled::drivetrain
+     * @ref grpl::pf::coupled::causal_trajectory_generator
      */
     class chassis {
      public:
       using transmission_t = transmission::dc_transmission;
 
       /**
-       * @brief
        * Construct a coupled chassis
        *
        * @param transmission_left   The left side transmission, held internally as a reference.
@@ -73,7 +71,6 @@ namespace pf {
       transmission_t &transmission_right() const { return _trans_right; }
 
       /**
-       * @brief
        * Calculate the absolute linear (translational) velocity limit of the chassis in metres
        * per second (ms^-1).
        *
@@ -159,7 +156,6 @@ namespace pf {
       }
 
       /**
-       * @brief
        * Calculate the minimum and maximum linear (translational) acceleration limits of the chassis,
        * in metres per second per second (ms^-2).
        *
@@ -212,7 +208,6 @@ namespace pf {
       }
 
       /**
-       * @brief
        * Split a centre state of this chassis into the left and right transmission state components.
        *
        * @return  A pair, ordered [left, right], of @ref wheel_state.

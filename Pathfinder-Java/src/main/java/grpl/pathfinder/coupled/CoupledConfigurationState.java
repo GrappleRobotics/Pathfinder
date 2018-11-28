@@ -2,19 +2,34 @@ package grpl.pathfinder.coupled;
 
 import grpl.pathfinder.Vec2;
 
-public class CoupledConfigurationState
-{
+/**
+ * Drivetrain configuration state, describing the configuration of the chassis.
+ * <p>
+ * Formally, the 'configuration' of a body is all variables required to fully define the position
+ * of the body and its manipulators. For a coupled drivetrain, this is simply its position in the
+ * the work space, as well as its heading. In the case of the coupled drivetrain, this may be referred
+ * to as the "transform" of the chassis.
+ * </p>
+ */
+public class CoupledConfigurationState {
 
-    private final Vec2 xy;
-    private final double heading;
+    /**
+     * The position of the centre of the drivetrain, in metres.
+     */
+    public Vec2 position;
+
+    /**
+     * The heading of the drivetrain, in radians.
+     */
+    public double heading;
 
     public CoupledConfigurationState() {
-        this.xy = Vec2.zero();
+        this.position = Vec2.zero();
         this.heading = 0;
     }
 
-    public CoupledConfigurationState(Vec2 xy, double heading) {
-        this.xy = xy;
+    public CoupledConfigurationState(Vec2 position, double heading) {
+        this.position = position;
         this.heading = heading;
     }
 
@@ -26,16 +41,8 @@ public class CoupledConfigurationState
         this(arr[0], arr[1], arr[2]);
     }
 
-    public Vec2 position() {
-        return xy;
-    }
-
-    public double heading() {
-        return heading;
-    }
-
     public double[] toArray() {
-        return new double[] { xy.x(), xy.y(), heading };
+        return new double[]{position.x(), position.y(), heading};
     }
 
     @Override
@@ -43,7 +50,7 @@ public class CoupledConfigurationState
         if (!(o instanceof CoupledConfigurationState))
             return false;
         CoupledConfigurationState k2 = (CoupledConfigurationState) o;
-        return k2.position().equals(position()) &&
-                Math.abs(k2.heading() - heading()) < 1e-6;
+        return k2.position.equals(position) &&
+                Math.abs(k2.heading - heading) < 1e-6;
     }
 }

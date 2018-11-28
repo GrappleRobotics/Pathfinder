@@ -6,7 +6,6 @@
 namespace grpl {
 namespace pf {
   /**
-   * @brief
    * Motion profiles
    *
    * The grpl::pf::profile namespace contains all motion profile implementations.
@@ -18,7 +17,6 @@ namespace pf {
     using kinematic_state = Eigen::Matrix<double, 1, constants::profile_kinematics_order>;
 
     /**
-     * @brief
      * A single state (sample point) of a motion profile. This contains the kinematics of
      * the profile sampled at a given time.
      *
@@ -36,7 +34,6 @@ namespace pf {
     };
 
     /**
-     * @brief
      * Abstract base class for all motion profile types.
      *
      * A motion profile describes some function that forms the shape of the position-time curve
@@ -58,14 +55,12 @@ namespace pf {
       virtual ~profile() {}
 
       /**
-       * @brief
        * Get the index of the limited term (the highest order, non-infinite term). See constants in
        * @ref grpl::pf
        */
       virtual const size_t limited_term() const = 0;
 
       /**
-       * @brief
        * Set the goal (setpoint) of the profile.
        *
        * @param sp The goal (setpoint) of the profile, in metres.
@@ -73,7 +68,6 @@ namespace pf {
       void set_goal(double sp) { _goal = sp; }
 
       /**
-       * @brief
        * Get the goal (setpoint) of the profile.
        *
        * @return The goal (setpoint) of the profile, in metres.
@@ -83,7 +77,6 @@ namespace pf {
       // TODO: Abstract timeslice?
 
       /**
-       * @brief
        * Set the timeslice period.
        *
        * The timeslice is used in @ref calculate(state&, double), where a single
@@ -98,7 +91,6 @@ namespace pf {
       void set_timeslice(double timeslice) { _timeslice = timeslice; }
 
       /**
-       * @brief
        * Get the timeslice period.
        *
        * @return The timeslice period, T_slice, in seconds.
@@ -106,7 +98,6 @@ namespace pf {
       double get_timeslice() const { return _timeslice; }
 
       /**
-       * @brief
        * Apply a constrained limit to the profile. This will limit the maximum and minimum value of
        * this term during the profile (e.g. maximum velocity / acceleration).
        *
@@ -123,7 +114,6 @@ namespace pf {
       }
 
       /**
-       * @brief
        * Obtain the currently set limits of the profile
        *
        * @return The limits matrix. Row 0 is the minimum values, row 1 is the maximum. The column indices
@@ -132,7 +122,6 @@ namespace pf {
       limits_t get_limits() { return _limits; }
 
       /**
-       * @brief
        * Calculate a single state of the motion profile, in a predictive manner.
        *
        * This method function uses the last (current) state of the system in order to generate the following

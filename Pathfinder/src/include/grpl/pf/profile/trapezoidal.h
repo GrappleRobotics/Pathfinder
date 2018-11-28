@@ -8,7 +8,6 @@ namespace grpl {
 namespace pf {
   namespace profile {
     /**
-     * @brief
      * Implementation of a trapezoidal (limited acceleration) motion profile.
      *
      * A trapezoidal motion profile is a motion profile limited by acceleration (therefore, infinite jerk).
