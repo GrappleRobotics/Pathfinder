@@ -10,6 +10,7 @@ jobs:
   variables:
     PlatformName: "win"
   steps:
+  - template: azure-init.yml
   - template: azure-steps.yml
     parameters:
       env: { }
@@ -20,6 +21,7 @@ jobs:
   variables:
     PlatformName: "mac"
   steps:
+  - template: azure-init.yml
   - template: azure-steps.yml
     parameters:
       env: { }
@@ -31,6 +33,7 @@ jobs:
   variables:
     PlatformName: "linuxGCC"
   steps:
+  - template: azure-init.yml
   - template: azure-steps.yml
     parameters:
       env: { "CI_COMPILER": "GCC" }
@@ -42,6 +45,7 @@ jobs:
   variables:
     PlatformName: "linuxClang"
   steps:
+  - template: azure-init.yml
   - template: azure-steps.yml
     parameters:
       env: { "CI_COMPILER": "CLANG" }
@@ -53,6 +57,7 @@ jobs:
   variables:
     PlatformName: "roborio"
   steps:
+  - template: azure-init.yml
   - task: Gradle@2
     inputs:
       workingDirectory: ''
@@ -70,6 +75,7 @@ jobs:
   variables:
     PlatformName: "raspbian"
   steps:
+  - template: azure-init.yml
   - task: Gradle@2
     inputs:
       workingDirectory: ''
