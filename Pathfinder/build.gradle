@@ -8,10 +8,8 @@ apply from: 'plot.gradle'
 model {
     binaries {
         all {
-            if (!(toolChain instanceof Clang) && !targetPlatform.operatingSystem.windows)
+            if (!(toolChain instanceof Clang) && targetPlatform.name == edu.wpi.first.toolchain.NativePlatforms.desktop)
                 println "WARNING: Not using Clang. Additional warnings and sanitation may be missing."
-            else if (toolChain instanceof Clang && targetPlatform.operatingSystem.windows)
-                println "WARNING: Clang on windows is not supported. Please install MSVC"
         }
     }
     components {
@@ -34,7 +32,7 @@ model {
             testing $.components.pathfinder 
 
             binaries.all {
-                if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                if (toolChain instanceof GccCompatibleToolChain) {
                     linker.args << '-pthread'
                 } else {
                     // MSVC
@@ -61,10 +59,10 @@ model {
             
             binaries.all {
                 cppCompiler.define 'EIGEN_RUNTIME_NO_MALLOC'
-                if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                if (toolChain instanceof GccCompatibleToolChain) {
                     linker.args << '-pthread'
 
-                    if (toolChain instanceof Clang && targetPlatform.architecture == 'any64') {
+                    if (toolChain instanceof Clang && targetPlatform.name == edu.wpi.first.toolchain.NativePlatforms.desktop) {
                         cppCompiler.args << '-fsanitize=address'
                         linker.args << '-fsanitize=address'
                     }

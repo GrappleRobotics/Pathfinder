@@ -1,3 +1,10 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'Pathfinder'
 
 include 'libs', 'Pathfinder', 'Pathfinder-Java'

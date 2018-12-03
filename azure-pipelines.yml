@@ -1,6 +1,6 @@
 resources:
   containers:
-  - container: wpilib2019
+  - container: linux
     image: jaci/azure-native-linux:2018.11.14
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
 - job: LinuxGCC
   pool: 
     vmImage: 'Ubuntu-16.04'
-  container: wpilib2019
+  container: linux
   variables:
     PlatformName: "linuxGCC"
   steps:
@@ -38,10 +38,44 @@ jobs:
 - job: LinuxClang
   pool: 
     vmImage: 'Ubuntu-16.04'
-  container: wpilib2019
+  container: linux
   variables:
     PlatformName: "linuxClang"
   steps:
   - template: azure-steps.yml
     parameters:
       env: { "CI_COMPILER": "CLANG" }
+
+- job: LinuxRoboRIO
+  pool: 
+    vmImage: 'Ubuntu-16.04'
+  container: linux
+  variables:
+    PlatformName: "roborio"
+  steps:
+  - task: Gradle@2
+    inputs:
+      workingDirectory: ''
+      gradleWrapperFile: 'gradlew'
+      tasks: 'installRoboRioToolchain'
+      options: '--scan --stacktrace'
+  - template: azure-steps.yml
+    parameters:
+      env: { "CI_COMPILER": "ROBORIO" }
+
+- job: LinuxRaspbian
+  pool: 
+    vmImage: 'Ubuntu-16.04'
+  container: linux
+  variables:
+    PlatformName: "raspbian"
+  steps:
+  - task: Gradle@2
+    inputs:
+      workingDirectory: ''
+      gradleWrapperFile: 'gradlew'
+      tasks: 'installRaspbianToolchain'
+      options: '--scan --stacktrace'
+  - template: azure-steps.yml
+    parameters:
+      env: { "CI_COMPILER": "RASPBIAN" }

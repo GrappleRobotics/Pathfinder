@@ -1,9 +1,11 @@
 plugins {
     id 'com.gradle.build-scan' version '1.16'
-    id "org.ysb33r.doxygen" version "0.4" apply false
+    id 'org.ysb33r.doxygen' version '0.4' apply false
+    id 'edu.wpi.first.Toolchain' version '2019.1.1-beta-3-p-2' apply false
 }
 
 import org.gradle.internal.os.OperatingSystem
+import edu.wpi.first.toolchain.NativePlatforms
 
 task subclean();
 
@@ -17,11 +19,17 @@ allprojects {
     plugins.withType(CppPlugin).whenPluginAdded {
         project.apply plugin: "visual-studio"
         project.apply plugin: "org.ysb33r.doxygen"
+        project.apply plugin: 'edu.wpi.first.Toolchain'
+        
+        toolchainsPlugin.withRaspbian()
+        toolchainsPlugin.withRoboRIO()
+
+        toolchainsPlugin.getByName('roboRio').optional = true
+
         rootProject.tasks.subclean.dependsOn tasks.clean
 
-        ext.desktopOS = OperatingSystem.current().isWindows() ? "windows" : OperatingSystem.current().isMacOsX() ? "osx" : "linux"
-        ext.desktop32Classifier = "${ext.desktopOS}x86"
-        ext.desktop64Classifier = "${ext.desktopOS}x86-64"
+        ext.is64 = NativePlatforms.desktopArch() == "x86-64"
+        ext.desktop32Classifier = NativePlatforms.desktopOS() + "x86"
 
         project.model {
             buildTypes {
@@ -29,37 +37,48 @@ allprojects {
                 debug
             }
             platforms {
-                "${desktop32Classifier}" {
-                    architecture 'x86'
-                }
-                "${desktop64Classifier}" {
-                    architecture 'x86_64'
+                // If we're on x86 64-bit, also compile for x86 32-bit
+                if (is64) {
+                    "${desktop32Classifier}" {
+                        architecture 'x86'
+                    }
                 }
             }
             toolChains {
-                if (System.getenv("CI_COMPILER") != null) {
-                    if (System.getenv("CI_COMPILER") == "GCC")
+                def ci = System.getenv("CI_COMPILER")
+                if (ci != null) {
+                    if (ci == "GCC")
                         gcc(Gcc)
-                    else if (System.getenv("CI_COMPILER") == "MSVC")
+                    else if (ci == "MSVC")
                         msvc(VisualCpp)
-                    else
+                    else if (ci == "CLANG")
                         clang(Clang)
+                    else if (ci == "ROBORIO")
+                        roborio(edu.wpi.first.toolchain.roborio.RoboRioGcc)
+                    else if (ci == "RASPBIAN")
+                        raspbian(edu.wpi.first.toolchain.raspbian.RaspbianGcc)
                 } else {
                     msvc(VisualCpp)
                     // Define Clang first - for ASAN (Default)
                     clang(Clang)
                     gcc(Gcc)
+                    roborio(edu.wpi.first.toolchain.roborio.RoboRioGcc)
+                    raspbian(edu.wpi.first.toolchain.raspbian.RaspbianGcc)
                 }
             }
             components {
                 withType(TargetedNativeComponent) {
-                    targetPlatform ext.desktop32Classifier
-                    targetPlatform ext.desktop64Classifier
+                    targetPlatform NativePlatforms.desktop
+                    targetPlatform NativePlatforms.raspbian
+                    targetPlatform NativePlatforms.roborio
+
+                    if (is64)
+                        targetPlatform ext.desktop32Classifier
                 }
             }
             binaries {
                 withType(NativeBinarySpec) {
-                    if (toolChain instanceof Gcc || toolChain instanceof Clang) {
+                    if (toolChain instanceof GccCompatibleToolChain) {
                         cppCompiler.args << '-std=c++14' << '-O2' << '-Werror'
 
                         if (buildType == buildTypes.debug) {
@@ -79,22 +98,26 @@ allprojects {
             }
         }
         
-        ext.binaryDists = []
+        // ext.binaryDists = []
+        // ext.binaryArtifacts = { scope, name, jar ->
+        //     binaryDists.each { z -> 
+        //         if (z.binary.component.name == name) {
+        //             scope.artifact(jar ? z.jartask : z.ziptask) {
+        //                 classifier z.binary.targetPlatform.name
+        //             }
+        //         }
+        //     }
+        // }
+        ext.binaryPublishers = [:]
         ext.binaryArtifacts = { scope, name, jar ->
-            binaryDists.each { z -> 
-                if (z.binary.component.name == name) {
-                    scope.artifact(jar ? z.jartask : z.ziptask) {
-                        classifier z.binary.targetPlatform.name
-                    }
-                }
-            }
+            binaryPublishers[name] = [scope: scope, jar: jar]
         }
 
         project.model {
             binaries {
                 withType(NativeBinarySpec) {
                     def bin = it
-                    if (buildType.name == "release" && !(it instanceof StaticLibraryBinary)) {
+                    if (buildType.name == "release" && !(it instanceof StaticLibraryBinary) && it.buildable) {
                         def taskSuffix = "${component.name}${targetPlatform.name}"
                         def source = (bin instanceof SharedLibraryBinary ? bin.sharedLibraryFile : bin.executable.file)
                         
@@ -117,7 +140,15 @@ allprojects {
 
                             dependsOn bin.tasks.withType(AbstractLinkTask)
                         }
-                        binaryDists << [ binary: bin, jartask: jartask, ziptask: ziptask ]
+
+                        if (binaryPublishers[bin.component.name] != null) {
+                            def entry = binaryPublishers[bin.component.name]
+                            entry.scope.artifact(entry.jar ? jartask : ziptask) {
+                                classifier targetPlatform.name
+                            }
+                        }
+                        // println "Bin: ${bin}"
+                        // binaryDists << [ binary: bin, jartask: jartask, ziptask: ziptask ]
                     }
                 }
             }
@@ -128,6 +159,18 @@ allprojects {
             binaries {
                 withType(GoogleTestTestSuiteBinarySpec) {
                     lib project: ":libs", library: "googleTest", linkage: "static"
+
+                    boolean applies = false
+                    if (targetPlatform.name == edu.wpi.first.toolchain.NativePlatforms.desktop)
+                        applies = true
+                    if (ext.is64 && targetPlatform.name == ext.desktop32Classifier)
+                        applies = true
+
+                    if (!applies) {
+                        tasks.withType(RunTestExecutable) { RunTestExecutable task ->
+                            task.enabled = false
+                        }
+                    }
                 }
             }
         }
@@ -160,5 +203,5 @@ buildScan {
 }
 
 wrapper {
-    gradleVersion = '4.9'
+    gradleVersion = '5.0'
 }

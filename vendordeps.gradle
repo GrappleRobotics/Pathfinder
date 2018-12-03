@@ -20,7 +20,6 @@ Map<String, Object> vendorJson() {
         headerClassifier: "headers", 
         libName: "Pathfinder",
         configuration: "native_pathfinder",
-        supportNative: true,
         validClassifiers: []
       ],
       [
@@ -32,7 +31,6 @@ Map<String, Object> vendorJson() {
         headerClassifier: "headers",
         libName: "Eigen",
         configuration: "native_pathfinder",
-        supportNative: true,
         validClassifiers: []
       ]
     ],

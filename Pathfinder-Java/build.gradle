@@ -101,7 +101,7 @@ project.afterEvaluate {
 test {
     useJUnitPlatform()
     // TODO: make this not-shit
-    def libPath = new File(project.buildDir, "libs/pathfinderjni/shared/${desktop64Classifier}/debug").absolutePath
+    def libPath = new File(project.buildDir, "libs/pathfinderjni/shared/${edu.wpi.first.toolchain.NativePlatforms.desktop}/debug").absolutePath
     systemProperties.put("java.library.path", libPath)
     testLogging {
         events "passed", "skipped", "failed"
