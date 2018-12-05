@@ -12,43 +12,39 @@ Map<String, Object> vendorJson() {
     jsonUrl: "https://dev.imjac.in/maven/grpl/pathfinder/Pathfinder-latest.json",
     cppDependencies: [
       [
-        groupId: "grpl.pathfinder",
+        groupId: project.group,
         artifactId: "Pathfinder",
         version: project.version,
-        isHeaderOnly: true,
-        hasSources: false,  // Header only - headers == sources
-        headerClassifier: "headers", 
         libName: "Pathfinder",
         configuration: "native_pathfinder",
-        validClassifiers: []
+        headerClassifier: "headers", 
+        validPlatforms: []
       ],
       [
         groupId: "grpl.thirdparty.tuxfamily.eigen",
         artifactId: "Eigen",
         version: project(':libs').eigen_version,
-        isHeaderOnly: true,
-        hasSources: false,  // See above
-        headerClassifier: "headers",
         libName: "Eigen",
         configuration: "native_pathfinder",
-        validClassifiers: []
+        headerClassifier: "headers",
+        validPlatforms: []
       ]
     ],
     javaDependencies: [
       [
-        groupId: "grpl.pathfinder",
+        groupId: project.group,
         artifactId: "Pathfinder-Java",
         version: project.version
       ]
     ],
     jniDependencies: [
       [
-        groupId: "grpl.pathfinder",
+        groupId: project.group,
         artifactId: "Pathfinder-JNI",
         version: project.version,
         isJar: true,
-        skipOnUnknownClassifier: true,
-        validClassifiers: [
+        skipInvalidPlatforms: true,
+        validPlatforms: [
           "linuxx86-64",
           "windowsx86-64",
           "osxx86-64",
