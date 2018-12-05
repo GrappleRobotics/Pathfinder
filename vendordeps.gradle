@@ -18,7 +18,7 @@ Map<String, Object> vendorJson() {
         libName: "Pathfinder",
         configuration: "native_pathfinder",
         headerClassifier: "headers", 
-        validPlatforms: []
+        binaryPlatforms: []
       ],
       [
         groupId: "grpl.thirdparty.tuxfamily.eigen",
@@ -27,7 +27,7 @@ Map<String, Object> vendorJson() {
         libName: "Eigen",
         configuration: "native_pathfinder",
         headerClassifier: "headers",
-        validPlatforms: []
+        binaryPlatforms: []
       ]
     ],
     javaDependencies: [
