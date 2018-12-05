@@ -1,5 +1,6 @@
 parameters: 
   env: {}
+  args: ''
 
 steps:
 - task: Gradle@2
@@ -10,7 +11,7 @@ steps:
     publishJUnitResults: false
     testResultsFiles: '**/TEST-*.xml'
     tasks: 'clean build doxygen javadoc publish'
-    options: '-PwithBench --scan --stacktrace'
+    options: '-PwithBench --scan --stacktrace $(parameters.args)'
   env: ${{ parameters.env }}
   
 - task: CopyFiles@2

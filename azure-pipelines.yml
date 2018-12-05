@@ -66,6 +66,7 @@ jobs:
   - template: azure-steps.yml
     parameters:
       env: { "CI_COMPILER": "ROBORIO" }
+      args: '-xcheck'
 
 - job: LinuxRaspbian
   pool: 
@@ -83,3 +84,4 @@ jobs:
   - template: azure-steps.yml
     parameters:
       env: { "CI_COMPILER": "RASPBIAN" }
+      args: '-xcheck'
