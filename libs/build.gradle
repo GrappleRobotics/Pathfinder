@@ -6,6 +6,8 @@ ext.gbench_root = new File(libroot, "googlebench")
 ext.eigen_root = new File(libroot, "eigen")
 
 ext.eigen_version = "3.3.5"
+ext.googlebench_version = "1.4.1"
+ext.googletest_version = "1.8.1"
 
 model {
     buildTypes {
@@ -82,6 +84,30 @@ task zipEigenHeaders(type: Zip) {
     version = eigen_version
 }
 
+task zipGoogleTestHeaders(type: Zip) {
+    from fileTree(new File(gtest_root, "include")) {
+        include "**/*.hpp", "**/*.h"
+    }
+
+    baseName = "GTest"
+    classifier = "headers"
+    version = googletest_version
+}
+
+task zipGoogleBenchHeaders(type: Zip) {
+    from fileTree(new File(gbench_root, "src")) {
+        include "**/*.hpp", "**/*.h"
+    }
+
+    from fileTree(new File(gbench_root, "include")) {
+        include "**/*.hpp", "**/*.h"
+    }
+
+    baseName = "GBench"
+    classifier = "headers"
+    version = googlebench_version
+}
+
 publishing {
     publications {
         eigen(MavenPublication) {
@@ -92,6 +118,28 @@ publishing {
             artifact zipEigenHeaders {
                 classifier 'headers'
             }
+        }
+        googleBench(MavenPublication) {
+            groupId 'grpl.thirdparty.google.test'
+            artifactId 'GoogleBench'
+            version googlebench_version
+
+            artifact zipGoogleBenchHeaders {
+                classifier 'headers'
+            }
+
+            binaryArtifacts(it, 'googleBench', false)
+        }
+        googleTest(MavenPublication) {
+            groupId 'grpl.thirdparty.google.test'
+            artifactId 'GoogleTest'
+            version googlebench_version
+
+            artifact zipGoogleTestHeaders {
+                classifier 'headers'
+            }
+
+            binaryArtifacts(it, 'googleTest', false)
         }
     }
 }

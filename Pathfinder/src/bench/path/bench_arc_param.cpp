@@ -34,4 +34,4 @@ static void BM_ArcParamHermite(benchmark::State &state) {
   state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK(BM_ArcParamHermite)->Arg(1)->Arg(10)->Arg(100)->Arg(1000)->Complexity();
+BENCHMARK(BM_ArcParamHermite)->Arg(1)->Arg(10)->Arg(100)->Arg(1000)->Complexity()->Unit(benchmark::kMillisecond);

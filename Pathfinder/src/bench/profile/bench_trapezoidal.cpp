@@ -22,4 +22,4 @@ static void BM_Profile_Trapezoidal(benchmark::State &state) {
   state.SetComplexityN(state.range(0));
 }
 
-BENCHMARK(BM_Profile_Trapezoidal)->Arg(10)->Arg(100)->Arg(1000)->Arg(10000)->Complexity();
+BENCHMARK(BM_Profile_Trapezoidal)->Arg(10)->Arg(100)->Arg(1000)->Arg(10000)->Complexity()->Unit(benchmark::kMillisecond);
