@@ -67,6 +67,7 @@ jobs:
     parameters:
       env: { "CI_COMPILER": "ROBORIO" }
       args: '-xcheck'
+      has_tests: false
 
 - job: LinuxRaspbian
   pool: 
@@ -85,3 +86,4 @@ jobs:
     parameters:
       env: { "CI_COMPILER": "RASPBIAN" }
       args: '-xcheck'
+      has_tests: false

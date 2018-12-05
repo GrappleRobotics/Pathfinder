@@ -1,6 +1,7 @@
 parameters: 
   env: {}
   args: ''
+  has_tests: true
 
 steps:
 - task: Gradle@2
@@ -20,10 +21,11 @@ steps:
     contents: '**/*'
     targetFolder: $(Build.ArtifactStagingDirectory)/build/pf
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    artifactName: 'test-results/$(PlatformName)'
-    pathtoPublish: $(Build.ArtifactStagingDirectory)/build/pf/test-results
+- ${{ if eq(parameters.has_tests, 'true') }}:
+  - task: PublishBuildArtifacts@1
+    inputs:
+      artifactName: 'test-results/$(PlatformName)'
+      pathtoPublish: $(Build.ArtifactStagingDirectory)/build/pf/test-results
 
 - task: CopyFiles@2
   inputs:
