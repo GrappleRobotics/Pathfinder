@@ -63,6 +63,8 @@ jobs:
       gradleWrapperFile: 'gradlew'
       tasks: 'installRoboRioToolchain'
       options: '--scan --stacktrace'
+  - bash: git apply ../bench-athena.patch
+    workingDirectory: libs/googlebench
   - template: azure-steps.yml
     parameters:
       env: { "CI_COMPILER": "ROBORIO" }

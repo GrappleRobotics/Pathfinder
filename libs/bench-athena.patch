@@ -1,0 +1,17 @@
+diff --git a/src/sysinfo.cc b/src/sysinfo.cc
+index d4e5336..9ead4c5 100644
+--- a/src/sysinfo.cc
++++ b/src/sysinfo.cc
+@@ -269,9 +269,9 @@ std::vector<CPUInfo::CacheInfo> GetCacheSizesFromKVFS() {
+     if (!ReadFromFile(StrCat(FPath, "level"), &info.level))
+       PrintErrorAndDie("Failed to read from file ", FPath, "level");
+     std::string map_str;
+-    if (!ReadFromFile(StrCat(FPath, "shared_cpu_map"), &map_str))
+-      PrintErrorAndDie("Failed to read from file ", FPath, "shared_cpu_map");
+-    info.num_sharing = CountSetBitsInCPUMap(map_str);
++    // if (!ReadFromFile(StrCat(FPath, "shared_cpu_map"), &map_str))
++    //   PrintErrorAndDie("Failed to read from file ", FPath, "shared_cpu_map");
++    // info.num_sharing = CountSetBitsInCPUMap(map_str);
+     res.push_back(info);
+   }
+ 
