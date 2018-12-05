@@ -11,7 +11,7 @@ steps:
     publishJUnitResults: false
     testResultsFiles: '**/TEST-*.xml'
     tasks: 'clean build doxygen javadoc publish'
-    options: '-PwithBench --scan --stacktrace $(parameters.args)'
+    options: ${{ parameters.args }} -PwithBench --scan --stacktrace
   env: ${{ parameters.env }}
   
 - task: CopyFiles@2
