@@ -54,7 +54,9 @@ Map<String, Object> vendorJson() {
           "osxx86-64",
           "linuxx86",
           "windowsx86",
-          "osxx86"
+          "osxx86",
+          "linuxathena",
+          "linuxraspbian"
         ]
       ]
     ]
