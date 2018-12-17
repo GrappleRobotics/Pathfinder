@@ -1,6 +1,6 @@
-set term png size 1800,1800 enhanced
+set term png size 1800,2400 enhanced
 set output "cdt.png"
-set multiplot layout 3, 3 title "CDT Model (Centre)"
+set multiplot layout 4, 3 title "CDT Model (Centre)"
 
 set xrange [-2:6]
 set yrange [-2:6]
@@ -27,7 +27,13 @@ set title "Curvature"
 plot "cdt.csv" using 1:8:9 w p pt 7 lc palette
 
 set title "Voltage"
-plot "cdt.csv" using 1:10:9 w p pt 7 lc palette
+plot "cdt.csv" using 1:12:9 w p pt 7 lc palette
 
 set title "Current"
-plot "cdt.csv" using 1:11:9 w p pt 7 lc palette 
+plot "cdt.csv" using 1:13:9 w p pt 7 lc palette 
+
+set title "Angular Speed"
+plot "cdt.csv" using 1:10:9 w p pt 7 lc palette
+
+set title "Torque"
+plot "cdt.csv" using 1:11:9 w p pt 7 lc palette

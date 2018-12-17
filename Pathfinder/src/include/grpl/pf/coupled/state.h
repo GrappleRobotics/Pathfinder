@@ -77,10 +77,12 @@ namespace pf {
       vector_t position = vector_t::Zero();
       //! The kinematics of the wheel at the time of the state. Note this is linear, not rotational.
       kinematic_state kinematics = kinematic_state::Zero();
-      //! The voltage applied to the transmission connected to this wheel, in Volts
-      double voltage = 0;
-      //! The current drawn by the transmission connected to this wheel, in Amperes.
-      double current  = 0;
+      //! The control signal applied to the transmission, unitless in the range of -1 to 1.
+      double control_signal = 0;
+      //! The torque applied by the transmission, in Nm.
+      double torque = 0;
+      //! The angular speed of the transmission, in rad/s.
+      double angular_speed = 0;
       bool   finished = false;
     };
   }  // namespace coupled

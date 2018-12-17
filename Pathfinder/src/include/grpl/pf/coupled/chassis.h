@@ -21,7 +21,7 @@ namespace pf {
      */
     class chassis {
      public:
-      using transmission_t = transmission::dc_transmission;
+      using transmission_t = transmission::transmission;
 
       /**
        * Construct a coupled chassis
@@ -90,9 +90,11 @@ namespace pf {
 
         // Wheel linear speed, maximum possible speeds
         // Ordered left, right.
-        Eigen::Vector2d maximum_vels{
-            _trans_left.get_free_speed(_trans_left.nominal_voltage()) * _wheel_radius,
-            _trans_right.get_free_speed(_trans_right.nominal_voltage()) * _wheel_radius};
+        // Eigen::Vector2d maximum_vels{
+        //     _trans_left.get_free_speed(_trans_left.nominal_voltage()) * _wheel_radius,
+        //     _trans_right.get_free_speed(_trans_right.nominal_voltage()) * _wheel_radius};
+        Eigen::Vector2d maximum_vels{_trans_left.free_speed(1.0) * _wheel_radius,
+                                     _trans_right.free_speed(1.0) * _wheel_radius};
 
         if (std::abs(curvature) < constants::epsilon) {
           // No curvature, straight forward (purely linear). Need to take minimum as for
@@ -187,18 +189,22 @@ namespace pf {
                                (linear - differential) / _wheel_radius};
 
         // Calculate fwd torque limits for each side
-        Eigen::Vector2d fwd_torque_limits{
-            _trans_right.get_torque(_trans_right.get_current(_trans_right.nominal_voltage(), wheels[0])),
-            _trans_left.get_torque(_trans_left.get_current(_trans_left.nominal_voltage(), wheels[1]))};
+        // Eigen::Vector2d fwd_torque_limits{
+        // _trans_right.get_torque(_trans_right.get_current(_trans_right.nominal_voltage(), wheels[0])),
+        // _trans_left.get_torque(_trans_left.get_current(_trans_left.nominal_voltage(), wheels[1]))};
+        Eigen::Vector2d fwd_torque_limits{_trans_right.torque(wheels[0], 1.0),
+                                          _trans_left.torque(wheels[1], 1.0)};
 
         Eigen::Vector2d fwd_accel_limits = fwd_torque_limits / (_mass * _wheel_radius);
 
         double max = fwd_accel_limits.sum() / 2.0;
 
         // Calculate rvs torque limits for each side
-        Eigen::Vector2d rvs_torque_limits{
-            _trans_right.get_torque(-_trans_right.get_current(_trans_right.nominal_voltage(), wheels[0])),
-            _trans_left.get_torque(-_trans_left.get_current(_trans_left.nominal_voltage(), wheels[1]))};
+        // Eigen::Vector2d rvs_torque_limits{
+        // _trans_right.get_torque(-_trans_right.get_current(_trans_right.nominal_voltage(), wheels[0])),
+        // _trans_left.get_torque(-_trans_left.get_current(_trans_left.nominal_voltage(), wheels[1]))};
+        Eigen::Vector2d rvs_torque_limits{_trans_right.torque(wheels[0], -1.0),
+                                          _trans_left.torque(wheels[1], -1.0)};
 
         Eigen::Vector2d rvs_accel_limits = rvs_torque_limits / (_mass * _wheel_radius);
 
@@ -258,31 +264,44 @@ namespace pf {
         left.kinematics[ACCELERATION] = a_linear - a_differential;
         right.kinematics[ACCELERATION] = a_linear + a_differential;
 
-        solve_electrical(left, right);
+        // solve_electrical(left, right);
+        solve_inv_transmission(left, right);
 
         return std::pair<wheel_state, wheel_state>{left, right};
       }
 
      private:
-      void solve_electrical(wheel_state &left, wheel_state &right) const {
-        do_solve_electrical(left, _trans_left);
-        do_solve_electrical(right, _trans_right);
+      void solve_inv_transmission(wheel_state &left, wheel_state &right) const {
+        do_solve_inv_transmission(left, _trans_left);
+        do_solve_inv_transmission(right, _trans_right);
+      }
+
+      void do_solve_inv_transmission(wheel_state &wheel, transmission_t &transmission) const {
+        double speed  = wheel.kinematics[VELOCITY] / _wheel_radius;
+        double torque = _mass * wheel.kinematics[ACCELERATION] * _wheel_radius;
+
+        double signal_free  = transmission.partial_signal_at_speed(speed);
+        double signal_stall = transmission.partial_signal_at_torque(torque);
+
+        wheel.control_signal = signal_free + signal_stall;
+        wheel.torque = torque;
+        wheel.angular_speed = speed;
       }
 
       // TODO: Make this part of transmission_t
-      void do_solve_electrical(wheel_state &wheel, transmission_t &transmission) const {
-        double speed        = wheel.kinematics[VELOCITY] / _wheel_radius;
-        double free_voltage = transmission.get_free_voltage(speed);
+      // void do_solve_electrical(wheel_state &wheel, transmission_t &transmission) const {
+      //   double speed        = wheel.kinematics[VELOCITY] / _wheel_radius;
+      //   double free_voltage = transmission.get_free_voltage(speed);
 
-        double torque          = _mass * wheel.kinematics[ACCELERATION] * _wheel_radius;
-        double current         = transmission.get_torque_current(torque);
-        double current_voltage = transmission.get_current_voltage(current);
+      //   double torque          = _mass * wheel.kinematics[ACCELERATION] * _wheel_radius;
+      //   double current         = transmission.get_torque_current(torque);
+      //   double current_voltage = transmission.get_current_voltage(current);
 
-        double total_voltage = free_voltage + current_voltage;
+      //   double total_voltage = free_voltage + current_voltage;
 
-        wheel.voltage = total_voltage;
-        wheel.current = current;
-      }
+      //   wheel.voltage = total_voltage;
+      //   wheel.current = current;
+      // }
 
       double _mass, _track_radius, _wheel_radius;
       // TODO: Not reference

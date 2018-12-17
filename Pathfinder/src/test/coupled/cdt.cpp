@@ -10,9 +10,13 @@ using namespace grpl::pf;
 
 template <typename ST>
 void echo(std::ofstream &out, ST state, int id) {
-  out << state.time << "," << state.config.x() << "," << state.config.y() << ","
-      << state.config[2] << "," << state.kinematics[POSITION] << "," << state.kinematics[VELOCITY]
-      << "," << state.kinematics[ACCELERATION] << "," << state.curvature << "," << id << ","
+  out << state.time << "," << state.config.x() << "," << state.config.y() << "," << state.config[2] << ","
+      << state.kinematics[POSITION] << "," << state.kinematics[VELOCITY] << ","
+      << state.kinematics[ACCELERATION] << "," << state.curvature << "," << id << ","
+      << ""
+      << ","
+      << ""
+      << ","
       << ""
       << "," << std::endl;
 }
@@ -21,23 +25,25 @@ void echo_limits(std::ofstream &out, double time, profile::trapezoidal::limits_t
   auto vel = lim.col(1);
   auto acc = lim.col(2);
 
-  out << time << ",,,,," << vel[0] << "," << acc[0] << ",,-1,," << std::endl;
-  out << time << ",,,,," << vel[1] << "," << acc[1] << ",,-1,," << std::endl;
+  out << time << ",,,,," << vel[0] << "," << acc[0] << ",,-1,,,," << std::endl;
+  out << time << ",,,,," << vel[1] << "," << acc[1] << ",,-1,,,," << std::endl;
 }
 
 void echo_simulation(std::ofstream &out, double time, Eigen::Vector3d config) {
-  out << time << "," << config.x() << "," << config.y() << "," << config[2] << ",,,,,3,," << std::endl;
+  out << time << "," << config.x() << "," << config.y() << "," << config[2] << ",,,,,3,,,," << std::endl;
 }
 
 template <typename ST>
-void echo_wheel(std::ofstream &out, ST state, int id) {
+void echo_wheel(std::ofstream &out, ST state, transmission::dc_motor &motor, int id) {
   out << state.time << "," << state.position.x() << "," << state.position.y() << ","
       << ""
       << ","
       << ""
       << "," << state.kinematics[VELOCITY] << "," << state.kinematics[ACCELERATION] << ","
       << ""
-      << "," << id << "," << state.voltage << "," << state.current << std::endl;
+      << "," << id << "," << state.angular_speed << "," << state.torque << ","
+      << motor.signal_to_voltage(state.control_signal) << "," << motor.torque_to_current(state.torque)
+      << std::endl;
 }
 
 TEST(CDT, basic) {
@@ -65,13 +71,13 @@ TEST(CDT, basic) {
   transmission::dc_motor dualCIM{12.0, 5330 * 2.0 * constants::PI / 60.0 / G, 2 * 2.7, 2 * 131.0,
                                  2 * 2.41 * G};
   // coupled_t               model{dualCIM, dualCIM, 0.0762, 0.5, 25.0, 10.0};
-  coupled::chassis    chassis{dualCIM, dualCIM, 0.0762, 0.5, 25.0};
+  coupled::chassis                     chassis{dualCIM, dualCIM, 0.0762, 0.5, 25.0};
   coupled::causal_trajectory_generator gen;
 
   state_t state;
 
   std::ofstream pathfile("cdt.csv");
-  pathfile << "t,x,y,heading,distance,velocity,acceleration,curvature,path,voltage,current\n";
+  pathfile << "t,x,y,heading,distance,velocity,acceleration,curvature,path,angular,torque,voltage,current\n";
 
   coupled::configuration_state centre{0, 0, 0};
 
@@ -82,8 +88,8 @@ TEST(CDT, basic) {
     echo_limits(pathfile, t, profile.get_limits());
 
     std::pair<wheel_state_t, wheel_state_t> split = chassis.split(state);
-    echo_wheel(pathfile, split.first, 1);
-    echo_wheel(pathfile, split.second, 2);
+    echo_wheel(pathfile, split.first, dualCIM, 1);
+    echo_wheel(pathfile, split.second, dualCIM, 2);
 
     double w = (split.second.kinematics[VELOCITY] -
                 split.first.kinematics[VELOCITY]);  // track radius = 0.5, track diam = 1
