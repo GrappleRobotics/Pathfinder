@@ -203,8 +203,8 @@ namespace pf {
         // Eigen::Vector2d rvs_torque_limits{
         // _trans_right.get_torque(-_trans_right.get_current(_trans_right.nominal_voltage(), wheels[0])),
         // _trans_left.get_torque(-_trans_left.get_current(_trans_left.nominal_voltage(), wheels[1]))};
-        Eigen::Vector2d rvs_torque_limits{_trans_right.torque(wheels[0], -1.0),
-                                          _trans_left.torque(wheels[1], -1.0)};
+        Eigen::Vector2d rvs_torque_limits{-_trans_right.torque(wheels[0], 1.0),
+                                          -_trans_left.torque(wheels[1], 1.0)};
 
         Eigen::Vector2d rvs_accel_limits = rvs_torque_limits / (_mass * _wheel_radius);
 
