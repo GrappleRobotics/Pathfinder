@@ -52,6 +52,8 @@ namespace pf {
      public:
       using limits_t = Eigen::Matrix<double, 2, constants::profile_limits_order>;
 
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
       virtual ~profile() {}
 
       /**

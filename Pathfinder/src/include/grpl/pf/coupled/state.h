@@ -45,6 +45,8 @@ namespace pf {
      * trajectory.
      */
     struct state {
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
       //! The time point of this state, in seconds.
       double time = 0;
       //! The instantaneous curvature of the state, in m^-1
@@ -63,6 +65,8 @@ namespace pf {
      * for use with encoders / other following regimes.
      */
     struct wheel_state {
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
       /**
        * Position vector of the wheel
        *

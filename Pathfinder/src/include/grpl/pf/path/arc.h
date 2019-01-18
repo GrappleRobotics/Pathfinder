@@ -15,6 +15,8 @@ namespace pf {
      public:
       using vector_t = typename curve::vector_t;
 
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
       arc2d() {}
 
       /**
