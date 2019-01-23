@@ -212,7 +212,7 @@ namespace pf {
        *
        * @return  A pair, ordered [left, right], of @ref wheel_state.
        */
-      std::pair<wheel_state, wheel_state> split(const state centre) const {
+      std::pair<wheel_state, wheel_state> split(const state &centre) const {
         wheel_state left, right;
 
         left.time = right.time = centre.time;

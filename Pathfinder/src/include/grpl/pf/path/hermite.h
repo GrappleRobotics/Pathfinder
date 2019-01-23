@@ -22,6 +22,8 @@ namespace pf {
       using basis_t          = typename Eigen::Matrix<double, ORDER + 1, 1>;
       using control_matrix_t = typename Eigen::Matrix<double, 2, ORDER + 1>;
 
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
       /**
        * Create a default hermite, with identical zero'd start and end waypoints
        */
@@ -87,6 +89,7 @@ namespace pf {
        * Waypoint for a cubic hermite spline.
        */
       struct waypoint {
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         //! 2D position of the waypoint, in metres. Ordered x, y.
         vector_t position;
         //! 2D tangent to the waypoint, in metres. Ordered x, y.
@@ -150,6 +153,7 @@ namespace pf {
        * Waypoint for a quintic hermite spline.
        */
       struct waypoint {
+        EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         //! 2D position of the waypoint, in metres. Ordered x, y.
         vector_t position;
         //! 2D tangent to the waypoint, in metres. Ordered x, y.
