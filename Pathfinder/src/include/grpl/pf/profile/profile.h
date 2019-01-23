@@ -26,6 +26,7 @@ namespace pf {
      * @ref grpl::pf::ACCELERATION, all higher orders will be an undefined value).
      */
     struct state {
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW
       //! The time point of this state, in seconds
       double time = 0;
       //! The kinematic state of the system at the time of the state, filled to the maximum order of
