@@ -18,7 +18,7 @@ namespace pf {
 
     /**
      * Drivetrain configuration state, describing the configuration of the chassis.
-     * 
+     *
      * Formally, the 'configuration' of a body is all variables required to fully define the position
      * of the body and its manipulators. For a coupled drivetrain, this is simply its position in the
      * the work space, as well as its heading. In the case of the coupled drivetrain, this may be referred
@@ -55,7 +55,9 @@ namespace pf {
       configuration_state config = configuration_state::Zero();
       //! The kinematics of the chassis at the time of the state.
       kinematic_state kinematics = kinematic_state::Zero();
-      bool            finished   = false;
+      //! The 'hold' velocity. This is the velocity _before_ the acceleration is kinematics is applied
+      double vhold    = 0;
+      bool   finished = false;
     };
 
     /**
@@ -83,6 +85,8 @@ namespace pf {
       double torque = 0;
       //! The angular speed of the transmission, in rad/s.
       double angular_speed = 0;
+      //! The 'hold' velocity of the wheel.
+      double vhold    = 0;
       bool   finished = false;
     };
   }  // namespace coupled

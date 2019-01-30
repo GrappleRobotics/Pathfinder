@@ -5,6 +5,8 @@
 #include "grpl/pf/transmission/dc.h"
 #include "state.h"
 
+#include <iostream>
+
 namespace grpl {
 namespace pf {
   namespace coupled {
@@ -42,7 +44,7 @@ namespace pf {
             _trans_right(transmission_right),
             _wheel_radius(wheel_radius),
             _track_radius(track_radius),
-            _mass(mass) {}
+            _mass(mass), _moment_inertia(10) {}
 
       /**
        * @return The mass of the chassis, in kilograms
@@ -174,43 +176,147 @@ namespace pf {
        * @return  A pair, ordered [min, max], of the linear acceleration limits, in metres per second
        *          per second (ms^-2).
        */
-      std::pair<double, double> acceleration_limits(const configuration_state &config, double curvature,
-                                                    double velocity) const {
+      // std::pair<double, double> acceleration_limits(const configuration_state &config, double curvature,
+      //                                               double velocity) const {
+      //   double linear = velocity;
+      //   // k = w / v, w = v * k
+      //   double angular = velocity * curvature;
+      //   // v_diff = w * r
+      //   double differential = angular * _track_radius;
+
+      //   // v_r = v + v_diff, w_r = v_r / r_wheel
+      //   // v_l = v - v_diff, w_l = v_l / r_wheel
+      //   // Ordered right, left.
+      //   Eigen::Vector2d wheels{(linear + differential) / _wheel_radius,
+      //                          (linear - differential) / _wheel_radius};
+
+      //   // std::cout << "CC," << wheels[0] << "," << wheels[1] << std::endl;
+      //   // std::cout << "CC," << ((linear + differential) / _wheel_radius) << std::endl;
+      //   // std::cout << "CC," << wheels[0] << std::endl;
+
+      //   // Calculate fwd torque limits for each side
+      //   // Eigen::Vector2d fwd_torque_limits{
+      //   // _trans_right.get_torque(_trans_right.get_current(_trans_right.nominal_voltage(), wheels[0])),
+      //   // _trans_left.get_torque(_trans_left.get_current(_trans_left.nominal_voltage(), wheels[1]))};
+      //   Eigen::Vector2d fwd_torque_limits{_trans_right.torque(wheels[0], 1.0),
+      //                                     _trans_left.torque(wheels[1], 1.0)};
+
+      //   Eigen::Vector2d fwd_accel_limits = fwd_torque_limits / (_mass * _wheel_radius);
+
+      //   std::cout << "CC," << fwd_accel_limits[1] << "," << fwd_accel_limits[0] << std::endl;
+
+      //   double max = fwd_accel_limits.sum() / 2.0;
+
+      //   // Calculate rvs torque limits for each side
+      //   // Eigen::Vector2d rvs_torque_limits{
+      //   // _trans_right.get_torque(-_trans_right.get_current(_trans_right.nominal_voltage(), wheels[0])),
+      //   // _trans_left.get_torque(-_trans_left.get_current(_trans_left.nominal_voltage(), wheels[1]))};
+      //   Eigen::Vector2d rvs_torque_limits{-_trans_right.torque(wheels[0], 1.0),
+      //                                     -_trans_left.torque(wheels[1], 1.0)};
+
+      //   Eigen::Vector2d rvs_accel_limits = rvs_torque_limits / (_mass * _wheel_radius);
+
+      //   double min = rvs_accel_limits.sum() / 2.0;
+
+      //   return std::pair<double, double>{min, max};
+      // }
+
+      std::pair<double, double> acceleration_limits(const configuration_state &config, double curvature, double dcurvature, double velocity) const {
         double linear = velocity;
         // k = w / v, w = v * k
         double angular = velocity * curvature;
         // v_diff = w * r
         double differential = angular * _track_radius;
 
-        // v_r = v + v_diff, w_r = v_r / r_wheel
+      }
+
+      std::pair<double, double> acceleration_limits2(const configuration_state &config, double curvature, double dcurvature, double velocity) const {
+        double linear = velocity;
+        // k = w / v, w = v * k
+        double angular = velocity * curvature;
+        // v_diff = w * r
+        double differential = angular * _track_radius;
+
         // v_l = v - v_diff, w_l = v_l / r_wheel
-        // Ordered right, left.
-        Eigen::Vector2d wheels{(linear + differential) / _wheel_radius,
-                               (linear - differential) / _wheel_radius};
+        // v_r = v + v_diff, w_r = v_r / r_wheel
+        // Ordered left, right.
+        Eigen::Vector2d wheels{(linear - differential) / _wheel_radius,
+                               (linear + differential) / _wheel_radius};
 
-        // Calculate fwd torque limits for each side
-        // Eigen::Vector2d fwd_torque_limits{
-        // _trans_right.get_torque(_trans_right.get_current(_trans_right.nominal_voltage(), wheels[0])),
-        // _trans_left.get_torque(_trans_left.get_current(_trans_left.nominal_voltage(), wheels[1]))};
-        Eigen::Vector2d fwd_torque_limits{_trans_right.torque(wheels[0], 1.0),
-                                          _trans_left.torque(wheels[1], 1.0)};
+        std::pair<double, double> lims{ std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
 
-        Eigen::Vector2d fwd_accel_limits = fwd_torque_limits / (_mass * _wheel_radius);
+        // for (int side_nominal : {0, 1}) {
+        //   // side_nominal is the side that is pinned at its maximum operating (nominal) voltage/signal. The other side is left to 
+        //   // vary in order to meet the acceleration requirements. We iterate over both combinations (left = nom and right = nom)
+        //   // in order to get the correct min and max while staying agnostic of transmission implementations.
+        //   auto& trans_nom = (side_nominal == 0) ? _trans_left : _trans_right;
+        //   auto& trans_var = (side_nominal == 0) ? _trans_right : _trans_left;
 
-        double max = fwd_accel_limits.sum() / 2.0;
+        //   // Iterate over both the forwards and reverse range of the nominal transmission, since reverse max acceleration is not
+        //   // necessarily equal to the negative forward max acceleration, especially when the system is already moving due to 
+        //   // inertia.
+        //   for (double nominal_signal : { 1.0, -1.0 }) {
+        //     double torque_for_nom = trans_nom.torque(wheels[side_nominal], nominal_signal);
 
-        // Calculate rvs torque limits for each side
-        // Eigen::Vector2d rvs_torque_limits{
-        // _trans_right.get_torque(-_trans_right.get_current(_trans_right.nominal_voltage(), wheels[0])),
-        // _trans_left.get_torque(-_trans_left.get_current(_trans_left.nominal_voltage(), wheels[1]))};
-        Eigen::Vector2d rvs_torque_limits{-_trans_right.torque(wheels[0], 1.0),
-                                          -_trans_left.torque(wheels[1], 1.0)};
+            
+        //   }
+        // }
 
-        Eigen::Vector2d rvs_accel_limits = rvs_torque_limits / (_mass * _wheel_radius);
+        std::cout << "START\n";
 
-        double min = rvs_accel_limits.sum() / 2.0;
+        for (double nominal_signal : { 1.0, -1.0 }) {
+          double force_fixed_l = _trans_left.torque(wheels[0], nominal_signal) / _wheel_radius;
+          double force_fixed_r = _trans_right.torque(wheels[1], nominal_signal) / _wheel_radius;
 
-        return std::pair<double, double>{min, max};
+          // Eigen::Matrix2d A_fixed_l = (Eigen::Matrix2d() << 1, -_mass,  _track_radius, -_moment_inertia*curvature).finished();
+          // Eigen::Matrix2d A_fixed_r = (Eigen::Matrix2d() << 1, -_mass, -_track_radius, -_moment_inertia*curvature).finished();
+
+          // Eigen::Vector2d result_l{ -force_fixed_l,  force_fixed_l * _track_radius + _moment_inertia * velocity * velocity * dcurvature };
+          // Eigen::Vector2d result_r{ -force_fixed_r, -force_fixed_r * _track_radius + _moment_inertia * velocity * velocity * dcurvature };
+
+          // double accel_l = (A_fixed_l.inverse() * result_l)[1];
+          // double accel_r = (A_fixed_r.inverse() * result_r)[1];
+
+          double angular_term = velocity * velocity * dcurvature;
+
+          // double accel_l = (_moment_inertia * angular_term - 2 * force_fixed_l * _track_radius) / ( -_mass * _track_radius + _moment_inertia * curvature );
+          // double accel_r = (2 * force_fixed_r * _track_radius - _moment_inertia * angular_term) / ( _mass * _track_radius + _moment_inertia * curvature );
+
+          Eigen::Matrix2d A_fl = (Eigen::Matrix2d() << _track_radius, -_moment_inertia * curvature, 1, -_mass).finished();
+          Eigen::Matrix2d A_fr = (Eigen::Matrix2d() << -_track_radius, -_moment_inertia * curvature, 1, -_mass).finished();
+
+          Eigen::Vector2d result_l{ _moment_inertia * angular_term + force_fixed_l * _track_radius, -force_fixed_l };
+          Eigen::Vector2d result_r{ _moment_inertia * angular_term - force_fixed_r * _track_radius, -force_fixed_r };
+
+          Eigen::Vector2d solution_l = A_fl.inverse() * result_l;
+          Eigen::Vector2d solution_r = A_fr.inverse() * result_r;
+
+          double accel_l = solution_l[1];
+          double accel_r = solution_r[1];
+
+          double signal_l = _trans_right.partial_signal_at_torque(solution_l[0] * _wheel_radius); // Since left is given, we're trying to find right
+          double signal_r = _trans_left.partial_signal_at_torque(solution_r[0] * _wheel_radius);  // Since right is given, we're trying to find left
+
+          if (std::abs(signal_l) <= 1.0 + constants::epsilon) {
+            lims.first = std::min(lims.first, accel_l);
+            lims.second = std::max(lims.second, accel_l);
+            std::cout << "Accept L (" << signal_l << "," << nominal_signal << ")\n";
+          } else {
+            std::cout << "Reject L (" << signal_l << "," << nominal_signal << ")\n";
+          }
+
+          if (std::abs(signal_r) <= 1.0 + constants::epsilon) {
+            lims.first = std::min(lims.first, accel_r);
+            lims.second = std::max(lims.second, accel_r);
+            std::cout << "Accept R (" << signal_r << "," << nominal_signal << ")\n";
+          }else {
+            std::cout << "Reject R (" << signal_r << "," << nominal_signal << ")\n";
+          }
+        }
+
+        std::cout << "CC," << lims.first << "," << lims.second << std::endl;
+
+        return lims;
       }
 
       /**
@@ -245,6 +351,11 @@ namespace pf {
         left.kinematics[VELOCITY]  = v_linear - v_differential;
         right.kinematics[VELOCITY] = v_linear + v_differential;
 
+        left.vhold = centre.vhold - centre.vhold * centre.curvature * _track_radius;
+        right.vhold = centre.vhold + centre.vhold * centre.curvature * _track_radius;
+
+        // std::cout << "SS," << (right.vhold / _wheel_radius) << std::endl;
+
         // Split accelerations
         double a_linear = centre.kinematics[ACCELERATION];
         // This is a bit of a tricky one, so don't blink
@@ -264,6 +375,8 @@ namespace pf {
         left.kinematics[ACCELERATION] = a_linear - a_differential;
         right.kinematics[ACCELERATION] = a_linear + a_differential;
 
+        std::cout << "SS," << left.kinematics[ACCELERATION] << "," << right.kinematics[ACCELERATION] << std::endl;
+
         // solve_electrical(left, right);
         solve_inv_transmission(left, right);
 
@@ -271,18 +384,32 @@ namespace pf {
       }
 
      private:
+      Eigen::Vector2d solve_variable_force_and_acceleration(double coeff, double force, double velocity, double curvature, double dcurvature) {
+        double angular_term = velocity * velocity * dcurvature;
+
+        Eigen::Matrix2d A = (Eigen::Matrix2d() << coeff * _track_radius, -_moment_inertia * curvature, 1, -_mass).finished();
+
+        Eigen::Vector2d result{ _moment_inertia * angular_term + coeff * force * _track_radius, -force};
+
+        return A.inverse() * result;
+      }
+
       void solve_inv_transmission(wheel_state &left, wheel_state &right) const {
         do_solve_inv_transmission(left, _trans_left);
         do_solve_inv_transmission(right, _trans_right);
       }
 
       void do_solve_inv_transmission(wheel_state &wheel, transmission_t &transmission) const {
-        double speed  = wheel.kinematics[VELOCITY] / _wheel_radius;
-        double torque = _mass * wheel.kinematics[ACCELERATION] * _wheel_radius;
+        // double speed  = wheel.kinematics[VELOCITY] / _wheel_radius;
+        double speed = wheel.vhold / _wheel_radius;
+        double torque = _mass / 2 * wheel.kinematics[ACCELERATION] * _wheel_radius;
 
         double signal_free  = transmission.partial_signal_at_speed(speed);
         double signal_stall = transmission.partial_signal_at_torque(torque);
 
+        // Problem is that we're sampling _both_ the current hold voltage AND the acceleration voltage.
+        // We need the last hold voltage. If we're using the current hold voltage, there is no need for the acceleration voltage,
+        // you nonce!
         wheel.control_signal = signal_free + signal_stall;
         wheel.torque = torque;
         wheel.angular_speed = speed;
@@ -303,7 +430,7 @@ namespace pf {
       //   wheel.current = current;
       // }
 
-      double _mass, _track_radius, _wheel_radius;
+      double _mass, _track_radius, _wheel_radius, _moment_inertia;
       // TODO: Not reference
       transmission_t &_trans_left, &_trans_right;
     };

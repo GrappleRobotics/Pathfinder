@@ -41,8 +41,10 @@ void echo_wheel(std::ofstream &out, ST state, transmission::dc_motor &motor, int
       << ""
       << "," << state.kinematics[VELOCITY] << "," << state.kinematics[ACCELERATION] << ","
       << ""
-      << "," << id << "," << state.angular_speed << "," << state.torque << ","
-      << motor.signal_to_voltage(state.control_signal) << "," << motor.torque_to_current(state.torque)
+      // << "," << id << "," << state.angular_speed << "," << state.torque << ","
+      // << motor.signal_to_voltage(state.control_signal) << "," << motor.torque_to_current(state.torque)
+      << "," << id << "," << motor.partial_signal_at_speed(state.angular_speed) << "," << motor.partial_signal_at_torque(state.torque) << ","
+      << state.control_signal << "," << motor.torque_to_current(state.torque)
       << std::endl;
 }
 
@@ -81,13 +83,20 @@ TEST(CDT, basic) {
 
   coupled::configuration_state centre{0, 0, 0};
 
+  std::pair<wheel_state_t, wheel_state_t> split;
+
+  std::cout << "TOR_max: " << dualCIM.torque(0, 1.0);
+
   for (double t = 0; !state.finished && t < 5; t += 0.01) {
+    // std::cout << "AA," << split.second.angular_speed << std::endl;
     state = gen.generate(chassis, curves.begin(), curves.end(), profile, state, t);
+    // std::cout << "AA," << (state.kinematics[1] * state.curvature) << std::endl;
+    // std::cout << "AA," << state.kinematics[VELOCITY] << std::endl;
     echo(pathfile, state, 0);
 
     echo_limits(pathfile, t, profile.get_limits());
 
-    std::pair<wheel_state_t, wheel_state_t> split = chassis.split(state);
+    split = chassis.split(state);
     echo_wheel(pathfile, split.first, dualCIM, 1);
     echo_wheel(pathfile, split.second, dualCIM, 2);
 

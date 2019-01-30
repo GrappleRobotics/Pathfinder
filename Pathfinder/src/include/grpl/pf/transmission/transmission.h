@@ -9,6 +9,15 @@ namespace pf {
    * control signals to motion (e.g. motors).
    */
   namespace transmission {
+    
+    inline double rpm_to_rad(double rpm) {
+      return rpm * 2.0 * constants::PI / 60.0;
+    }
+
+    inline double rad_to_rpm(double rad_per_sec) {
+      return rad_per_sec * 60.0 / (2 * constants::PI);
+    }
+
     /**
      * Interface for any transmission
      *

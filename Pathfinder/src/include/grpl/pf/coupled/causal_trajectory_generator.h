@@ -86,7 +86,7 @@ namespace pf {
         // TODO: Does limiting jerk prevent oscillation
         double                    limit_vel = chassis.linear_vel_limit(config, curvature);
         std::pair<double, double> limit_acc =
-            chassis.acceleration_limits(config, curvature, last.kinematics[1]);
+            chassis.acceleration_limits(config, curvature, dcurvature, last.kinematics[VELOCITY]);
 
         profile.apply_limit(1, -limit_vel, limit_vel);
         profile.apply_limit(2, limit_acc.first, limit_acc.second);
@@ -97,6 +97,7 @@ namespace pf {
 
         prof_state = profile.calculate(prof_state, time);
 
+        output.vhold = last.kinematics[VELOCITY];
         output.kinematics = prof_state.kinematics;
         output.curvature  = curvature;
         output.dcurvature = dcurvature;
